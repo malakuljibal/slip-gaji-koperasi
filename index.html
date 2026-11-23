@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e293b">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Aplikasi Cetak Bukti Pembayaran Pekerja (Thermal 58mm / 57x30)</title>
   <style>
     :root {
@@ -706,6 +709,13 @@
 
       const grandTotal = totalIncome - totalDeduction;
       document.getElementById('prevTotal').innerText = formatRupiah(grandTotal);
+    }
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg error:', err));
+      });
     }
   </script>
 </body>
