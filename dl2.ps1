@@ -1,0 +1,8 @@
+$docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk"
+$url1 = "https://docs.google.com/spreadsheets/d/$docId/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja"
+Invoke-RestMethod -Uri $url1 -OutFile "live_db.csv"
+$url2 = "https://docs.google.com/spreadsheets/d/$docId/gviz/tq?tqx=out:csv&sheet=Dasbor%20Gaji"
+Invoke-RestMethod -Uri $url2 -OutFile "live_dasbor.csv"
+$url3 = "https://docs.google.com/spreadsheets/d/$docId/gviz/tq?tqx=out:csv&sheet=Database%20Keuangan"
+Invoke-RestMethod -Uri $url3 -OutFile "live_keuangan.csv"
+Write-Host "Done"

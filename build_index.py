@@ -1189,11 +1189,13 @@ html_template = """<!DOCTYPE html>
 
   <script>
     // Embedded Database Datasets from Google Sheets
-    const defaultWorkersData = WORKERS_JSON_PLACEHOLDER;
-    const defaultRekapData = REKAP_JSON_PLACEHOLDER;
+    let defaultWorkersData = WORKERS_JSON_PLACEHOLDER;
+    let defaultRekapData = REKAP_JSON_PLACEHOLDER;
 
     let workersData = JSON.parse(localStorage.getItem('workersData') || 'null') || defaultWorkersData;
     let rekapData = JSON.parse(localStorage.getItem('rekapData') || 'null') || defaultRekapData;
+    let savedTarif = parseInt(localStorage.getItem('tarifBorongan')) || 7000;
+    let savedPeriode = localStorage.getItem('periodeSync') || "";
 
     // Category & Worker State
     let workerCategory = "Pengawas";
@@ -1291,7 +1293,7 @@ html_template = """<!DOCTYPE html>
         pGroup.style.display = "none";
         bGroup.style.display = "block";
         boronganType = document.getElementById('boronganTypeSelect').value || "Borongan Petik";
-        incomeItems = [{ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: 7000, amount: 0 }];
+        incomeItems = [{ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: savedTarif, amount: 0 }];
       } else {
         pGroup.style.display = "block";
         bGroup.style.display = "none";
@@ -1369,7 +1371,7 @@ html_template = """<!DOCTYPE html>
         handleBoronganTypeChange(type);
 
         let kg = rekap ? parseFloat(rekap.hasilKg) || 0 : 0;
-        let price = 7000;
+        let price = savedTarif;
         let total = kg * price;
 
         incomeItems = [{
@@ -1406,14 +1408,6 @@ html_template = """<!DOCTYPE html>
 
         let days = getDaysFromPeriod();
 
-        if (rekap && rekap.subTotal) {
-          let cleaned = rekap.subTotal.replace(/[^0-9.]/g, '');
-          let subTot = parseFloat(cleaned) || 0;
-          if (subTot > 0) {
-            days = Math.round(subTot / defaultRate) || days;
-          }
-        }
-
         incomeItems = [{
           desc: "Gaji " + exactRole,
           workDays: days,
@@ -1433,6 +1427,10 @@ html_template = """<!DOCTYPE html>
         desc: "Kasbon / Pinjaman",
         amount: kasbonAmt
       }];
+
+      if (savedPeriode && savedPeriode.trim() !== "") {
+        document.getElementById('periodText').value = savedPeriode;
+      }
 
       renderItemsInput();
       updateReceipt();
@@ -1542,8 +1540,10 @@ html_template = """<!DOCTYPE html>
       alert('Memulai sinkronisasi Dasbor Gaji (Hanya Belum Dibayarkan) dari Google Sheets...');
 
       const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
-      const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja`;
-      const urlPemetik = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Pembayaran%20Pemetik`;
+      // Added cache-busting timestamp to always fetch live data
+      const t = new Date().getTime();
+      const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja&_t=${t}`;
+      const urlPemetik = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Pembayaran%20Pemetik&_t=${t}`;
 
       function performSync() {
         let csvPekerja = "";
@@ -1588,6 +1588,28 @@ html_template = """<!DOCTYPE html>
         let newRekap = [];
         if (csvPemetik && csvPemetik.trim().length > 0) {
           let linesM = csvPemetik.split('\\n');
+
+          // Try parse Tarif and Period from header lines
+          if (linesM.length > 2) {
+            const h1 = linesM[0];
+            const tMatch = h1.match(/Tarif Borongan:\\s*Rp\\s*([0-9.,]+)/i);
+            if (tMatch && tMatch[1]) {
+               let parsedTarif = parseInt(tMatch[1].replace(/\\./g, ''));
+               if (parsedTarif > 0) {
+                 savedTarif = parsedTarif;
+                 localStorage.setItem('tarifBorongan', savedTarif);
+               }
+            }
+
+            const h2 = linesM[1];
+            const pMatch = h2.match(/Periode Gaji\\s*\\(([^)]+)\\)/i);
+            if (pMatch && pMatch[1]) {
+               savedPeriode = pMatch[1];
+               localStorage.setItem('periodeSync', savedPeriode);
+               document.getElementById('periodText').value = savedPeriode;
+            }
+          }
+
           linesM.forEach(line => {
             const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
             if (fields.length >= 8) {
@@ -1631,7 +1653,7 @@ html_template = """<!DOCTYPE html>
         renderWorkerTemplateDropdown();
 
         let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert(`✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: \${workersData.length} orang\\n• Status Belum Dibayarkan: \${unpaidCount} orang\\n\\nData ter-update langsung dari Google Sheets!`);
+        alert(`✅ Sinkronisasi Berhasil!\\n\\n• Pekerja Aktif: \${workersData.length} orang\\n• Tarif Borongan: Rp \${savedTarif}\\n• Periode: \${savedPeriode}\\n\\nData ter-update langsung dari Google Sheets!`);
       }
 
       setTimeout(performSync, 100);
@@ -1936,7 +1958,8 @@ html_template = """<!DOCTYPE html>
         let maxLabelLen = 32 - r.length - 1;
         if (maxLabelLen < 4) maxLabelLen = 4;
         if (l.length > maxLabelLen) {
-          l = l.substring(0, maxLabelLen);
+          pushString(l + "\\n");
+          l = "";
         }
         let spaces = 32 - (l.length + r.length);
         if (spaces < 1) spaces = 1;
@@ -2181,7 +2204,7 @@ html_template = """<!DOCTYPE html>
 
     function addIncomeItem() {
       if (workerCategory === "Borongan") {
-        incomeItems.push({ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: 7000, amount: 0 });
+        incomeItems.push({ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: savedTarif, amount: 0 });
       } else {
         let defaultRate = 100000;
         if (pengawasRole === "Pengawas Lapangan") defaultRate = 150000;
@@ -2310,7 +2333,7 @@ html_template = """<!DOCTYPE html>
           tr.innerHTML = `
             <td class="col-item">
               <div>${item.desc || 'Item'}</div>
-              <div style="font-size: 9px; color: #555;">${item.weightKg} kg x @${formatRupiah(item.pricePerKg)}</div>
+              <div style="font-size: 9px; color: #555;">(${item.weightKg} kg x @${formatRupiah(item.pricePerKg)})</div>
             </td>
             <td class="col-val">${formatRupiah(item.amount)}</td>
           `;
@@ -2318,7 +2341,7 @@ html_template = """<!DOCTYPE html>
           tr.innerHTML = `
             <td class="col-item">
               <div>${item.desc || 'Item'}</div>
-              <div style="font-size: 9px; color: #555;">${item.workDays} hari x @${formatRupiah(item.dailyRate)}</div>
+              <div style="font-size: 9px; color: #555;">(${item.workDays} hari x @${formatRupiah(item.dailyRate)})</div>
             </td>
             <td class="col-val">${formatRupiah(item.amount)}</td>
           `;
