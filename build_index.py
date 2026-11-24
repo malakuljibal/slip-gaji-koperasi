@@ -6,6 +6,23 @@ with open("workers_data.json", "r", encoding="utf-8") as f:
 with open("rekap_data.json", "r", encoding="utf-8") as f:
     rekap_data = json.load(f)
 
+# Annotate payment status for each rekap entry
+for r in rekap_data:
+    if r.get("hasilKg", 0) > 0 or (r.get("totalGaji") and r.get("totalGaji") != "-"):
+        r["paymentStatus"] = "Belum Dibayarkan"
+    else:
+        r["paymentStatus"] = "Lunas"
+
+# Annotate payment status for workers based on rekap
+rekap_dict = {r["name"].lower(): r["paymentStatus"] for r in rekap_data}
+for w in workers_data:
+    name_lower = w["name"].lower()
+    if name_lower in rekap_dict:
+        w["paymentStatus"] = rekap_dict[name_lower]
+    else:
+        # Default active workers without rekap entry are ready for new slip
+        w["paymentStatus"] = "Belum Dibayarkan"
+
 workers_json_str = json.dumps(workers_data, ensure_ascii=False)
 rekap_json_str = json.dumps(rekap_data, ensure_ascii=False)
 
@@ -448,9 +465,16 @@ html_template = """<!DOCTYPE html>
       color: #92400e;
     }
 
-    .tag-active {
+    .tag-unpaid {
+      background: #fef3c7;
+      color: #d97706;
+      border: 1px solid #fcd34d;
+    }
+
+    .tag-paid {
       background: #dcfce7;
-      color: #166534;
+      color: #15803d;
+      border: 1px solid #86efac;
     }
 
     /* Rekap Table Styles */
@@ -716,7 +740,7 @@ html_template = """<!DOCTYPE html>
           <span>Pilih / Kelola Template Pekerja</span>
         </div>
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
-          <label>Daftar Nama Pekerja (Pilih untuk memuat template / data):</label>
+          <label>Daftar Nama Pekerja (Hanya yang Belum Dibayarkan):</label>
           <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem; flex-wrap: wrap;">
             <select id="workerTemplateSelect" onchange="loadWorkerTemplate(this.value)" style="flex: 2; min-width: 180px;">
               <option value="">-- Pilih / Cari Nama Pekerja --</option>
@@ -765,7 +789,7 @@ html_template = """<!DOCTYPE html>
           </div>
         </div>
 
-        <!-- Sub-Kategori Pengawas / Harian (Tampil jika Kategori = Pengawas) -->
+        <!-- Sub-Kategori Pengawas / Harian -->
         <div class="form-group" id="pengawasSubGroup" style="display: block;">
           <label>Jabatan / Peran Pengawas</label>
           <select id="pengawasRoleSelect" onchange="handlePengawasRoleChange(this.value)">
@@ -777,7 +801,7 @@ html_template = """<!DOCTYPE html>
           </select>
         </div>
 
-        <!-- Sub-Kategori Borongan (Tampil jika Kategori = Borongan) -->
+        <!-- Sub-Kategori Borongan -->
         <div class="form-group" id="boronganSubGroup" style="display: none;">
           <label>Jenis Borongan</label>
           <select id="boronganTypeSelect" onchange="handleBoronganTypeChange(this.value)">
@@ -1005,6 +1029,11 @@ html_template = """<!DOCTYPE html>
 
         <div class="filter-bar">
           <input type="text" id="searchWorkerInput" placeholder="Cari nama pekerja..." oninput="filterWorkers()" style="flex: 2; min-width: 180px;">
+          <select id="filterStatusSelect" onchange="filterWorkers()" style="flex: 1; min-width: 150px; background: #fffbebf7; font-weight: bold; color: #d97706;">
+            <option value="Belum Dibayarkan">🟡 Hanya Belum Dibayarkan</option>
+            <option value="Lunas">🟢 Sudah Lunas / Dibayarkan</option>
+            <option value="">⚪ Semua Status Pembayaran</option>
+          </select>
           <select id="filterCategorySelect" onchange="filterWorkers()" style="flex: 1; min-width: 150px;">
             <option value="">-- Semua Kategori --</option>
             <option value="Borongan Pemetik">Borongan Pemetik</option>
@@ -1041,6 +1070,11 @@ html_template = """<!DOCTYPE html>
 
         <div class="filter-bar">
           <input type="text" id="searchRekapInput" placeholder="Cari nama pemetik..." oninput="filterRekap()" style="flex: 2; min-width: 180px;">
+          <select id="filterRekapStatusSelect" onchange="filterRekap()" style="flex: 1; min-width: 150px; background: #fffbebf7; font-weight: bold; color: #d97706;">
+            <option value="Belum Dibayarkan">🟡 Hanya Belum Dibayarkan</option>
+            <option value="Lunas">🟢 Sudah Lunas / Dibayarkan</option>
+            <option value="">⚪ Semua Status Pembayaran</option>
+          </select>
         </div>
 
         <div style="overflow-x: auto;">
@@ -1054,6 +1088,7 @@ html_template = """<!DOCTYPE html>
                 <th>Sub Total Gaji</th>
                 <th>Kasbon</th>
                 <th>Total Gaji Netto</th>
+                <th>Status Pembayaran</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -1366,6 +1401,7 @@ html_template = """<!DOCTYPE html>
     function renderWorkerGrid() {
       const container = document.getElementById('workerGridContainer');
       const search = (document.getElementById('searchWorkerInput').value || '').toLowerCase();
+      const statusFilter = document.getElementById('filterStatusSelect').value;
       const categoryFilter = document.getElementById('filterCategorySelect').value;
       const reguFilter = document.getElementById('filterReguSelect').value;
 
@@ -1374,15 +1410,17 @@ html_template = """<!DOCTYPE html>
 
       workersData.forEach(w => {
         const matchesSearch = !search || w.name.toLowerCase().includes(search) || (w.regu || '').toLowerCase().includes(search);
+        const matchesStatus = !statusFilter || (w.paymentStatus === statusFilter);
         const matchesCategory = !categoryFilter || w.category === categoryFilter;
         const matchesRegu = !reguFilter || w.regu === reguFilter;
 
-        if (matchesSearch && matchesCategory && matchesRegu) {
+        if (matchesSearch && matchesStatus && matchesCategory && matchesRegu) {
           count++;
           const card = document.createElement('div');
           card.className = 'worker-card';
 
           const initial = w.name.charAt(0).toUpperCase();
+          const statusClass = (w.paymentStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
 
           card.innerHTML = `
             <div>
@@ -1395,8 +1433,7 @@ html_template = """<!DOCTYPE html>
               </div>
               <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
                 <span class="tag tag-category">${w.category}</span>
-                <span class="tag tag-schema">${w.schema}</span>
-                <span class="tag tag-active">${w.status}</span>
+                <span class="tag ${statusClass}">🟡 ${w.paymentStatus || 'Belum Dibayarkan'}</span>
               </div>
             </div>
             <button class="btn btn-primary" onclick="createSlipForWorker('${w.name}', '${w.category}', '${w.regu}')" style="width: 100%; justify-content: center; font-size: 0.8rem;">
@@ -1407,7 +1444,7 @@ html_template = """<!DOCTYPE html>
         }
       });
 
-      document.getElementById('dbStatsText').innerText = `Menampilkan ${count} dari ${workersData.length} Pekerja`;
+      document.getElementById('dbStatsText').innerText = `Menampilkan ${count} dari ${workersData.length} Pekerja (${statusFilter || 'Semua Status'})`;
       document.getElementById('totalWorkerBadge').innerText = workersData.length;
     }
 
@@ -1424,11 +1461,17 @@ html_template = """<!DOCTYPE html>
     function renderRekapTable() {
       const tbody = document.getElementById('rekapTableBody');
       const search = (document.getElementById('searchRekapInput').value || '').toLowerCase();
+      const statusFilter = document.getElementById('filterRekapStatusSelect').value;
       tbody.innerHTML = '';
 
       rekapData.forEach(r => {
-        if (!search || r.name.toLowerCase().includes(search) || (r.regu || '').toLowerCase().includes(search)) {
+        const matchesSearch = !search || r.name.toLowerCase().includes(search) || (r.regu || '').toLowerCase().includes(search);
+        const matchesStatus = !statusFilter || (r.paymentStatus === statusFilter);
+
+        if (matchesSearch && matchesStatus) {
           const tr = document.createElement('tr');
+          const statusClass = (r.paymentStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
+
           tr.innerHTML = `
             <td>#${r.no}</td>
             <td style="font-weight: 700; color: #0f172a;">${r.name}</td>
@@ -1437,6 +1480,7 @@ html_template = """<!DOCTYPE html>
             <td>Rp ${r.subTotal || '0'}</td>
             <td style="color: #dc2626;">${r.kasbon || '-'}</td>
             <td style="font-weight: 700; color: #16a34a;">${r.totalGaji || 'Rp 0'}</td>
+            <td><span class="tag ${statusClass}">🟡 ${r.paymentStatus || 'Belum Dibayarkan'}</span></td>
             <td>
               <button class="btn btn-secondary" onclick="createSlipForWorker('${r.name}', 'Borongan Pemetik', '${r.regu}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                 Buat Slip
@@ -1453,7 +1497,7 @@ html_template = """<!DOCTYPE html>
     }
 
     function syncWithGoogleSheets() {
-      alert('Memulai sinkronisasi data langsung dari Google Sheets...');
+      alert('Memulai sinkronisasi data yang BELUM DIBAYARKAN dari Dasbor Gaji Google Sheets...');
 
       const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
       const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja`;
@@ -1480,7 +1524,8 @@ html_template = """<!DOCTYPE html>
                   category: category,
                   regu: regu || "-",
                   schema: schema || "-",
-                  status: status || "Aktif"
+                  status: status || "Aktif",
+                  paymentStatus: "Belum Dibayarkan"
                 });
               }
             }
@@ -1491,7 +1536,7 @@ html_template = """<!DOCTYPE html>
             localStorage.setItem('workersData', JSON.stringify(workersData));
             renderWorkerGrid();
             renderWorkerTemplateDropdown();
-            alert(`Sinkronisasi berhasil! Memuat ${newWorkers.length} data pekerja dari Google Sheets.`);
+            alert(`✅ Sinkronisasi berhasil! Memuat ${newWorkers.length} data pekerja (Status: Belum Dibayarkan) dari Google Sheets.`);
           } else {
             alert('Sinkronisasi selesai: Data sudah paling mutakhir.');
           }
@@ -1554,7 +1599,7 @@ html_template = """<!DOCTYPE html>
 
     function renderWorkerTemplateDropdown() {
       const select = document.getElementById('workerTemplateSelect');
-      select.innerHTML = '<option value="">-- Pilih / Cari Nama Pekerja --</option>';
+      select.innerHTML = '<option value="">-- Pilih / Cari Nama Pekerja (Belum Dibayarkan) --</option>';
 
       let templateGroup = document.createElement('optgroup');
       templateGroup.label = "💾 Template Tersimpan";
@@ -1569,13 +1614,13 @@ html_template = """<!DOCTYPE html>
       if (hasTemplates) select.appendChild(templateGroup);
 
       let dbGroup = document.createElement('optgroup');
-      dbGroup.label = "👥 Database Pekerja (" + workersData.length + " Orang)";
+      dbGroup.label = "🟡 Belum Dibayarkan (" + workersData.length + " Orang)";
 
       const sortedWorkers = [...workersData].sort((a,b) => a.name.localeCompare(b.name));
       sortedWorkers.forEach(w => {
         const opt = document.createElement('option');
         opt.value = "WORKER:" + w.name;
-        opt.innerText = `${w.name} (${w.category}${w.regu && w.regu !== '-' ? ' - Regu ' + w.regu : ''})`;
+        opt.innerText = `🟡 ${w.name} (${w.category}${w.regu && w.regu !== '-' ? ' - Regu ' + w.regu : ''})`;
         dbGroup.appendChild(opt);
       });
       select.appendChild(dbGroup);
