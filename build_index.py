@@ -105,7 +105,7 @@ html_template = """<!DOCTYPE html>
       flex: 1;
       gap: 1.5rem;
       padding: 1.25rem;
-      max-width: 1350px;
+      max-width: 1200px;
       margin: 0 auto;
       width: 100%;
     }
@@ -116,15 +116,20 @@ html_template = """<!DOCTYPE html>
       display: none;
     }
 
-    /* Left Form Editor */
+    #secSlip {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    /* Form Editor - Full Width */
     .editor-section {
-      flex: 1.3;
+      width: 100%;
       background: var(--card-bg);
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       padding: 1.25rem;
-      max-height: calc(100vh - 140px);
-      overflow-y: auto;
       transition: all 0.2s ease;
     }
 
@@ -229,20 +234,28 @@ html_template = """<!DOCTYPE html>
       background: #059669;
     }
 
-    /* Right Preview Section */
+    /* Bottom Preview Section - Stacked Below Form */
     .preview-section {
-      flex: 1;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       transition: all 0.2s ease;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 1.25rem;
+    }
+
+    .preview-section.hidden {
+      display: none !important;
     }
 
     .preview-header {
       margin-bottom: 0.75rem;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: #475569;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #334155;
       display: flex;
       justify-content: space-between;
       width: 100%;
@@ -582,35 +595,6 @@ html_template = """<!DOCTYPE html>
       background: #e2e8f0;
     }
 
-    .mode-toggle-bar {
-      display: none;
-      background: #cbd5e1;
-      padding: 0.3rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      gap: 0.4rem;
-    }
-
-    .mode-tab {
-      flex: 1;
-      text-align: center;
-      padding: 0.55rem 0.5rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      color: #334155;
-      background: transparent;
-      border: none;
-      transition: all 0.2s ease;
-    }
-
-    .mode-tab.active {
-      background: #2563eb;
-      color: #ffffff;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-
     @media (max-width: 900px) {
       header {
         flex-direction: column;
@@ -625,29 +609,9 @@ html_template = """<!DOCTYPE html>
         gap: 1rem;
       }
 
-      #secSlip.active {
-        flex-direction: column;
-      }
-
-      .editor-section {
-        max-height: none;
-        overflow-y: visible;
-        width: 100%;
-        padding: 1rem;
-      }
-
-      .preview-section {
-        width: 100%;
-        margin-top: 0.5rem;
-      }
-
       .form-row {
         flex-direction: column;
         gap: 0.5rem;
-      }
-
-      .mode-toggle-bar {
-        display: flex;
       }
     }
 
@@ -693,6 +657,9 @@ html_template = """<!DOCTYPE html>
         <button class="btn btn-secondary" onclick="openBluetoothModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
           Printer Bluetooth
         </button>
+        <button class="btn btn-secondary" id="togglePreviewBtn" onclick="togglePreview()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
+          <span id="toggleText">Sembunyikan Preview</span>
+        </button>
         <button class="btn btn-primary" onclick="syncWithGoogleSheets()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem; background: #059669;">
           Sync Google Sheets
         </button>
@@ -709,15 +676,10 @@ html_template = """<!DOCTYPE html>
 
   <div class="container">
 
-    <!-- SECTION 1: Slip Gaji Generator -->
+    <!-- SECTION 1: Slip Gaji Generator (Editor di Atas, Preview di Bawah) -->
     <div class="view-section" id="secSlip" style="display: flex;">
-      <!-- Mode Switcher for Mobile -->
-      <div class="mode-toggle-bar" style="width: 100%;">
-        <button class="mode-tab active" id="tabEdit" onclick="switchMobileTab('edit')">Edit Form Data</button>
-        <button class="mode-tab" id="tabPreview" onclick="switchMobileTab('preview')">Lihat Preview (57mm)</button>
-      </div>
 
-      <!-- Form Input / Editor -->
+      <!-- Form Input / Editor (Full Width) -->
       <div class="editor-section">
 
         <!-- Master Data Template Pekerja -->
@@ -893,10 +855,10 @@ html_template = """<!DOCTYPE html>
         </button>
       </div>
 
-      <!-- Preview Thermal -->
-      <div class="preview-section">
+      <!-- Preview Thermal Section (Di Bawah Form Editor) -->
+      <div class="preview-section" id="previewSectionBox">
         <div class="preview-header">
-          <span>Live Preview Ukuran 57mm</span>
+          <span>Live Preview Thermal (57mm)</span>
           <span style="color: #64748b; font-size: 0.8rem;">Auto-update</span>
         </div>
 
@@ -1319,7 +1281,7 @@ html_template = """<!DOCTYPE html>
       fetch(urlPekerja)
         .then(res => res.text())
         .then(csvText => {
-          const lines = csvText.split('\n');
+          const lines = csvText.split('\\n');
           let newWorkers = [];
           lines.forEach(line => {
             const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
@@ -1331,7 +1293,7 @@ html_template = """<!DOCTYPE html>
               const schema = fields[5];
               const status = fields[7];
 
-              if (/^\d+$/.test(no) && name && isNaN(name)) {
+              if (/^\\d+$/.test(no) && name && isNaN(name)) {
                 newWorkers.push({
                   no: parseInt(no),
                   name: name,
@@ -1515,27 +1477,15 @@ html_template = """<!DOCTYPE html>
     }
 
     function togglePreview() {
-      const previewSec = document.querySelector('.preview-section');
-      const editorSec = document.querySelector('.editor-section');
-      const toggleBtn = document.getElementById('togglePreviewBtn');
+      const previewSec = document.getElementById('previewSectionBox');
       const toggleText = document.getElementById('toggleText');
 
       if (previewSec.classList.contains('hidden')) {
         previewSec.classList.remove('hidden');
-        editorSec.classList.remove('full-width');
         if (toggleText) toggleText.innerText = 'Sembunyikan Preview';
-        if (toggleBtn) {
-          toggleBtn.classList.remove('btn-primary');
-          toggleBtn.classList.add('btn-secondary');
-        }
       } else {
         previewSec.classList.add('hidden');
-        editorSec.classList.add('full-width');
         if (toggleText) toggleText.innerText = 'Tampilkan Preview';
-        if (toggleBtn) {
-          toggleBtn.classList.remove('btn-secondary');
-          toggleBtn.classList.add('btn-primary');
-        }
       }
     }
 
