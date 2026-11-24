@@ -105,7 +105,7 @@ html_template = """<!DOCTYPE html>
       flex: 1;
       gap: 1.5rem;
       padding: 1.25rem;
-      max-width: 1200px;
+      max-width: 1350px;
       margin: 0 auto;
       width: 100%;
     }
@@ -595,6 +595,35 @@ html_template = """<!DOCTYPE html>
       background: #e2e8f0;
     }
 
+    .mode-toggle-bar {
+      display: none;
+      background: #cbd5e1;
+      padding: 0.3rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      gap: 0.4rem;
+    }
+
+    .mode-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.55rem 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #334155;
+      background: transparent;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab.active {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
     @media (max-width: 900px) {
       header {
         flex-direction: column;
@@ -687,10 +716,10 @@ html_template = """<!DOCTYPE html>
           <span>Pilih / Kelola Template Pekerja</span>
         </div>
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
-          <label>Daftar Nama Pekerja (Pilih untuk memuat template):</label>
+          <label>Daftar Nama Pekerja (Pilih untuk memuat template / data):</label>
           <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem; flex-wrap: wrap;">
             <select id="workerTemplateSelect" onchange="loadWorkerTemplate(this.value)" style="flex: 2; min-width: 180px;">
-              <option value="">-- Pilih Nama Pekerja --</option>
+              <option value="">-- Pilih / Cari Nama Pekerja --</option>
             </select>
             <button class="btn btn-primary" onclick="saveWorkerTemplate()" style="font-size: 0.8rem;">
               Simpan
@@ -1167,6 +1196,69 @@ html_template = """<!DOCTYPE html>
       }
     }
 
+    function applyWorkerData(workerName) {
+      if (!workerName) return;
+
+      const worker = workersData.find(w => w.name.toLowerCase() === workerName.toLowerCase());
+      const rekap = rekapData.find(r => r.name.toLowerCase() === workerName.toLowerCase());
+
+      document.getElementById('workerName').value = workerName;
+
+      let category = worker ? worker.category : "Pengawas";
+      let isBorongan = category.toLowerCase().includes('borongan') || category.toLowerCase().includes('pemetik');
+
+      if (isBorongan) {
+        document.getElementById('workerCategorySelect').value = 'Borongan';
+        handleCategoryChange('Borongan');
+
+        let type = 'Borongan Cudai';
+        if (category.toLowerCase().includes('petik')) {
+          type = 'Borongan Petik';
+        }
+        document.getElementById('boronganTypeSelect').value = type;
+        handleBoronganTypeChange(type);
+
+        let kg = rekap ? parseFloat(rekap.hasilKg) || 0 : 0;
+        let price = 7000;
+        let total = kg * price;
+
+        incomeItems = [{
+          desc: "Hasil " + type,
+          weightKg: kg,
+          pricePerKg: price,
+          amount: total
+        }];
+      } else {
+        document.getElementById('workerCategorySelect').value = 'Pengawas';
+        handleCategoryChange('Pengawas');
+
+        let amount = 0;
+        if (rekap && rekap.subTotal) {
+          let cleaned = rekap.subTotal.replace(/[^0-9.]/g, '');
+          amount = parseFloat(cleaned) || 0;
+        }
+
+        incomeItems = [{
+          desc: "Gaji " + (category || "Pengawas"),
+          amount: amount
+        }];
+      }
+
+      let kasbonAmt = 0;
+      if (rekap && rekap.kasbon && rekap.kasbon !== "-") {
+        let cleaned = rekap.kasbon.replace(/[^0-9]/g, '');
+        kasbonAmt = parseFloat(cleaned) || 0;
+      }
+
+      deductionItems = [{
+        desc: "Kasbon / Pinjaman",
+        amount: kasbonAmt
+      }];
+
+      renderItemsInput();
+      updateReceipt();
+    }
+
     function renderWorkerGrid() {
       const container = document.getElementById('workerGridContainer');
       const search = (document.getElementById('searchWorkerInput').value || '').toLowerCase();
@@ -1220,25 +1312,9 @@ html_template = """<!DOCTYPE html>
     }
 
     function createSlipForWorker(name, category, regu) {
-      document.getElementById('workerName').value = name;
-
-      if (category.toLowerCase().includes('borongan') || category.toLowerCase().includes('pemetik')) {
-        document.getElementById('workerCategorySelect').value = 'Borongan';
-        handleCategoryChange('Borongan');
-        if (category.toLowerCase().includes('petik')) {
-          document.getElementById('boronganTypeSelect').value = 'Borongan Petik';
-          handleBoronganTypeChange('Borongan Petik');
-        } else {
-          document.getElementById('boronganTypeSelect').value = 'Borongan Cudai';
-          handleBoronganTypeChange('Borongan Cudai');
-        }
-      } else {
-        document.getElementById('workerCategorySelect').value = 'Pengawas';
-        handleCategoryChange('Pengawas');
-      }
-
+      applyWorkerData(name);
       switchMainTab('slip');
-      updateReceipt();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function renderRekapTable() {
@@ -1310,6 +1386,7 @@ html_template = """<!DOCTYPE html>
             workersData = newWorkers;
             localStorage.setItem('workersData', JSON.stringify(workersData));
             renderWorkerGrid();
+            renderWorkerTemplateDropdown();
             alert(`Sinkronisasi berhasil! Memuat ${newWorkers.length} data pekerja dari Google Sheets.`);
           } else {
             alert('Sinkronisasi selesai: Data sudah paling mutakhir.');
@@ -1404,13 +1481,31 @@ html_template = """<!DOCTYPE html>
 
     function renderWorkerTemplateDropdown() {
       const select = document.getElementById('workerTemplateSelect');
-      select.innerHTML = '<option value="">-- Pilih Nama Pekerja --</option>';
+      select.innerHTML = '<option value="">-- Pilih / Cari Nama Pekerja --</option>';
+
+      let templateGroup = document.createElement('optgroup');
+      templateGroup.label = "💾 Template Tersimpan";
+      let hasTemplates = false;
       for (const name in workerTemplates) {
+        hasTemplates = true;
         const opt = document.createElement('option');
-        opt.value = name;
-        opt.innerText = `${name} (${workerTemplates[name].role || workerTemplates[name].category || 'Pekerja'})`;
-        select.appendChild(opt);
+        opt.value = "TEMPLATE:" + name;
+        opt.innerText = name;
+        templateGroup.appendChild(opt);
       }
+      if (hasTemplates) select.appendChild(templateGroup);
+
+      let dbGroup = document.createElement('optgroup');
+      dbGroup.label = "👥 Database Pekerja (" + workersData.length + " Orang)";
+
+      const sortedWorkers = [...workersData].sort((a,b) => a.name.localeCompare(b.name));
+      sortedWorkers.forEach(w => {
+        const opt = document.createElement('option');
+        opt.value = "WORKER:" + w.name;
+        opt.innerText = `${w.name} (${w.category}${w.regu && w.regu !== '-' ? ' - Regu ' + w.regu : ''})`;
+        dbGroup.appendChild(opt);
+      });
+      select.appendChild(dbGroup);
     }
 
     function saveWorkerTemplate() {
@@ -1432,42 +1527,50 @@ html_template = """<!DOCTYPE html>
 
       localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
       renderWorkerTemplateDropdown();
-      document.getElementById('workerTemplateSelect').value = name;
+      document.getElementById('workerTemplateSelect').value = "TEMPLATE:" + name;
       alert(`Data pekerja "${name}" berhasil disimpan ke daftar template!`);
     }
 
-    function loadWorkerTemplate(name) {
-      if (!name || !workerTemplates[name]) return;
-      const data = workerTemplates[name];
-      document.getElementById('workerName').value = data.name;
+    function loadWorkerTemplate(val) {
+      if (!val) return;
+      if (val.startsWith("WORKER:")) {
+        const name = val.replace("WORKER:", "");
+        applyWorkerData(name);
+      } else if (val.startsWith("TEMPLATE:")) {
+        const name = val.replace("TEMPLATE:", "");
+        const data = workerTemplates[name];
+        if (!data) return;
+        document.getElementById('workerName').value = data.name;
 
-      if (data.category) {
-        document.getElementById('workerCategorySelect').value = data.category;
-        handleCategoryChange(data.category);
-      }
-      if (data.boronganType && data.category === "Borongan") {
-        document.getElementById('boronganTypeSelect').value = data.boronganType;
-        handleBoronganTypeChange(data.boronganType);
-      }
+        if (data.category) {
+          document.getElementById('workerCategorySelect').value = data.category;
+          handleCategoryChange(data.category);
+        }
+        if (data.boronganType && data.category === "Borongan") {
+          document.getElementById('boronganTypeSelect').value = data.boronganType;
+          handleBoronganTypeChange(data.boronganType);
+        }
 
-      if (data.incomeItems) {
-        incomeItems = JSON.parse(JSON.stringify(data.incomeItems));
-      }
-      if (data.deductionItems) {
-        deductionItems = JSON.parse(JSON.stringify(data.deductionItems));
-      }
+        if (data.incomeItems) {
+          incomeItems = JSON.parse(JSON.stringify(data.incomeItems));
+        }
+        if (data.deductionItems) {
+          deductionItems = JSON.parse(JSON.stringify(data.deductionItems));
+        }
 
-      renderItemsInput();
-      updateReceipt();
+        renderItemsInput();
+        updateReceipt();
+      }
     }
 
     function deleteWorkerTemplate() {
       const select = document.getElementById('workerTemplateSelect');
-      const name = select.value;
-      if (!name || !workerTemplates[name]) {
-        alert('Pilih pekerja dari daftar yang ingin dihapus!');
+      const val = select.value;
+      if (!val || !val.startsWith("TEMPLATE:")) {
+        alert('Pilih template tersimpan dari daftar yang ingin dihapus!');
         return;
       }
+      const name = val.replace("TEMPLATE:", "");
       if (confirm(`Apakah Anda yakin ingin menghapus template pekerja "${name}"?`)) {
         delete workerTemplates[name];
         localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
