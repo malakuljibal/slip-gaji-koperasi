@@ -759,18 +759,30 @@ html_template = """<!DOCTYPE html>
           <div class="form-group">
             <label>Kategori Pekerja</label>
             <select id="workerCategorySelect" onchange="handleCategoryChange(this.value)">
-              <option value="Pengawas">Pengawas</option>
+              <option value="Pengawas">Pengawas / Harian</option>
               <option value="Borongan">Borongan</option>
             </select>
           </div>
+        </div>
+
+        <!-- Sub-Kategori Pengawas / Harian (Tampil jika Kategori = Pengawas) -->
+        <div class="form-group" id="pengawasSubGroup" style="display: block;">
+          <label>Jabatan / Peran Pengawas</label>
+          <select id="pengawasRoleSelect" onchange="handlePengawasRoleChange(this.value)">
+            <option value="Pengawas Lapangan">Pengawas Lapangan</option>
+            <option value="Pengawas Cudai">Pengawas Cudai</option>
+            <option value="Penjemur">Penjemur</option>
+            <option value="Pengawas Malam">Pengawas Malam</option>
+            <option value="Pengawas Koperasi">Pengawas Koperasi</option>
+          </select>
         </div>
 
         <!-- Sub-Kategori Borongan (Tampil jika Kategori = Borongan) -->
         <div class="form-group" id="boronganSubGroup" style="display: none;">
           <label>Jenis Borongan</label>
           <select id="boronganTypeSelect" onchange="handleBoronganTypeChange(this.value)">
-            <option value="Borongan Cudai">Borongan Cudai</option>
             <option value="Borongan Petik">Borongan Petik</option>
+            <option value="Borongan Cudai">Borongan Cudai</option>
           </select>
         </div>
 
@@ -916,7 +928,7 @@ html_template = """<!DOCTYPE html>
           </div>
           <div class="receipt-row">
             <span class="label">Jabatan</span>
-            <span class="val" id="prevRole">Pengawas</span>
+            <span class="val" id="prevRole">Pengawas Lapangan</span>
           </div>
           <div class="receipt-row">
             <span class="label">Periode</span>
@@ -1138,10 +1150,11 @@ html_template = """<!DOCTYPE html>
 
     // Category & Worker State
     let workerCategory = "Pengawas";
-    let boronganType = "Borongan Cudai";
+    let boronganType = "Borongan Petik";
+    let pengawasRole = "Pengawas Lapangan";
 
     let incomeItems = [
-      { desc: "Gaji", amount: 0 }
+      { desc: "Gaji Pengawas Lapangan", workDays: 6, dailyRate: 150000, amount: 900000 }
     ];
 
     let deductionItems = [
@@ -1196,6 +1209,69 @@ html_template = """<!DOCTYPE html>
       }
     }
 
+    function handleCategoryChange(cat) {
+      workerCategory = cat;
+      const pGroup = document.getElementById('pengawasSubGroup');
+      const bGroup = document.getElementById('boronganSubGroup');
+
+      if (cat === "Borongan") {
+        pGroup.style.display = "none";
+        bGroup.style.display = "block";
+        boronganType = document.getElementById('boronganTypeSelect').value || "Borongan Petik";
+        incomeItems = [{ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: 7000, amount: 0 }];
+      } else {
+        pGroup.style.display = "block";
+        bGroup.style.display = "none";
+        pengawasRole = document.getElementById('pengawasRoleSelect').value || "Pengawas Lapangan";
+
+        let defaultRate = 100000;
+        if (pengawasRole === "Pengawas Lapangan") defaultRate = 150000;
+        else if (pengawasRole === "Pengawas Cudai") defaultRate = 120000;
+        else if (pengawasRole === "Penjemur") defaultRate = 100000;
+        else if (pengawasRole === "Pengawas Malam") defaultRate = 100000;
+
+        incomeItems = [{ desc: "Gaji " + pengawasRole, workDays: 6, dailyRate: defaultRate, amount: 6 * defaultRate }];
+      }
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function handlePengawasRoleChange(role) {
+      pengawasRole = role;
+      let defaultRate = 100000;
+      if (role === "Pengawas Lapangan") defaultRate = 150000;
+      else if (role === "Pengawas Cudai") defaultRate = 120000;
+      else if (role === "Penjemur") defaultRate = 100000;
+      else if (role === "Pengawas Malam") defaultRate = 100000;
+
+      let currentDays = (incomeItems.length > 0 && incomeItems[0].workDays) ? incomeItems[0].workDays : 6;
+
+      if (incomeItems.length > 0) {
+        incomeItems[0].desc = "Gaji " + role;
+        incomeItems[0].dailyRate = defaultRate;
+        incomeItems[0].workDays = currentDays;
+        incomeItems[0].amount = currentDays * defaultRate;
+      }
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function handleBoronganTypeChange(type) {
+      boronganType = type;
+      if (incomeItems.length > 0 && incomeItems[0].desc.startsWith("Hasil ")) {
+        incomeItems[0].desc = "Hasil " + type;
+      }
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function getSelectedRole() {
+      if (workerCategory === "Borongan") {
+        return document.getElementById('boronganTypeSelect').value || "Borongan";
+      }
+      return document.getElementById('pengawasRoleSelect').value || "Pengawas Lapangan";
+    }
+
     function applyWorkerData(workerName) {
       if (!workerName) return;
 
@@ -1204,16 +1280,16 @@ html_template = """<!DOCTYPE html>
 
       document.getElementById('workerName').value = workerName;
 
-      let category = worker ? worker.category : "Pengawas";
-      let isBorongan = category.toLowerCase().includes('borongan') || category.toLowerCase().includes('pemetik');
+      let category = worker ? worker.category : "Pengawas Lapangan";
+      let catLower = category.toLowerCase();
 
-      if (isBorongan) {
+      if (catLower.includes('borongan') || catLower.includes('pemetik') || catLower.includes('pencudai')) {
         document.getElementById('workerCategorySelect').value = 'Borongan';
         handleCategoryChange('Borongan');
 
-        let type = 'Borongan Cudai';
-        if (category.toLowerCase().includes('petik')) {
-          type = 'Borongan Petik';
+        let type = 'Borongan Petik';
+        if (catLower.includes('cudai')) {
+          type = 'Borongan Cudai';
         }
         document.getElementById('boronganTypeSelect').value = type;
         handleBoronganTypeChange(type);
@@ -1229,21 +1305,49 @@ html_template = """<!DOCTYPE html>
           amount: total
         }];
       } else {
+        // Pengawas / Penjemur / Harian
         document.getElementById('workerCategorySelect').value = 'Pengawas';
         handleCategoryChange('Pengawas');
 
-        let amount = 0;
+        let exactRole = "Pengawas Lapangan";
+        if (catLower.includes('malam')) {
+          exactRole = "Pengawas Malam";
+        } else if (catLower.includes('cudai')) {
+          exactRole = "Pengawas Cudai";
+        } else if (catLower.includes('jemur')) {
+          exactRole = "Penjemur";
+        } else if (catLower.includes('koperasi')) {
+          exactRole = "Pengawas Koperasi";
+        }
+
+        document.getElementById('pengawasRoleSelect').value = exactRole;
+        pengawasRole = exactRole;
+
+        let defaultRate = 100000;
+        if (exactRole === "Pengawas Lapangan") defaultRate = 150000;
+        else if (exactRole === "Pengawas Cudai") defaultRate = 120000;
+        else if (exactRole === "Penjemur") defaultRate = 100000;
+        else if (exactRole === "Pengawas Malam") defaultRate = 100000;
+
+        let days = 6;
+
         if (rekap && rekap.subTotal) {
           let cleaned = rekap.subTotal.replace(/[^0-9.]/g, '');
-          amount = parseFloat(cleaned) || 0;
+          let subTot = parseFloat(cleaned) || 0;
+          if (subTot > 0) {
+            days = Math.round(subTot / defaultRate) || 6;
+          }
         }
 
         incomeItems = [{
-          desc: "Gaji " + (category || "Pengawas"),
-          amount: amount
+          desc: "Gaji " + exactRole,
+          workDays: days,
+          dailyRate: defaultRate,
+          amount: days * defaultRate
         }];
       }
 
+      // Kasbon
       let kasbonAmt = 0;
       if (rekap && rekap.kasbon && rekap.kasbon !== "-") {
         let cleaned = rekap.kasbon.replace(/[^0-9]/g, '');
@@ -1427,37 +1531,6 @@ html_template = """<!DOCTYPE html>
       }
     }
 
-    function handleCategoryChange(cat) {
-      workerCategory = cat;
-      const subGroup = document.getElementById('boronganSubGroup');
-      if (cat === "Borongan") {
-        subGroup.style.display = "block";
-        boronganType = document.getElementById('boronganTypeSelect').value || "Borongan Cudai";
-        incomeItems = [{ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: 0, amount: 0 }];
-      } else {
-        subGroup.style.display = "none";
-        incomeItems = [{ desc: "Gaji", amount: 0 }];
-      }
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function handleBoronganTypeChange(type) {
-      boronganType = type;
-      if (incomeItems.length > 0 && incomeItems[0].desc.startsWith("Hasil ")) {
-        incomeItems[0].desc = "Hasil " + type;
-      }
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function getSelectedRole() {
-      if (workerCategory === "Borongan") {
-        return document.getElementById('boronganTypeSelect').value || "Borongan";
-      }
-      return "Pengawas";
-    }
-
     function updatePeriodFromDates() {
       const startVal = document.getElementById('periodStart').value;
       const endVal = document.getElementById('periodEnd').value;
@@ -1520,6 +1593,7 @@ html_template = """<!DOCTYPE html>
         name: name,
         category: workerCategory,
         boronganType: boronganType,
+        pengawasRole: pengawasRole,
         role: role,
         incomeItems: JSON.parse(JSON.stringify(incomeItems)),
         deductionItems: JSON.parse(JSON.stringify(deductionItems))
@@ -1549,6 +1623,10 @@ html_template = """<!DOCTYPE html>
         if (data.boronganType && data.category === "Borongan") {
           document.getElementById('boronganTypeSelect').value = data.boronganType;
           handleBoronganTypeChange(data.boronganType);
+        }
+        if (data.pengawasRole && data.category === "Pengawas") {
+          document.getElementById('pengawasRoleSelect').value = data.pengawasRole;
+          handlePengawasRoleChange(data.pengawasRole);
         }
 
         if (data.incomeItems) {
@@ -1742,8 +1820,10 @@ html_template = """<!DOCTYPE html>
       incomeItems.forEach(item => {
         totalIncome += (item.amount || 0);
         addRow(item.desc || 'Item', formatRupiah(item.amount));
-        if (item.weightKg && item.pricePerKg) {
+        if (item.weightKg !== undefined && item.pricePerKg !== undefined) {
           pushString(`  ${item.weightKg} kg x @${formatRupiah(item.pricePerKg)}\\n`);
+        } else if (item.workDays !== undefined && item.dailyRate !== undefined) {
+          pushString(`  ${item.workDays} hari x @${formatRupiah(item.dailyRate)}\\n`);
         }
       });
 
@@ -1875,9 +1955,9 @@ html_template = """<!DOCTYPE html>
       incomeItems.forEach((item, idx) => {
         const row = document.createElement('div');
         row.className = 'form-row';
+        row.style.cssText = "flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;";
 
         if (workerCategory === "Borongan") {
-          row.style.cssText = "flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;";
           row.innerHTML = `
             <div style="flex: 2; min-width: 140px;">
               <label style="font-size: 0.75rem; color: #64748b;">Deskripsi Komponen</label>
@@ -1901,9 +1981,25 @@ html_template = """<!DOCTYPE html>
           `;
         } else {
           row.innerHTML = `
-            <input type="text" placeholder="Deskripsi komponen" value="${item.desc}" oninput="updateIncomeDesc(${idx}, this.value)" style="flex: 2;">
-            <input type="number" placeholder="Nominal (Rp)" value="${item.amount}" oninput="updateIncomeAmount(${idx}, this.value)" style="flex: 1.2;">
-            <button class="btn btn-danger" onclick="removeIncomeItem(${idx})" title="Hapus">✕</button>
+            <div style="flex: 2; min-width: 140px;">
+              <label style="font-size: 0.75rem; color: #64748b;">Deskripsi Komponen</label>
+              <input type="text" placeholder="Deskripsi" value="${item.desc}" oninput="updateIncomeDesc(${idx}, this.value)">
+            </div>
+            <div style="flex: 1; min-width: 90px;">
+              <label style="font-size: 0.75rem; color: #64748b;">Jumlah Hari</label>
+              <input type="number" placeholder="0" value="${item.workDays !== undefined ? item.workDays : ''}" oninput="updateIncomeDays(${idx}, this.value)">
+            </div>
+            <div style="flex: 1; min-width: 100px;">
+              <label style="font-size: 0.75rem; color: #64748b;">Tarif/Hari (Rp)</label>
+              <input type="number" placeholder="0" value="${item.dailyRate !== undefined ? item.dailyRate : ''}" oninput="updateIncomeRate(${idx}, this.value)">
+            </div>
+            <div style="flex: 1.2; min-width: 110px;">
+              <label style="font-size: 0.75rem; color: #64748b;">Total (Rp)</label>
+              <input type="text" placeholder="Rp 0" value="${formatRupiah(item.amount)}" readonly style="background: #f1f5f9; font-weight: bold; color: #16a34a;">
+            </div>
+            <div style="display: flex; align-items: flex-end; padding-top: 1.25rem;">
+              <button class="btn btn-danger" onclick="removeIncomeItem(${idx})" title="Hapus">✕</button>
+            </div>
           `;
         }
         incomeContainer.appendChild(row);
@@ -1926,9 +2022,12 @@ html_template = """<!DOCTYPE html>
 
     function addIncomeItem() {
       if (workerCategory === "Borongan") {
-        incomeItems.push({ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: 0, amount: 0 });
+        incomeItems.push({ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: 7000, amount: 0 });
       } else {
-        incomeItems.push({ desc: "Gaji", amount: 0 });
+        let defaultRate = 100000;
+        if (pengawasRole === "Pengawas Lapangan") defaultRate = 150000;
+        else if (pengawasRole === "Pengawas Cudai") defaultRate = 120000;
+        incomeItems.push({ desc: "Gaji " + pengawasRole, workDays: 6, dailyRate: defaultRate, amount: 6 * defaultRate });
       }
       renderItemsInput();
       updateReceipt();
@@ -1964,6 +2063,24 @@ html_template = """<!DOCTYPE html>
       incomeItems[index].pricePerKg = price;
       const weight = incomeItems[index].weightKg || 0;
       incomeItems[index].amount = weight * price;
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function updateIncomeDays(index, val) {
+      const days = parseFloat(val) || 0;
+      incomeItems[index].workDays = days;
+      const rate = incomeItems[index].dailyRate || 0;
+      incomeItems[index].amount = days * rate;
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function updateIncomeRate(index, val) {
+      const rate = parseFloat(val) || 0;
+      incomeItems[index].dailyRate = rate;
+      const days = incomeItems[index].workDays || 0;
+      incomeItems[index].amount = days * rate;
       renderItemsInput();
       updateReceipt();
     }
@@ -2029,11 +2146,19 @@ html_template = """<!DOCTYPE html>
         totalIncome += (item.amount || 0);
         const tr = document.createElement('tr');
 
-        if (item.weightKg && item.pricePerKg) {
+        if (item.weightKg !== undefined && item.pricePerKg !== undefined) {
           tr.innerHTML = `
             <td class="col-item">
               <div>${item.desc || 'Item'}</div>
               <div style="font-size: 9px; color: #555;">${item.weightKg} kg x @${formatRupiah(item.pricePerKg)}</div>
+            </td>
+            <td class="col-val">${formatRupiah(item.amount)}</td>
+          `;
+        } else if (item.workDays !== undefined && item.dailyRate !== undefined) {
+          tr.innerHTML = `
+            <td class="col-item">
+              <div>${item.desc || 'Item'}</div>
+              <div style="font-size: 9px; color: #555;">${item.workDays} hari x @${formatRupiah(item.dailyRate)}</div>
             </td>
             <td class="col-val">${formatRupiah(item.amount)}</td>
           `;
