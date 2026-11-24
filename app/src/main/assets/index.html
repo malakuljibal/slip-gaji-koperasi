@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Cetak Bukti Pembayaran Pekerja (Thermal 58mm / 57x30)</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --border: #cbd5e1;
+      --text: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1e293b;
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .badge {
+      background: #3b82f6;
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      margin-left: 0.5rem;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      gap: 2rem;
+      padding: 1.5rem;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Left Form Editor */
+    .editor-section {
+      flex: 1.3;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #334155;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.35rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .form-row > * {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: #475569;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    }
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .items-table th {
+      text-align: left;
+      font-size: 0.75rem;
+      color: #64748b;
+      padding: 0.35rem;
+    }
+
+    .items-table td {
+      padding: 0.35rem;
+    }
+
+    .btn {
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #ef4444;
+      padding: 0.35rem 0.6rem;
+    }
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+
+    .btn-print {
+      background: #10b981;
+      color: white;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      width: 100%;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .btn-print:hover {
+      background: #059669;
+    }
+
+    /* Right Preview Section */
+    .preview-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .preview-header {
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #475569;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    /* Thermal Receipt Simulation (57mm / 58mm printer) */
+    .receipt-container {
+      width: 58mm; /* standard 58mm receipt thermal width */
+      background: #ffffff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+      padding: 3mm 2mm;
+      color: #000;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      line-height: 1.25;
+      border-radius: 4px;
+    }
+
+    .receipt-center {
+      text-align: center;
+    }
+
+    .receipt-title {
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .receipt-sub {
+      font-size: 10px;
+      margin-bottom: 2px;
+    }
+
+    .divider {
+      border-top: 1px dashed #000;
+      margin: 5px 0;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+      word-break: break-all;
+    }
+
+    .receipt-row.bold {
+      font-weight: bold;
+    }
+
+    .receipt-row .label {
+      text-align: left;
+      flex: 1;
+    }
+
+    .receipt-row .val {
+      text-align: right;
+      white-space: nowrap;
+      margin-left: 4px;
+    }
+
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 4px 0;
+    }
+
+    .receipt-table td {
+      padding: 1px 0;
+      vertical-align: top;
+    }
+
+    .receipt-table td.col-item {
+      text-align: left;
+      font-size: 10.5px;
+    }
+
+    .receipt-table td.col-val {
+      text-align: right;
+      white-space: nowrap;
+      font-size: 10.5px;
+    }
+
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .sign-box {
+      width: 45%;
+    }
+
+    .sign-space {
+      height: 35px;
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      body {
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .receipt-container, .receipt-container * {
+        visibility: visible;
+      }
+      .receipt-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 58mm !important;
+        padding: 0 1mm !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+      }
+      @page {
+        size: 58mm auto;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="display: flex; align-items: center;">
+      <h1>Slip Pembayaran Pekerja</h1>
+      <span class="badge">Thermal 57x30 / 58mm</span>
+    </div>
+    <div style="font-size: 0.85rem; color: #94a3b8;">
+      Praktis &amp; Langsung Cetak via Printer Thermal
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Form Input / Editor -->
+    <div class="editor-section">
+      <div class="section-title">
+        <span>Informasi Usaha / Tempat Kerja</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nama Usaha / Toko / Perusahaan</label>
+          <input type="text" id="businessName" value="KEDAI MAKMUR JAYA" oninput="updateReceipt()">
+        </div>
+        <div class="form-group">
+          <label>Sub-judul / Unit Kerja</label>
+          <input type="text" id="businessUnit" value="Slip Gaji &amp; Upah Kerja" oninput="updateReceipt()">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Alamat / Kontak Singkat</label>
+        <input type="text" id="businessAddress" value="Jl. Sudirman No. 45 | 0812-3456-7890" oninput="updateReceipt()">
+      </div>
+
+      <div class="section-title" style="margin-top: 1.25rem;">
+        <span>Detail Pekerja &amp; Periode</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nama Pekerja</label>
+          <input type="text" id="workerName" value="Ahmad Maulana" oninput="updateReceipt()">
+        </div>
+        <div class="form-group">
+          <label>Jabatan / Peran</label>
+          <input type="text" id="workerRole" value="Staf Gudang &amp; Packing" oninput="updateReceipt()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>No. Bukti / Referensi</label>
+          <input type="text" id="refNo" value="PAY-202611-01" oninput="updateReceipt()">
+        </div>
+        <div class="form-group">
+          <label>Tanggal Pembayaran</label>
+          <input type="date" id="payDate" oninput="updateReceipt()">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Periode Kerja</label>
+        <input type="text" id="periodText" value="16 Nov 2026 - 22 Nov 2026 (Mingguan)" oninput="updateReceipt()">
+      </div>
+
+      <!-- Pendapatan / Komponen Gaji -->
+      <div class="section-title" style="margin-top: 1.25rem;">
+        <span>Komponen Pendapatan (+)</span>
+        <button class="btn btn-secondary" onclick="addIncomeItem()">+ Tambah Baris</button>
+      </div>
+      <div id="incomeItemsContainer"></div>
+
+      <!-- Potongan / Kasbon -->
+      <div class="section-title" style="margin-top: 1.25rem;">
+        <span>Komponen Potongan / Kasbon (-)</span>
+        <button class="btn btn-secondary" onclick="addDeductionItem()">+ Tambah Baris</button>
+      </div>
+      <div id="deductionItemsContainer"></div>
+
+      <!-- Pembayaran & Tanda Tangan -->
+      <div class="section-title" style="margin-top: 1.25rem;">
+        <span>Metode Pembayaran &amp; Tanda Tangan</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Metode Pembayaran</label>
+          <select id="paymentMethod" onchange="updateReceipt()">
+            <option value="Tunai / Cash">Tunai / Cash</option>
+            <option value="Transfer Bank BCA">Transfer Bank BCA</option>
+            <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
+            <option value="Transfer Bank BRI">Transfer Bank BRI</option>
+            <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nama Penanggung Jawab</label>
+          <input type="text" id="picName" value="H. Hendra (Admin)" oninput="updateReceipt()">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Catatan Tambahan (Bawah Kertas)</label>
+        <textarea id="noteText" rows="2" oninput="updateReceipt()">Terima kasih atas kerja keras &amp; dedikasinya!</textarea>
+      </div>
+
+      <button class="btn btn-print" onclick="window.print()">
+        🖨️ Cetak ke Printer Thermal (57x30)
+      </button>
+    </div>
+
+    <!-- Preview Thermal -->
+    <div class="preview-section">
+      <div class="preview-header">
+        <span>📄 Live Preview Ukuran 57mm</span>
+        <span style="color: #64748b; font-size: 0.8rem;">Auto-update</span>
+      </div>
+
+      <div class="receipt-container" id="receiptPrintArea">
+        <!-- Header Usaha -->
+        <div class="receipt-center">
+          <div class="receipt-title" id="prevBusinessName">KEDAI MAKMUR JAYA</div>
+          <div class="receipt-sub" id="prevBusinessUnit">Slip Gaji &amp; Upah Kerja</div>
+          <div class="receipt-sub" id="prevBusinessAddress" style="font-size: 9px;">Jl. Sudirman No. 45</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Info Bukti & Pekerja -->
+        <div class="receipt-row">
+          <span class="label">No.Bukti</span>
+          <span class="val" id="prevRefNo">PAY-202611-01</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">Tanggal</span>
+          <span class="val" id="prevDate">22/11/2026</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">Pekerja</span>
+          <span class="val bold" id="prevWorker">Ahmad Maulana</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">Jabatan</span>
+          <span class="val" id="prevRole">Staf Gudang</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">Periode</span>
+          <span class="val" id="prevPeriod" style="font-size: 10px;">16-22 Nov 2026</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Rincian Pendapatan -->
+        <div style="font-weight: bold; margin-bottom: 2px;">RINCIAN PENDAPATAN:</div>
+        <table class="receipt-table" id="prevIncomeTable">
+          <!-- Rows injected via JS -->
+        </table>
+
+        <!-- Rincian Potongan -->
+        <div id="prevDeductionSection" style="display: none; margin-top: 4px;">
+          <div style="font-weight: bold; margin-bottom: 2px;">POTONGAN / KASBON:</div>
+          <table class="receipt-table" id="prevDeductionTable">
+            <!-- Rows injected via JS -->
+          </table>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Total Bersih -->
+        <div class="receipt-row bold" style="font-size: 12px;">
+          <span class="label">TOTAL DITERIMA:</span>
+          <span class="val" id="prevTotal">Rp 0</span>
+        </div>
+        <div class="receipt-row" style="font-size: 9.5px; margin-top: 2px;">
+          <span class="label">Metode:</span>
+          <span class="val" id="prevPaymentMethod">Tunai / Cash</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Tanda Tangan -->
+        <div class="signatures">
+          <div class="sign-box">
+            <div>Penerima,</div>
+            <div class="sign-space"></div>
+            <div id="prevSignWorker">( Ahmad M. )</div>
+          </div>
+          <div class="sign-box">
+            <div>Pengesah,</div>
+            <div class="sign-space"></div>
+            <div id="prevSignPic">( H. Hendra )</div>
+          </div>
+        </div>
+
+        <div class="divider" style="margin-top: 10px;"></div>
+
+        <div class="receipt-center" style="font-size: 9px; margin-top: 4px;" id="prevNote">
+          Terima kasih atas kerja keras &amp; dedikasinya!
+        </div>
+        <div class="receipt-center" style="font-size: 8px; color: #555; margin-top: 2px;">
+          --- Simpan bukti ini dengan baik ---
+        </div>
+      </div>
+
+      <div style="margin-top: 15px; font-size: 0.8rem; color: #64748b; max-width: 300px; text-align: center;">
+        💡 <strong>Tips Setting Printer:</strong> Saat jendela print muncul, pilih printer thermal 58mm, margins <strong>None / Minimum</strong>, lalu uncheck <em>Headers and Footers</em>.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State items
+    let incomeItems = [
+      { desc: "Gaji Pokok / Upah Dasar", amount: 1200000 },
+      { desc: "Uang Makan (6 hari x 25rb)", amount: 150000 },
+      { desc: "Lembur (5 jam x 20rb)", amount: 100000 },
+      { desc: "Bonus Performa", amount: 50000 }
+    ];
+
+    let deductionItems = [
+      { desc: "Kasbon / Pinjaman", amount: 100000 },
+      { desc: "BPJS / Iuran", amount: 25000 }
+    ];
+
+    // Set default date to today
+    window.onload = function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('payDate').value = today;
+      renderItemsInput();
+      updateReceipt();
+    };
+
+    function formatRupiah(num) {
+      return "Rp " + Number(num || 0).toLocaleString("id-ID");
+    }
+
+    function renderItemsInput() {
+      // Income Inputs
+      const incomeContainer = document.getElementById('incomeItemsContainer');
+      incomeContainer.innerHTML = '';
+      incomeItems.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'form-row';
+        row.innerHTML = `
+          <input type="text" placeholder="Deskripsi komponen" value="${item.desc}" oninput="updateIncomeDesc(${idx}, this.value)" style="flex: 2;">
+          <input type="number" placeholder="Nominal (Rp)" value="${item.amount}" oninput="updateIncomeAmount(${idx}, this.value)" style="flex: 1.2;">
+          <button class="btn btn-danger" onclick="removeIncomeItem(${idx})" title="Hapus">✕</button>
+        `;
+        incomeContainer.appendChild(row);
+      });
+
+      // Deduction Inputs
+      const deductionContainer = document.getElementById('deductionItemsContainer');
+      deductionContainer.innerHTML = '';
+      deductionItems.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'form-row';
+        row.innerHTML = `
+          <input type="text" placeholder="Deskripsi potongan" value="${item.desc}" oninput="updateDeductionDesc(${idx}, this.value)" style="flex: 2;">
+          <input type="number" placeholder="Nominal (Rp)" value="${item.amount}" oninput="updateDeductionAmount(${idx}, this.value)" style="flex: 1.2;">
+          <button class="btn btn-danger" onclick="removeDeductionItem(${idx})" title="Hapus">✕</button>
+        `;
+        deductionContainer.appendChild(row);
+      });
+    }
+
+    function addIncomeItem() {
+      incomeItems.push({ desc: "", amount: 0 });
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function removeIncomeItem(index) {
+      incomeItems.splice(index, 1);
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function updateIncomeDesc(index, val) {
+      incomeItems[index].desc = val;
+      updateReceipt();
+    }
+
+    function updateIncomeAmount(index, val) {
+      incomeItems[index].amount = parseFloat(val) || 0;
+      updateReceipt();
+    }
+
+    function addDeductionItem() {
+      deductionItems.push({ desc: "", amount: 0 });
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function removeDeductionItem(index) {
+      deductionItems.splice(index, 1);
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function updateDeductionDesc(index, val) {
+      deductionItems[index].desc = val;
+      updateReceipt();
+    }
+
+    function updateDeductionAmount(index, val) {
+      deductionItems[index].amount = parseFloat(val) || 0;
+      updateReceipt();
+    }
+
+    function updateReceipt() {
+      // Header & Worker info
+      document.getElementById('prevBusinessName').innerText = document.getElementById('businessName').value || 'USAHA ANDA';
+      document.getElementById('prevBusinessUnit').innerText = document.getElementById('businessUnit').value || '';
+      document.getElementById('prevBusinessAddress').innerText = document.getElementById('businessAddress').value || '';
+
+      document.getElementById('prevRefNo').innerText = document.getElementById('refNo').value || '-';
+      
+      const dateVal = document.getElementById('payDate').value;
+      if (dateVal) {
+        const parts = dateVal.split('-');
+        document.getElementById('prevDate').innerText = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } else {
+        document.getElementById('prevDate').innerText = '-';
+      }
+
+      const worker = document.getElementById('workerName').value || 'Nama Pekerja';
+      document.getElementById('prevWorker').innerText = worker;
+      document.getElementById('prevSignWorker').innerText = `( ${worker} )`;
+
+      const role = document.getElementById('workerRole').value || '-';
+      document.getElementById('prevRole').innerText = role;
+
+      document.getElementById('prevPeriod').innerText = document.getElementById('periodText').value || '-';
+
+      const pic = document.getElementById('picName').value || 'Admin';
+      document.getElementById('prevSignPic').innerText = `( ${pic} )`;
+
+      document.getElementById('prevPaymentMethod').innerText = document.getElementById('paymentMethod').value;
+      document.getElementById('prevNote').innerText = document.getElementById('noteText').value;
+
+      // Calculate totals
+      let totalIncome = 0;
+      const incomeTable = document.getElementById('prevIncomeTable');
+      incomeTable.innerHTML = '';
+      incomeItems.forEach(item => {
+        totalIncome += (item.amount || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="col-item">${item.desc || 'Item'}</td>
+          <td class="col-val">${formatRupiah(item.amount)}</td>
+        `;
+        incomeTable.appendChild(tr);
+      });
+
+      let totalDeduction = 0;
+      const deductionSec = document.getElementById('prevDeductionSection');
+      const deductionTable = document.getElementById('prevDeductionTable');
+      deductionTable.innerHTML = '';
+
+      if (deductionItems.length > 0) {
+        deductionSec.style.display = 'block';
+        deductionItems.forEach(item => {
+          totalDeduction += (item.amount || 0);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="col-item">${item.desc || 'Potongan'}</td>
+            <td class="col-val">-${formatRupiah(item.amount)}</td>
+          `;
+          deductionTable.appendChild(tr);
+        });
+      } else {
+        deductionSec.style.display = 'none';
+      }
+
+      const grandTotal = totalIncome - totalDeduction;
+      document.getElementById('prevTotal').innerText = formatRupiah(grandTotal);
+    }
+  </script>
+</body>
+</html>
