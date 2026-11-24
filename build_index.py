@@ -680,26 +680,25 @@ html_template = """<!DOCTYPE html>
 
     /* Print Stylesheet for System Print & PDF */
     @media print {
-      body * {
-        visibility: hidden !important;
+      body > *:not(#printableReceiptContainer) {
+        display: none !important;
       }
-      body {
-        background: #ffffff !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      #receiptPrintArea, #receiptPrintArea * {
+      #printableReceiptContainer {
+        display: block !important;
         visibility: visible !important;
-      }
-      #receiptPrintArea {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
         width: 58mm !important;
-        margin: 0 auto !important;
-        padding: 2mm !important;
-        box-shadow: none !important;
-        border: none !important;
+        padding: 3mm 2mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+      }
+      #printableReceiptContainer * {
+        visibility: visible !important;
       }
       @page {
         size: 58mm auto;
@@ -709,6 +708,9 @@ html_template = """<!DOCTYPE html>
   </style>
 </head>
 <body>
+
+  <!-- Hidden Container for System PDF Printing -->
+  <div id="printableReceiptContainer" style="display: none;"></div>
 
   <header>
     <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
@@ -925,7 +927,7 @@ html_template = """<!DOCTYPE html>
           Cetak Slip Gaji (Thermal 57x30)
         </button>
 
-        <button class="btn btn-secondary" onclick="AndroidPrint.printPage()" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.85rem;">
+        <button class="btn btn-secondary" onclick="prepareAndPrintSystem()" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.85rem;">
           Simpan PDF / Cetak Sistem
         </button>
       </div>
@@ -1228,6 +1230,19 @@ html_template = """<!DOCTYPE html>
 
       checkBtStatusOnLoad();
     };
+
+    function prepareAndPrintSystem() {
+      const source = document.getElementById('receiptPrintArea');
+      const container = document.getElementById('printableReceiptContainer');
+      if (source && container) {
+        container.innerHTML = source.innerHTML;
+      }
+      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.printPage) {
+        AndroidPrint.printPage();
+      } else {
+        window.print();
+      }
+    }
 
     function switchMainTab(tab) {
       const secSlip = document.getElementById('secSlip');
@@ -1887,7 +1902,7 @@ html_template = """<!DOCTYPE html>
       }
     }
 
-    // Direct ESC/POS Thermal Printing (Clean 32-column alignment)
+    // Direct ESC/POS Thermal Printing (32-column precise alignment)
     function generateEscPosBytes() {
       let bytes = [];
 
@@ -1921,8 +1936,7 @@ html_template = """<!DOCTYPE html>
         let maxLabelLen = 32 - r.length - 1;
         if (maxLabelLen < 4) maxLabelLen = 4;
         if (l.length > maxLabelLen) {
-          pushString(l + "\\n");
-          l = "";
+          l = l.substring(0, maxLabelLen);
         }
         let spaces = 32 - (l.length + r.length);
         if (spaces < 1) spaces = 1;
@@ -1960,9 +1974,9 @@ html_template = """<!DOCTYPE html>
         totalIncome += (item.amount || 0);
         addRow(item.desc || 'Item', formatRupiah(item.amount));
         if (item.weightKg !== undefined && item.pricePerKg !== undefined) {
-          pushString(`  ${item.weightKg} kg x @${formatRupiah(item.pricePerKg)}\\n`);
+          pushString(`  (${item.weightKg} kg x @${formatRupiah(item.pricePerKg)})\\n`);
         } else if (item.workDays !== undefined && item.dailyRate !== undefined) {
-          pushString(`  ${item.workDays} hari x @${formatRupiah(item.dailyRate)}\\n`);
+          pushString(`  (${item.workDays} hari x @${formatRupiah(item.dailyRate)})\\n`);
         }
       });
 
@@ -1993,8 +2007,8 @@ html_template = """<!DOCTYPE html>
       // Signatures
       pushString("Penerima,              Pengesah,\\n\\n\\n");
       const pic = document.getElementById('picName').value || 'Koperasi';
-      let wSign = worker.length > 14 ? worker.substring(0, 14) : worker;
-      let pSign = pic.length > 14 ? pic.substring(0, 14) : pic;
+      let wSign = worker.length > 12 ? worker.substring(0, 12) : worker;
+      let pSign = pic.length > 12 ? pic.substring(0, 12) : pic;
       let leftStr = "(" + wSign + ")";
       let rightStr = "(" + pSign + ")";
       let signSpaces = 32 - (leftStr.length + rightStr.length);
