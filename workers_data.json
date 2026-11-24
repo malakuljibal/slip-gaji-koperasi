@@ -1,0 +1,682 @@
+﻿[
+    {
+        "name":  "Alfiki Paputungan",
+        "no":  1,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Akmaludin Tombo",
+        "no":  2,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Wahyudin Paputungan",
+        "no":  3,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Malik Paputungan",
+        "no":  4,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alvin Paputungan",
+        "no":  5,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Fajrin Paputungan",
+        "no":  6,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Iki",
+        "no":  7,
+        "regu":  "Sabua Miring",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yaya",
+        "no":  8,
+        "regu":  "Sabua Miring",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yudi",
+        "no":  9,
+        "regu":  "Sabua Miring",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Darman",
+        "no":  10,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Amran",
+        "no":  11,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Heru",
+        "no":  12,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Sastra",
+        "no":  13,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Gusti",
+        "no":  14,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Nugi",
+        "no":  15,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Adil",
+        "no":  16,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Tian",
+        "no":  17,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Daffa",
+        "no":  18,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Agung",
+        "no":  19,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Rehan",
+        "no":  20,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Begi",
+        "no":  21,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Mama Acin",
+        "no":  22,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Mama Tar",
+        "no":  23,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Mama Tina",
+        "no":  24,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Fandi",
+        "no":  25,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Dian",
+        "no":  26,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Deni",
+        "no":  27,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Acin",
+        "no":  28,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Adnan",
+        "no":  29,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dalin",
+        "no":  30,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yudi",
+        "no":  31,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dandi",
+        "no":  32,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Salman",
+        "no":  33,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Asis",
+        "no":  34,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Rako",
+        "no":  35,
+        "regu":  "Due 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Om Deni",
+        "no":  36,
+        "regu":  "Due 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Aldo",
+        "no":  37,
+        "regu":  "Due 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alfred",
+        "no":  38,
+        "regu":  "Due 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Boy",
+        "no":  39,
+        "regu":  "Due 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Jems",
+        "no":  40,
+        "regu":  "Due 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alan",
+        "no":  41,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Opal",
+        "no":  42,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Amin",
+        "no":  43,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Gilang",
+        "no":  44,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ka Undu",
+        "no":  45,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Lendy",
+        "no":  46,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ako",
+        "no":  47,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alis",
+        "no":  48,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "NENEK",
+        "no":  49,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Omin",
+        "no":  50,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Tutun",
+        "no":  51,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dandi",
+        "no":  52,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yapin",
+        "no":  53,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Gina",
+        "no":  54,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Iyal",
+        "no":  55,
+        "regu":  "Sabua Miring 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Non-Aktif"
+    },
+    {
+        "name":  "Riyan",
+        "no":  56,
+        "regu":  "Sabua Miring 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Non-Aktif"
+    },
+    {
+        "name":  "Saprian",
+        "no":  57,
+        "regu":  "Sabua Miring 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Non-Aktif"
+    },
+    {
+        "name":  "Dolpi",
+        "no":  58,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alex",
+        "no":  59,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Male",
+        "no":  60,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Maikel",
+        "no":  61,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Bojes",
+        "no":  62,
+        "regu":  "Kaki Seribu 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Jun",
+        "no":  63,
+        "regu":  "Kaki Seribu 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Handi",
+        "no":  64,
+        "regu":  "Kaki Seribu 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Bobon",
+        "no":  65,
+        "regu":  "Kaki Seribu 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ray",
+        "no":  66,
+        "regu":  "Kaki Seribu 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Oni",
+        "no":  67,
+        "regu":  "Kaki Seribu 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alfiki Paputungan",
+        "no":  68,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Akmaludin Tombo",
+        "no":  69,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Wahyudin Paputungan",
+        "no":  70,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Malik Paputungan",
+        "no":  71,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alvin Paputungan",
+        "no":  72,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Fajrin Paputungan",
+        "no":  73,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Musripan Paputungan",
+        "no":  74,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Anis Bapuli",
+        "no":  75,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Moh Yakob Botutihe",
+        "no":  76,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Acong Paputungan",
+        "no":  77,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Agil",
+        "no":  78,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Etin Paputungan",
+        "no":  79,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Wira",
+        "no":  80,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ridho Paputungan",
+        "no":  81,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Penjemur",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dandi Huntua",
+        "no":  82,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Penjemur",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Iki Paputungan",
+        "no":  83,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Penjemur",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Sariin",
+        "no":  84,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Malam",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Yul",
+        "no":  85,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Malam",
+        "status":  "Aktif"
+    }
+]

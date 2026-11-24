@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1e293b">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <title>Finance Ilantat Jaya - Aplikasi Slip Gaji Koperasi</title>
+  <title>Finance Ilantat Jaya - Database Pekerja & Slip Gaji Koperasi</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -35,7 +35,7 @@
     header {
       background: #1e293b;
       color: white;
-      padding: 1rem 1.5rem;
+      padding: 0.85rem 1.25rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -43,8 +43,8 @@
     }
 
     header h1 {
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-size: 1.2rem;
+      font-weight: 700;
     }
 
     .badge {
@@ -56,14 +56,53 @@
       margin-left: 0.5rem;
     }
 
+    /* Main Navigation Bar */
+    .top-nav {
+      background: #0f172a;
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      overflow-x: auto;
+      border-bottom: 1px solid #334155;
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: #94a3b8;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      color: #ffffff;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .nav-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
     .container {
       display: flex;
       flex: 1;
-      gap: 2rem;
-      padding: 1.5rem;
-      max-width: 1300px;
+      gap: 1.5rem;
+      padding: 1.25rem;
+      max-width: 1350px;
       margin: 0 auto;
       width: 100%;
+    }
+
+    /* Main View Sections */
+    .view-section {
+      width: 100%;
+      display: none;
     }
 
     /* Left Form Editor */
@@ -72,14 +111,14 @@
       background: var(--card-bg);
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      padding: 1.5rem;
-      max-height: calc(100vh - 120px);
+      padding: 1.25rem;
+      max-height: calc(100vh - 140px);
       overflow-y: auto;
       transition: all 0.2s ease;
     }
 
     .section-title {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       margin-bottom: 0.75rem;
       color: #334155;
@@ -91,7 +130,7 @@
     }
 
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
     }
 
     .form-row {
@@ -106,18 +145,18 @@
 
     label {
       display: block;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.25rem;
       color: #475569;
     }
 
     input, textarea, select {
       width: 100%;
-      padding: 0.5rem 0.75rem;
+      padding: 0.45rem 0.65rem;
       border: 1px solid var(--border);
       border-radius: 6px;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       outline: none;
       transition: border-color 0.15s;
     }
@@ -190,7 +229,7 @@
 
     .preview-header {
       margin-bottom: 0.75rem;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       color: #475569;
       display: flex;
@@ -201,7 +240,7 @@
 
     /* Thermal Receipt Simulation (57mm / 58mm printer) */
     .receipt-container {
-      width: 58mm; /* standard 58mm receipt thermal width */
+      width: 58mm;
       background: #ffffff;
       box-shadow: 0 4px 15px rgba(0,0,0,0.12);
       padding: 3mm 2mm;
@@ -293,43 +332,125 @@
       height: 35px;
     }
 
-    /* Toggle & Responsive Mode Styles */
-    .preview-section.hidden {
-      display: none !important;
-    }
-
-    .editor-section.full-width {
-      flex: 1 1 100% !important;
-      max-width: 100% !important;
-    }
-
-    .mode-toggle-bar {
-      display: none;
-      background: #cbd5e1;
-      padding: 0.3rem;
+    /* Database Pekerja Styles */
+    .db-container {
+      width: 100%;
+      background: #ffffff;
       border-radius: 8px;
-      margin-bottom: 1rem;
-      gap: 0.4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 1.25rem;
     }
 
-    .mode-tab {
-      flex: 1;
-      text-align: center;
-      padding: 0.55rem 0.5rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      color: #334155;
-      background: transparent;
-      border: none;
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .worker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .worker-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      background: #f8fafc;
       transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    .mode-tab.active {
+    .worker-card:hover {
+      border-color: #2563eb;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.08);
+      transform: translateY(-2px);
+    }
+
+    .worker-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
       background: #2563eb;
-      color: #ffffff;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .worker-info {
+      flex: 1;
+    }
+
+    .worker-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+    }
+
+    .worker-regu {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .tag-category {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .tag-schema {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .tag-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    /* Rekap Table Styles */
+    .rekap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .rekap-table th {
+      background: #1e293b;
+      color: white;
+      padding: 0.65rem;
+      text-align: left;
+    }
+
+    .rekap-table td {
+      padding: 0.6rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .rekap-table tr:hover {
+      background: #f1f5f9;
     }
 
     /* Modal & Calculator Styles */
@@ -450,6 +571,35 @@
       background: #e2e8f0;
     }
 
+    .mode-toggle-bar {
+      display: none;
+      background: #cbd5e1;
+      padding: 0.3rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      gap: 0.4rem;
+    }
+
+    .mode-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.55rem 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #334155;
+      background: transparent;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab.active {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
     @media (max-width: 900px) {
       header {
         flex-direction: column;
@@ -462,6 +612,10 @@
         flex-direction: column;
         padding: 0.75rem;
         gap: 1rem;
+      }
+
+      #secSlip.active {
+        flex-direction: column;
       }
 
       .editor-section {
@@ -526,295 +680,377 @@
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
         <button class="btn btn-secondary" onclick="openBluetoothModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
-          📶 Printer Bluetooth
+          Printer Bluetooth
         </button>
-        <button class="btn btn-secondary" id="togglePreviewBtn" onclick="togglePreview()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
-          👁️ <span id="toggleText">Sembunyikan Preview</span>
+        <button class="btn btn-primary" onclick="syncWithGoogleSheets()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem; background: #059669;">
+          Sync Google Sheets
         </button>
       </div>
     </div>
   </header>
 
+  <!-- Top Main Navigation Bar -->
+  <div class="top-nav">
+    <button class="nav-btn active" id="tabNavSlip" onclick="switchMainTab('slip')">Cetak Slip Gaji</button>
+    <button class="nav-btn" id="tabNavDb" onclick="switchMainTab('db')">Database Pekerja (<span id="totalWorkerBadge">85</span>)</button>
+    <button class="nav-btn" id="tabNavRekap" onclick="switchMainTab('rekap')">Rekapitulasi Gaji &amp; Pemetik</button>
+  </div>
+
   <div class="container">
-    <!-- Mode Switcher for Mobile -->
-    <div class="mode-toggle-bar">
-      <button class="mode-tab active" id="tabEdit" onclick="switchMobileTab('edit')">✏️ Edit Form Data</button>
-      <button class="mode-tab" id="tabPreview" onclick="switchMobileTab('preview')">📄 Lihat Preview (57mm)</button>
-    </div>
 
-    <!-- Form Input / Editor -->
-    <div class="editor-section">
-
-      <!-- Master Data Template Pekerja -->
-      <div class="section-title">
-        <span>👥 Pilih / Kelola Template Pekerja</span>
+    <!-- SECTION 1: Slip Gaji Generator -->
+    <div class="view-section" id="secSlip" style="display: flex;">
+      <!-- Mode Switcher for Mobile -->
+      <div class="mode-toggle-bar" style="width: 100%;">
+        <button class="mode-tab active" id="tabEdit" onclick="switchMobileTab('edit')">Edit Form Data</button>
+        <button class="mode-tab" id="tabPreview" onclick="switchMobileTab('preview')">Lihat Preview (57mm)</button>
       </div>
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
-        <label>Daftar Nama Pekerja (Pilih untuk memuat template):</label>
-        <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem; flex-wrap: wrap;">
-          <select id="workerTemplateSelect" onchange="loadWorkerTemplate(this.value)" style="flex: 2; min-width: 180px;">
-            <option value="">-- Pilih Nama Pekerja --</option>
-          </select>
-          <button class="btn btn-primary" onclick="saveWorkerTemplate()" style="font-size: 0.8rem;">
-            💾 Simpan
-          </button>
-          <button class="btn btn-danger" onclick="deleteWorkerTemplate()" style="font-size: 0.8rem;">
-            🗑️ Hapus
-          </button>
+
+      <!-- Form Input / Editor -->
+      <div class="editor-section">
+
+        <!-- Master Data Template Pekerja -->
+        <div class="section-title">
+          <span>Pilih / Kelola Template Pekerja</span>
         </div>
-      </div>
-
-      <div class="section-title">
-        <span>Informasi Usaha / Tempat Kerja</span>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nama Usaha / Toko / Perusahaan</label>
-          <input type="text" id="businessName" value="KOPERASI ILANTAT JAYA" oninput="updateReceipt()">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
+          <label>Daftar Nama Pekerja (Pilih untuk memuat template):</label>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem; flex-wrap: wrap;">
+            <select id="workerTemplateSelect" onchange="loadWorkerTemplate(this.value)" style="flex: 2; min-width: 180px;">
+              <option value="">-- Pilih Nama Pekerja --</option>
+            </select>
+            <button class="btn btn-primary" onclick="saveWorkerTemplate()" style="font-size: 0.8rem;">
+              Simpan
+            </button>
+            <button class="btn btn-danger" onclick="deleteWorkerTemplate()" style="font-size: 0.8rem;">
+              Hapus
+            </button>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Sub-judul / Unit Kerja</label>
-          <input type="text" id="businessUnit" value="Slip Gaji &amp; Upah Kerja" oninput="updateReceipt()">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Alamat / Kontak Singkat</label>
-        <input type="text" id="businessAddress" value="Desa Lungkap, Bolaang Mongondow Selatan" oninput="updateReceipt()">
-      </div>
 
-      <div class="section-title" style="margin-top: 1.25rem;">
-        <span>Detail Pekerja &amp; Kategori</span>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nama Pekerja</label>
-          <input type="text" id="workerName" value="Ahmad Maulana" oninput="updateReceipt()">
+        <div class="section-title">
+          <span>Informasi Usaha / Tempat Kerja</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nama Usaha / Toko / Perusahaan</label>
+            <input type="text" id="businessName" value="KOPERASI ILANTAT JAYA" oninput="updateReceipt()">
+          </div>
+          <div class="form-group">
+            <label>Sub-judul / Unit Kerja</label>
+            <input type="text" id="businessUnit" value="Slip Gaji &amp; Upah Kerja" oninput="updateReceipt()">
+          </div>
         </div>
         <div class="form-group">
-          <label>Kategori Pekerja</label>
-          <select id="workerCategorySelect" onchange="handleCategoryChange(this.value)">
-            <option value="Pengawas">Pengawas</option>
-            <option value="Borongan">Borongan</option>
-          </select>
+          <label>Alamat / Kontak Singkat</label>
+          <input type="text" id="businessAddress" value="Desa Lungkap, Bolaang Mongondow Selatan" oninput="updateReceipt()">
         </div>
-      </div>
 
-      <!-- Sub-Kategori Borongan (Tampil jika Kategori = Borongan) -->
-      <div class="form-group" id="boronganSubGroup" style="display: none;">
-        <label>Jenis Borongan</label>
-        <select id="boronganTypeSelect" onchange="handleBoronganTypeChange(this.value)">
-          <option value="Borongan Cudai">Borongan Cudai</option>
-          <option value="Borongan Petik">Borongan Petik</option>
-        </select>
-      </div>
+        <div class="section-title" style="margin-top: 1.25rem;">
+          <span>Detail Pekerja &amp; Kategori</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nama Pekerja</label>
+            <input type="text" id="workerName" value="Ahmad Maulana" oninput="updateReceipt()">
+          </div>
+          <div class="form-group">
+            <label>Kategori Pekerja</label>
+            <select id="workerCategorySelect" onchange="handleCategoryChange(this.value)">
+              <option value="Pengawas">Pengawas</option>
+              <option value="Borongan">Borongan</option>
+            </select>
+          </div>
+        </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>No. Bukti / Referensi</label>
-          <input type="text" id="refNo" value="PAY-202611-01" oninput="updateReceipt()">
-        </div>
-        <div class="form-group">
-          <label>Tanggal Pembayaran</label>
-          <input type="date" id="payDate" oninput="updateReceipt()">
-        </div>
-      </div>
-
-      <!-- Kalender Periode Kerja -->
-      <div class="form-row">
-        <div class="form-group">
-          <label>Periode Kerja (Mulai)</label>
-          <input type="date" id="periodStart" oninput="updatePeriodFromDates()">
-        </div>
-        <div class="form-group">
-          <label>Periode Kerja (Sampai)</label>
-          <input type="date" id="periodEnd" oninput="updatePeriodFromDates()">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Format Teks Periode (Otomatis / Custom)</label>
-        <input type="text" id="periodText" value="16 Nov 2026 - 22 Nov 2026 (Mingguan)" oninput="updateReceipt()">
-      </div>
-
-      <!-- Pendapatan / Komponen Gaji -->
-      <div class="section-title" style="margin-top: 1.25rem;">
-        <span>Komponen Pendapatan (+)</span>
-        <button class="btn btn-secondary" onclick="addIncomeItem()">+ Tambah Baris</button>
-      </div>
-      <div id="incomeItemsContainer"></div>
-      <div class="calc-summary-card">
-        <div class="calc-row">
-          <span>Subtotal Pendapatan (+):</span>
-          <strong id="editorTotalIncome" style="color: #16a34a;">Rp 0</strong>
-        </div>
-      </div>
-
-      <!-- Potongan / Kasbon -->
-      <div class="section-title" style="margin-top: 1.25rem;">
-        <span>Komponen Potongan / Kasbon (-)</span>
-        <button class="btn btn-secondary" onclick="addDeductionItem()">+ Tambah Baris</button>
-      </div>
-      <div id="deductionItemsContainer"></div>
-      <div class="calc-summary-card">
-        <div class="calc-row">
-          <span>Subtotal Potongan / Kasbon (-):</span>
-          <strong id="editorTotalDeduction" style="color: #ef4444;">-Rp 0</strong>
-        </div>
-      </div>
-
-      <!-- Ringkasan Kalkulator Otomatis Gaji -->
-      <div class="calc-box">
-        <div class="calc-box-title">
-          <span>🧮 Kalkulator Ringkasan Gaji</span>
-          <button class="btn btn-secondary" onclick="openCalcModal()" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-            🧮 Buka Kalkulator Hitung
-          </button>
-        </div>
-        <div class="calc-item">
-          <span>Total Pendapatan (+)</span>
-          <span id="sumIncome" style="color: #16a34a; font-weight: 600;">Rp 0</span>
-        </div>
-        <div class="calc-item">
-          <span>Total Potongan / Kasbon (-)</span>
-          <span id="sumDeduction" style="color: #dc2626; font-weight: 600;">-Rp 0</span>
-        </div>
-        <div class="calc-divider"></div>
-        <div class="calc-item bold">
-          <span>Gaji Bersih / Total Diterima (=)</span>
-          <span id="sumGrandTotal" style="color: #2563eb; font-size: 1.05rem;">Rp 0</span>
-        </div>
-      </div>
-
-      <!-- Pembayaran & Tanda Tangan -->
-      <div class="section-title" style="margin-top: 1.25rem;">
-        <span>Metode Pembayaran &amp; Tanda Tangan</span>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Metode Pembayaran</label>
-          <select id="paymentMethod" onchange="updateReceipt()">
-            <option value="Tunai / Cash">Tunai / Cash</option>
-            <option value="Transfer Bank BCA">Transfer Bank BCA</option>
-            <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
-            <option value="Transfer Bank BRI">Transfer Bank BRI</option>
-            <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+        <!-- Sub-Kategori Borongan (Tampil jika Kategori = Borongan) -->
+        <div class="form-group" id="boronganSubGroup" style="display: none;">
+          <label>Jenis Borongan</label>
+          <select id="boronganTypeSelect" onchange="handleBoronganTypeChange(this.value)">
+            <option value="Borongan Cudai">Borongan Cudai</option>
+            <option value="Borongan Petik">Borongan Petik</option>
           </select>
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>No. Bukti / Referensi</label>
+            <input type="text" id="refNo" value="PAY-202611-01" oninput="updateReceipt()">
+          </div>
+          <div class="form-group">
+            <label>Tanggal Pembayaran</label>
+            <input type="date" id="payDate" oninput="updateReceipt()">
+          </div>
+        </div>
+
+        <!-- Kalender Periode Kerja -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Periode Kerja (Mulai)</label>
+            <input type="date" id="periodStart" oninput="updatePeriodFromDates()">
+          </div>
+          <div class="form-group">
+            <label>Periode Kerja (Sampai)</label>
+            <input type="date" id="periodEnd" oninput="updatePeriodFromDates()">
+          </div>
+        </div>
         <div class="form-group">
-          <label>Nama Penanggung Jawab</label>
-          <input type="text" id="picName" value="Koperasi" oninput="updateReceipt()">
+          <label>Format Teks Periode (Otomatis / Custom)</label>
+          <input type="text" id="periodText" value="16 Nov 2026 - 22 Nov 2026 (Mingguan)" oninput="updateReceipt()">
         </div>
+
+        <!-- Pendapatan / Komponen Gaji -->
+        <div class="section-title" style="margin-top: 1.25rem;">
+          <span>Komponen Pendapatan (+)</span>
+          <button class="btn btn-secondary" onclick="addIncomeItem()">+ Tambah Baris</button>
+        </div>
+        <div id="incomeItemsContainer"></div>
+        <div class="calc-summary-card">
+          <div class="calc-row">
+            <span>Subtotal Pendapatan (+):</span>
+            <strong id="editorTotalIncome" style="color: #16a34a;">Rp 0</strong>
+          </div>
+        </div>
+
+        <!-- Potongan / Kasbon -->
+        <div class="section-title" style="margin-top: 1.25rem;">
+          <span>Komponen Potongan / Kasbon (-)</span>
+          <button class="btn btn-secondary" onclick="addDeductionItem()">+ Tambah Baris</button>
+        </div>
+        <div id="deductionItemsContainer"></div>
+        <div class="calc-summary-card">
+          <div class="calc-row">
+            <span>Subtotal Potongan / Kasbon (-):</span>
+            <strong id="editorTotalDeduction" style="color: #ef4444;">-Rp 0</strong>
+          </div>
+        </div>
+
+        <!-- Ringkasan Kalkulator Otomatis Gaji -->
+        <div class="calc-box">
+          <div class="calc-box-title">
+            <span>Kalkulator Ringkasan Gaji</span>
+            <button class="btn btn-secondary" onclick="openCalcModal()" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+              Buka Kalkulator Hitung
+            </button>
+          </div>
+          <div class="calc-item">
+            <span>Total Pendapatan (+)</span>
+            <span id="sumIncome" style="color: #16a34a; font-weight: 600;">Rp 0</span>
+          </div>
+          <div class="calc-item">
+            <span>Total Potongan / Kasbon (-)</span>
+            <span id="sumDeduction" style="color: #dc2626; font-weight: 600;">-Rp 0</span>
+          </div>
+          <div class="calc-divider"></div>
+          <div class="calc-item bold">
+            <span>Gaji Bersih / Total Diterima (=)</span>
+            <span id="sumGrandTotal" style="color: #2563eb; font-size: 1.05rem;">Rp 0</span>
+          </div>
+        </div>
+
+        <!-- Pembayaran & Tanda Tangan -->
+        <div class="section-title" style="margin-top: 1.25rem;">
+          <span>Metode Pembayaran &amp; Tanda Tangan</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Metode Pembayaran</label>
+            <select id="paymentMethod" onchange="updateReceipt()">
+              <option value="Tunai / Cash">Tunai / Cash</option>
+              <option value="Transfer Bank BCA">Transfer Bank BCA</option>
+              <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
+              <option value="Transfer Bank BRI">Transfer Bank BRI</option>
+              <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nama Penanggung Jawab</label>
+            <input type="text" id="picName" value="Koperasi" oninput="updateReceipt()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Catatan Tambahan (Bawah Kertas)</label>
+          <textarea id="noteText" rows="2" oninput="updateReceipt()">Terima kasih atas kerja keras &amp; dedikasinya!</textarea>
+        </div>
+
+        <button class="btn btn-print" onclick="handleMainPrint()">
+          Cetak Slip Gaji (Thermal 57x30)
+        </button>
+
+        <button class="btn btn-secondary" onclick="AndroidPrint.printPage()" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.85rem;">
+          Simpan PDF / Cetak Sistem
+        </button>
       </div>
-      <div class="form-group">
-        <label>Catatan Tambahan (Bawah Kertas)</label>
-        <textarea id="noteText" rows="2" oninput="updateReceipt()">Terima kasih atas kerja keras &amp; dedikasinya!</textarea>
-      </div>
 
-      <button class="btn btn-print" onclick="handleMainPrint()">
-        🖨️ Cetak Slip Gaji (Thermal 57x30)
-      </button>
-
-      <button class="btn btn-secondary" onclick="AndroidPrint.printPage()" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.85rem;">
-        📄 Simpan PDF / Cetak Sistem
-      </button>
-    </div>
-
-    <!-- Preview Thermal -->
-    <div class="preview-section">
-      <div class="preview-header">
-        <span>📄 Live Preview Ukuran 57mm</span>
-        <span style="color: #64748b; font-size: 0.8rem;">Auto-update</span>
-      </div>
-
-      <div class="receipt-container" id="receiptPrintArea">
-        <!-- Header Usaha -->
-        <div class="receipt-center">
-          <div class="receipt-title" id="prevBusinessName">KOPERASI ILANTAT JAYA</div>
-          <div class="receipt-sub" id="prevBusinessUnit">Slip Gaji &amp; Upah Kerja</div>
-          <div class="receipt-sub" id="prevBusinessAddress" style="font-size: 9px;">Desa Lungkap, Bolaang Mongondow Selatan</div>
+      <!-- Preview Thermal -->
+      <div class="preview-section">
+        <div class="preview-header">
+          <span>Live Preview Ukuran 57mm</span>
+          <span style="color: #64748b; font-size: 0.8rem;">Auto-update</span>
         </div>
 
-        <div class="divider"></div>
+        <div class="receipt-container" id="receiptPrintArea">
+          <!-- Header Usaha -->
+          <div class="receipt-center">
+            <div class="receipt-title" id="prevBusinessName">KOPERASI ILANTAT JAYA</div>
+            <div class="receipt-sub" id="prevBusinessUnit">Slip Gaji &amp; Upah Kerja</div>
+            <div class="receipt-sub" id="prevBusinessAddress" style="font-size: 9px;">Desa Lungkap, Bolaang Mongondow Selatan</div>
+          </div>
 
-        <!-- Info Bukti & Pekerja -->
-        <div class="receipt-row">
-          <span class="label">No.Bukti</span>
-          <span class="val" id="prevRefNo">PAY-202611-01</span>
-        </div>
-        <div class="receipt-row">
-          <span class="label">Tanggal</span>
-          <span class="val" id="prevDate">22/11/2026</span>
-        </div>
-        <div class="receipt-row">
-          <span class="label">Pekerja</span>
-          <span class="val bold" id="prevWorker">Ahmad Maulana</span>
-        </div>
-        <div class="receipt-row">
-          <span class="label">Jabatan</span>
-          <span class="val" id="prevRole">Pengawas</span>
-        </div>
-        <div class="receipt-row">
-          <span class="label">Periode</span>
-          <span class="val" id="prevPeriod" style="font-size: 10px;">16-22 Nov 2026</span>
-        </div>
+          <div class="divider"></div>
 
-        <div class="divider"></div>
+          <!-- Info Bukti & Pekerja -->
+          <div class="receipt-row">
+            <span class="label">No.Bukti</span>
+            <span class="val" id="prevRefNo">PAY-202611-01</span>
+          </div>
+          <div class="receipt-row">
+            <span class="label">Tanggal</span>
+            <span class="val" id="prevDate">22/11/2026</span>
+          </div>
+          <div class="receipt-row">
+            <span class="label">Pekerja</span>
+            <span class="val bold" id="prevWorker">Ahmad Maulana</span>
+          </div>
+          <div class="receipt-row">
+            <span class="label">Jabatan</span>
+            <span class="val" id="prevRole">Pengawas</span>
+          </div>
+          <div class="receipt-row">
+            <span class="label">Periode</span>
+            <span class="val" id="prevPeriod" style="font-size: 10px;">16-22 Nov 2026</span>
+          </div>
 
-        <!-- Rincian Pendapatan -->
-        <div style="font-weight: bold; margin-bottom: 2px;">RINCIAN PENDAPATAN:</div>
-        <table class="receipt-table" id="prevIncomeTable">
-          <!-- Rows injected via JS -->
-        </table>
+          <div class="divider"></div>
 
-        <!-- Rincian Potongan -->
-        <div id="prevDeductionSection" style="display: none; margin-top: 4px;">
-          <div style="font-weight: bold; margin-bottom: 2px;">POTONGAN / KASBON:</div>
-          <table class="receipt-table" id="prevDeductionTable">
+          <!-- Rincian Pendapatan -->
+          <div style="font-weight: bold; margin-bottom: 2px;">RINCIAN PENDAPATAN:</div>
+          <table class="receipt-table" id="prevIncomeTable">
             <!-- Rows injected via JS -->
           </table>
-        </div>
 
-        <div class="divider"></div>
-
-        <!-- Total Bersih -->
-        <div class="receipt-row bold" style="font-size: 12px;">
-          <span class="label">TOTAL DITERIMA:</span>
-          <span class="val" id="prevTotal">Rp 0</span>
-        </div>
-        <div class="receipt-row" style="font-size: 9.5px; margin-top: 2px;">
-          <span class="label">Metode:</span>
-          <span class="val" id="prevPaymentMethod">Tunai / Cash</span>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- Tanda Tangan -->
-        <div class="signatures">
-          <div class="sign-box">
-            <div>Penerima,</div>
-            <div class="sign-space"></div>
-            <div id="prevSignWorker">( Ahmad M. )</div>
+          <!-- Rincian Potongan -->
+          <div id="prevDeductionSection" style="display: none; margin-top: 4px;">
+            <div style="font-weight: bold; margin-bottom: 2px;">POTONGAN / KASBON:</div>
+            <table class="receipt-table" id="prevDeductionTable">
+              <!-- Rows injected via JS -->
+            </table>
           </div>
-          <div class="sign-box">
-            <div>Pengesah,</div>
-            <div class="sign-space"></div>
-            <div id="prevSignPic">( Koperasi )</div>
+
+          <div class="divider"></div>
+
+          <!-- Total Bersih -->
+          <div class="receipt-row bold" style="font-size: 12px;">
+            <span class="label">TOTAL DITERIMA:</span>
+            <span class="val" id="prevTotal">Rp 0</span>
+          </div>
+          <div class="receipt-row" style="font-size: 9.5px; margin-top: 2px;">
+            <span class="label">Metode:</span>
+            <span class="val" id="prevPaymentMethod">Tunai / Cash</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Tanda Tangan -->
+          <div class="signatures">
+            <div class="sign-box">
+              <div>Penerima,</div>
+              <div class="sign-space"></div>
+              <div id="prevSignWorker">( Ahmad M. )</div>
+            </div>
+            <div class="sign-box">
+              <div>Pengesah,</div>
+              <div class="sign-space"></div>
+              <div id="prevSignPic">( Koperasi )</div>
+            </div>
+          </div>
+
+          <div class="divider" style="margin-top: 10px;"></div>
+
+          <div class="receipt-center" style="font-size: 9px; margin-top: 4px;" id="prevNote">
+            Terima kasih atas kerja keras &amp; dedikasinya!
+          </div>
+          <div class="receipt-center" style="font-size: 8px; color: #555; margin-top: 2px;">
+            --- Simpan bukti ini dengan baik ---
           </div>
         </div>
 
-        <div class="divider" style="margin-top: 10px;"></div>
-
-        <div class="receipt-center" style="font-size: 9px; margin-top: 4px;" id="prevNote">
-          Terima kasih atas kerja keras &amp; dedikasinya!
+        <div style="margin-top: 15px; font-size: 0.8rem; color: #64748b; max-width: 300px; text-align: center;">
+          <strong>Tips Setting Printer:</strong> Saat jendela print muncul, pilih printer thermal 58mm, margins <strong>None / Minimum</strong>, lalu uncheck <em>Headers and Footers</em>.
         </div>
-        <div class="receipt-center" style="font-size: 8px; color: #555; margin-top: 2px;">
-          --- Simpan bukti ini dengan baik ---
-        </div>
-      </div>
-
-      <div style="margin-top: 15px; font-size: 0.8rem; color: #64748b; max-width: 300px; text-align: center;">
-        💡 <strong>Tips Setting Printer:</strong> Saat jendela print muncul, pilih printer thermal 58mm, margins <strong>None / Minimum</strong>, lalu uncheck <em>Headers and Footers</em>.
       </div>
     </div>
+
+    <!-- SECTION 2: Database Pekerja -->
+    <div class="view-section" id="secDb" style="display: none;">
+      <div class="db-container">
+        <div class="section-title">
+          <span>Database Pekerja Koperasi</span>
+          <span style="font-size: 0.8rem; color: #64748b;" id="dbStatsText">Total 85 Pekerja</span>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="searchWorkerInput" placeholder="Cari nama pekerja..." oninput="filterWorkers()" style="flex: 2; min-width: 180px;">
+          <select id="filterCategorySelect" onchange="filterWorkers()" style="flex: 1; min-width: 150px;">
+            <option value="">-- Semua Kategori --</option>
+            <option value="Borongan Pemetik">Borongan Pemetik</option>
+            <option value="Pengawas Lapangan">Pengawas Lapangan</option>
+            <option value="Pengawas Cudai">Pengawas Cudai</option>
+            <option value="Penjemur">Penjemur</option>
+            <option value="Pengawas Malam">Pengawas Malam</option>
+          </select>
+          <select id="filterReguSelect" onchange="filterWorkers()" style="flex: 1; min-width: 130px;">
+            <option value="">-- Semua Regu --</option>
+            <option value="PGWS">PGWS</option>
+            <option value="LGKP">LGKP</option>
+            <option value="Sabua Miring">Sabua Miring</option>
+            <option value="Due 1">Due 1</option>
+            <option value="Due 2">Due 2</option>
+            <option value="Kaki Seribu 1">Kaki Seribu 1</option>
+            <option value="Kaki Seribu 2">Kaki Seribu 2</option>
+          </select>
+        </div>
+
+        <div class="worker-grid" id="workerGridContainer">
+          <!-- Worker cards injected via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Rekapitulasi Gaji -->
+    <div class="view-section" id="secRekap" style="display: none;">
+      <div class="db-container">
+        <div class="section-title">
+          <span>Rekapitulasi Pembayaran Gaji &amp; Pemetik</span>
+          <span style="font-size: 0.8rem; color: #059669;" id="rekapStatsText">Google Sheets Live Data</span>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="searchRekapInput" placeholder="Cari nama pemetik..." oninput="filterRekap()" style="flex: 2; min-width: 180px;">
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="rekap-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Pemetik</th>
+                <th>Kode Regu</th>
+                <th>Hasil Petik (kg)</th>
+                <th>Sub Total Gaji</th>
+                <th>Kasbon</th>
+                <th>Total Gaji Netto</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rekapTableBody">
+              <!-- Rekap rows injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Modal Bluetooth Settings -->
@@ -832,20 +1068,20 @@
           <select id="btDeviceSelect" style="flex: 1;">
             <option value="">-- Cari / Pilih Perangkat --</option>
           </select>
-          <button class="btn btn-secondary" onclick="loadBtDevices()">🔄 Cari</button>
+          <button class="btn btn-secondary" onclick="loadBtDevices()">Cari</button>
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <button class="btn btn-primary" onclick="connectBtDevice()" style="flex: 1; justify-content: center;">
-            🔗 Hubungkan
+            Hubungkan
           </button>
           <button class="btn btn-danger" onclick="disconnectBtDevice()" style="flex: 1; justify-content: center;">
-            🔌 Putus
+            Putus
           </button>
         </div>
 
         <div id="directBtBtnBox" style="margin-top: 1rem; display: none;">
           <button class="btn btn-primary" onclick="printDirectBluetooth()" style="width: 100%; justify-content: center; background: #10b981; font-size: 1rem; padding: 0.75rem; font-weight: 700;">
-            🖨️ CETAK LANGSUNG VIA BLUETOOTH
+            CETAK LANGSUNG VIA BLUETOOTH
           </button>
         </div>
 
@@ -858,7 +1094,7 @@
   <div id="calcModal" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 320px;">
       <div class="modal-header">
-        <h3>🧮 Kalkulator Hitung Gaji</h3>
+        <h3>Kalkulator Hitung Gaji</h3>
         <span class="close-btn" onclick="closeCalcModal()">&times;</span>
       </div>
       <div class="modal-body">
@@ -891,11 +1127,1304 @@
   </div>
 
   <script>
-    // Category & Worker State
-    let workerCategory = "Pengawas"; // "Pengawas" or "Borongan"
-    let boronganType = "Borongan Cudai"; // "Borongan Cudai" or "Borongan Petik"
+    // Embedded Database Datasets from Google Sheets
+    const defaultWorkersData = [
+    {
+        "name":  "Alfiki Paputungan",
+        "no":  1,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Akmaludin Tombo",
+        "no":  2,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Wahyudin Paputungan",
+        "no":  3,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Malik Paputungan",
+        "no":  4,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alvin Paputungan",
+        "no":  5,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Fajrin Paputungan",
+        "no":  6,
+        "regu":  "PGWS",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Iki",
+        "no":  7,
+        "regu":  "Sabua Miring",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yaya",
+        "no":  8,
+        "regu":  "Sabua Miring",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yudi",
+        "no":  9,
+        "regu":  "Sabua Miring",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Darman",
+        "no":  10,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Amran",
+        "no":  11,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Heru",
+        "no":  12,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Sastra",
+        "no":  13,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Gusti",
+        "no":  14,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Nugi",
+        "no":  15,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Adil",
+        "no":  16,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Tian",
+        "no":  17,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Daffa",
+        "no":  18,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Agung",
+        "no":  19,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Rehan",
+        "no":  20,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Begi",
+        "no":  21,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Mama Acin",
+        "no":  22,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Mama Tar",
+        "no":  23,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Mama Tina",
+        "no":  24,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Fandi",
+        "no":  25,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Dian",
+        "no":  26,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Deni",
+        "no":  27,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Acin",
+        "no":  28,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Adnan",
+        "no":  29,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dalin",
+        "no":  30,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yudi",
+        "no":  31,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dandi",
+        "no":  32,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Salman",
+        "no":  33,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Asis",
+        "no":  34,
+        "regu":  "LGKP",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Rako",
+        "no":  35,
+        "regu":  "Due 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Om Deni",
+        "no":  36,
+        "regu":  "Due 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Aldo",
+        "no":  37,
+        "regu":  "Due 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alfred",
+        "no":  38,
+        "regu":  "Due 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Boy",
+        "no":  39,
+        "regu":  "Due 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Jems",
+        "no":  40,
+        "regu":  "Due 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alan",
+        "no":  41,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Opal",
+        "no":  42,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Amin",
+        "no":  43,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Gilang",
+        "no":  44,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ka Undu",
+        "no":  45,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Lendy",
+        "no":  46,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ako",
+        "no":  47,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alis",
+        "no":  48,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "NENEK",
+        "no":  49,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Omin",
+        "no":  50,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Tutun",
+        "no":  51,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dandi",
+        "no":  52,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Yapin",
+        "no":  53,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Gina",
+        "no":  54,
+        "regu":  "Sabua Miring 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Iyal",
+        "no":  55,
+        "regu":  "Sabua Miring 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Non-Aktif"
+    },
+    {
+        "name":  "Riyan",
+        "no":  56,
+        "regu":  "Sabua Miring 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Non-Aktif"
+    },
+    {
+        "name":  "Saprian",
+        "no":  57,
+        "regu":  "Sabua Miring 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Non-Aktif"
+    },
+    {
+        "name":  "Dolpi",
+        "no":  58,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alex",
+        "no":  59,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Male",
+        "no":  60,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Maikel",
+        "no":  61,
+        "regu":  "Sabua Miring 3",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Bojes",
+        "no":  62,
+        "regu":  "Kaki Seribu 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Jun",
+        "no":  63,
+        "regu":  "Kaki Seribu 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Handi",
+        "no":  64,
+        "regu":  "Kaki Seribu 1",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Bobon",
+        "no":  65,
+        "regu":  "Kaki Seribu 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ray",
+        "no":  66,
+        "regu":  "Kaki Seribu 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Oni",
+        "no":  67,
+        "regu":  "Kaki Seribu 2",
+        "schema":  "Borongan",
+        "category":  "Borongan Pemetik",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alfiki Paputungan",
+        "no":  68,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Akmaludin Tombo",
+        "no":  69,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Wahyudin Paputungan",
+        "no":  70,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Malik Paputungan",
+        "no":  71,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Alvin Paputungan",
+        "no":  72,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Fajrin Paputungan",
+        "no":  73,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Musripan Paputungan",
+        "no":  74,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Lapangan",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Anis Bapuli",
+        "no":  75,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Moh Yakob Botutihe",
+        "no":  76,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Acong Paputungan",
+        "no":  77,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Agil",
+        "no":  78,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Etin Paputungan",
+        "no":  79,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Wira",
+        "no":  80,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Cudai",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Ridho Paputungan",
+        "no":  81,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Penjemur",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Dandi Huntua",
+        "no":  82,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Penjemur",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Iki Paputungan",
+        "no":  83,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Penjemur",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Sariin",
+        "no":  84,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Malam",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Papa Yul",
+        "no":  85,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Malam",
+        "status":  "Aktif"
+    }
+]
+;
+    const defaultRekapData = [
+    {
+        "subTotal":  "124,600.00",
+        "name":  "Alfiki Paputungan",
+        "no":  1,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 124,600",
+        "hasilKg":  17.8
+    },
+    {
+        "subTotal":  "196,000.00",
+        "name":  "Akmaludin Tombo",
+        "no":  2,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 196,000",
+        "hasilKg":  28
+    },
+    {
+        "subTotal":  "92,400.00",
+        "name":  "Wahyudin Paputungan",
+        "no":  3,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 92,400",
+        "hasilKg":  13.2
+    },
+    {
+        "subTotal":  "448,000.00",
+        "name":  "Malik Paputungan",
+        "no":  4,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 448,000",
+        "hasilKg":  64
+    },
+    {
+        "subTotal":  "60,900.00",
+        "name":  "Alvin Paputungan",
+        "no":  5,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 60,900",
+        "hasilKg":  8.7
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Fajrin Paputungan",
+        "no":  6,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Iki",
+        "no":  7,
+        "regu":  "Sabua Miring",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,135,400.00",
+        "name":  "Yaya",
+        "no":  8,
+        "regu":  "Sabua Miring",
+        "kasbon":  "Rp 50,000",
+        "totalGaji":  "Rp 1,085,400",
+        "hasilKg":  162.2
+    },
+    {
+        "subTotal":  "251,300.00",
+        "name":  "Yudi",
+        "no":  9,
+        "regu":  "Sabua Miring",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 251,300",
+        "hasilKg":  35.9
+    },
+    {
+        "subTotal":  "686,700.00",
+        "name":  "Darman",
+        "no":  1,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 50,000",
+        "totalGaji":  "Rp 636,700",
+        "hasilKg":  98.1
+    },
+    {
+        "subTotal":  "646,100.00",
+        "name":  "Amran",
+        "no":  2,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 546,100",
+        "hasilKg":  92.3
+    },
+    {
+        "subTotal":  "300,300.00",
+        "name":  "Heru",
+        "no":  3,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 150,000",
+        "totalGaji":  "Rp 150,300",
+        "hasilKg":  42.9
+    },
+    {
+        "subTotal":  "736,400.00",
+        "name":  "Sastra",
+        "no":  4,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 150,000",
+        "totalGaji":  "Rp 586,400",
+        "hasilKg":  105.2
+    },
+    {
+        "subTotal":  "483,700.00",
+        "name":  "Gusti",
+        "no":  5,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 70,000",
+        "totalGaji":  "Rp 413,700",
+        "hasilKg":  69.1
+    },
+    {
+        "subTotal":  "211,400.00",
+        "name":  "Nugi",
+        "no":  6,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 111,400",
+        "hasilKg":  30.2
+    },
+    {
+        "subTotal":  "308,700.00",
+        "name":  "Adil",
+        "no":  7,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 308,700",
+        "hasilKg":  44.1
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Tian",
+        "no":  8,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "262,500.00",
+        "name":  "Daffa",
+        "no":  9,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 50,000",
+        "totalGaji":  "Rp 212,500",
+        "hasilKg":  37.5
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Agung",
+        "no":  10,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Rehan",
+        "no":  11,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "274,400.00",
+        "name":  "Begi",
+        "no":  12,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 274,400",
+        "hasilKg":  39.2
+    },
+    {
+        "subTotal":  "50,400.00",
+        "name":  "Mama Acin",
+        "no":  13,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 50,400",
+        "hasilKg":  7.2
+    },
+    {
+        "subTotal":  "784,000.00",
+        "name":  "Mama Tar",
+        "no":  14,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 684,000",
+        "hasilKg":  112
+    },
+    {
+        "subTotal":  "920,500.00",
+        "name":  "Mama Tina",
+        "no":  15,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 920,500",
+        "hasilKg":  131.5
+    },
+    {
+        "subTotal":  "1,231,300.00",
+        "name":  "Fandi",
+        "no":  16,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 1,231,300",
+        "hasilKg":  175.9
+    },
+    {
+        "subTotal":  "947,800.00",
+        "name":  "Papa Dian",
+        "no":  17,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 847,800",
+        "hasilKg":  135.4
+    },
+    {
+        "subTotal":  "595,000.00",
+        "name":  "Deni",
+        "no":  18,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 595,000",
+        "hasilKg":  85
+    },
+    {
+        "subTotal":  "459,200.00",
+        "name":  "Acin",
+        "no":  19,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 459,200",
+        "hasilKg":  65.6
+    },
+    {
+        "subTotal":  "95,900.00",
+        "name":  "Adnan",
+        "no":  20,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 95,900",
+        "hasilKg":  13.7
+    },
+    {
+        "subTotal":  "84,700.00",
+        "name":  "Dalin",
+        "no":  21,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 84,700",
+        "hasilKg":  12.1
+    },
+    {
+        "subTotal":  "324,100.00",
+        "name":  "Yudi",
+        "no":  22,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 324,100",
+        "hasilKg":  46.3
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Dandi",
+        "no":  23,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Salman",
+        "no":  24,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Asis",
+        "no":  25,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Rako",
+        "no":  1,
+        "regu":  "Due 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Om Deni",
+        "no":  2,
+        "regu":  "Due 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Aldo",
+        "no":  3,
+        "regu":  "Due 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Alfred",
+        "no":  2,
+        "regu":  "Due 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Boy",
+        "no":  1,
+        "regu":  "Due 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Jems",
+        "no":  3,
+        "regu":  "Due 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,814,400.00",
+        "name":  "Alan",
+        "no":  1,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 1,000,000",
+        "totalGaji":  "Rp 814,400",
+        "hasilKg":  259.2
+    },
+    {
+        "subTotal":  "2,129,750.00",
+        "name":  "Opal",
+        "no":  2,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 1,600,000",
+        "totalGaji":  "Rp 529,750",
+        "hasilKg":  304.25
+    },
+    {
+        "subTotal":  "2,230,900.00",
+        "name":  "Amin",
+        "no":  3,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 750,000",
+        "totalGaji":  "Rp 1,480,900",
+        "hasilKg":  318.7
+    },
+    {
+        "subTotal":  "936,600.00",
+        "name":  "Gilang",
+        "no":  4,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 70,000",
+        "totalGaji":  "Rp 866,600",
+        "hasilKg":  133.8
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Ka Undu",
+        "no":  5,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Lendy",
+        "no":  6,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Ako",
+        "no":  7,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,043,000.00",
+        "name":  "Alis",
+        "no":  8,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 1,043,000",
+        "hasilKg":  149
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "NENEK",
+        "no":  9,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Omin",
+        "no":  10,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Tutun",
+        "no":  11,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Dandi",
+        "no":  12,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Yapin",
+        "no":  13,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Gina",
+        "no":  14,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "515,900.00",
+        "name":  "Iyal",
+        "no":  1,
+        "regu":  "Sabua Miring 2",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 515,900",
+        "hasilKg":  73.7
+    },
+    {
+        "subTotal":  "1,051,400.00",
+        "name":  "Riyan",
+        "no":  2,
+        "regu":  "Sabua Miring 2",
+        "kasbon":  "Rp 400,000",
+        "totalGaji":  "Rp 651,400",
+        "hasilKg":  150.2
+    },
+    {
+        "subTotal":  "436,100.00",
+        "name":  "Saprian",
+        "no":  3,
+        "regu":  "Sabua Miring 2",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 436,100",
+        "hasilKg":  62.3
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Dolpi",
+        "no":  1,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Alex",
+        "no":  2,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Male",
+        "no":  3,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Maikel",
+        "no":  4,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,191,400.00",
+        "name":  "Bojes",
+        "no":  1,
+        "regu":  "Kaki Seribu 1",
+        "kasbon":  "Rp 800,000",
+        "totalGaji":  "Rp 391,400",
+        "hasilKg":  170.2
+    },
+    {
+        "subTotal":  "1,307,600.00",
+        "name":  "Jun",
+        "no":  2,
+        "regu":  "Kaki Seribu 1",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 1,307,600",
+        "hasilKg":  186.8
+    },
+    {
+        "subTotal":  "735,000.00",
+        "name":  "Handi",
+        "no":  3,
+        "regu":  "Kaki Seribu 1",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 735,000",
+        "hasilKg":  105
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Bobon",
+        "no":  1,
+        "regu":  "Kaki Seribu 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Ray",
+        "no":  2,
+        "regu":  "Kaki Seribu 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Oni",
+        "no":  3,
+        "regu":  "Kaki Seribu 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    }
+]
+;
 
-    // State items - Default only "Gaji"
+    let workersData = JSON.parse(localStorage.getItem('workersData') || 'null') || defaultWorkersData;
+    let rekapData = JSON.parse(localStorage.getItem('rekapData') || 'null') || defaultRekapData;
+
+    // Category & Worker State
+    let workerCategory = "Pengawas";
+    let boronganType = "Borongan Cudai";
+
     let incomeItems = [
       { desc: "Gaji", amount: 0 }
     ];
@@ -906,51 +2435,204 @@
 
     let workerTemplates = JSON.parse(localStorage.getItem('workerTemplates') || '{}');
 
-    // Set default date to today
     window.onload = function() {
       const todayDate = new Date();
       const today = todayDate.toISOString().split('T')[0];
       document.getElementById('payDate').value = today;
 
-      // Set default period start & end (7 days range)
       const startDate = new Date();
       startDate.setDate(todayDate.getDate() - 6);
       document.getElementById('periodStart').value = startDate.toISOString().split('T')[0];
       document.getElementById('periodEnd').value = today;
       updatePeriodFromDates();
 
-      // Seed sample templates if empty
-      if (Object.keys(workerTemplates).length === 0) {
-        workerTemplates["Ahmad Maulana (Pengawas)"] = {
-          name: "Ahmad Maulana",
-          category: "Pengawas",
-          incomeItems: [
-            { desc: "Gaji", amount: 1500000 }
-          ],
-          deductionItems: [
-            { desc: "Kasbon / Pinjaman", amount: 100000 }
-          ]
-        };
-        workerTemplates["Budi (Borongan Cudai)"] = {
-          name: "Budi",
-          category: "Borongan",
-          boronganType: "Borongan Cudai",
-          incomeItems: [
-            { desc: "Hasil Borongan Cudai", weightKg: 150, pricePerKg: 2000, amount: 300000 }
-          ],
-          deductionItems: [
-            { desc: "Kasbon / Pinjaman", amount: 25000 }
-          ]
-        };
-        localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
-      }
-
       renderWorkerTemplateDropdown();
       renderItemsInput();
       updateReceipt();
 
+      renderWorkerGrid();
+      renderRekapTable();
+
       checkBtStatusOnLoad();
     };
+
+    function switchMainTab(tab) {
+      const secSlip = document.getElementById('secSlip');
+      const secDb = document.getElementById('secDb');
+      const secRekap = document.getElementById('secRekap');
+
+      secSlip.style.display = 'none';
+      secDb.style.display = 'none';
+      secRekap.style.display = 'none';
+
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (tab === 'slip') {
+        secSlip.style.display = 'flex';
+        document.getElementById('tabNavSlip').classList.add('active');
+      } else if (tab === 'db') {
+        secDb.style.display = 'block';
+        document.getElementById('tabNavDb').classList.add('active');
+        renderWorkerGrid();
+      } else if (tab === 'rekap') {
+        secRekap.style.display = 'block';
+        document.getElementById('tabNavRekap').classList.add('active');
+        renderRekapTable();
+      }
+    }
+
+    function renderWorkerGrid() {
+      const container = document.getElementById('workerGridContainer');
+      const search = (document.getElementById('searchWorkerInput').value || '').toLowerCase();
+      const categoryFilter = document.getElementById('filterCategorySelect').value;
+      const reguFilter = document.getElementById('filterReguSelect').value;
+
+      container.innerHTML = '';
+      let count = 0;
+
+      workersData.forEach(w => {
+        const matchesSearch = !search || w.name.toLowerCase().includes(search) || (w.regu || '').toLowerCase().includes(search);
+        const matchesCategory = !categoryFilter || w.category === categoryFilter;
+        const matchesRegu = !reguFilter || w.regu === reguFilter;
+
+        if (matchesSearch && matchesCategory && matchesRegu) {
+          count++;
+          const card = document.createElement('div');
+          card.className = 'worker-card';
+
+          const initial = w.name.charAt(0).toUpperCase();
+
+          card.innerHTML = `
+            <div>
+              <div class="worker-header">
+                <div class="avatar">${initial}</div>
+                <div class="worker-info">
+                  <div class="worker-name">${w.name}</div>
+                  <div class="worker-regu">Regu: ${w.regu || '-'} (#${w.no})</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+                <span class="tag tag-category">${w.category}</span>
+                <span class="tag tag-schema">${w.schema}</span>
+                <span class="tag tag-active">${w.status}</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="createSlipForWorker('${w.name}', '${w.category}', '${w.regu}')" style="width: 100%; justify-content: center; font-size: 0.8rem;">
+              Buat Slip Gaji
+            </button>
+          `;
+          container.appendChild(card);
+        }
+      });
+
+      document.getElementById('dbStatsText').innerText = `Menampilkan ${count} dari ${workersData.length} Pekerja`;
+      document.getElementById('totalWorkerBadge').innerText = workersData.length;
+    }
+
+    function filterWorkers() {
+      renderWorkerGrid();
+    }
+
+    function createSlipForWorker(name, category, regu) {
+      document.getElementById('workerName').value = name;
+
+      if (category.toLowerCase().includes('borongan') || category.toLowerCase().includes('pemetik')) {
+        document.getElementById('workerCategorySelect').value = 'Borongan';
+        handleCategoryChange('Borongan');
+        if (category.toLowerCase().includes('petik')) {
+          document.getElementById('boronganTypeSelect').value = 'Borongan Petik';
+          handleBoronganTypeChange('Borongan Petik');
+        } else {
+          document.getElementById('boronganTypeSelect').value = 'Borongan Cudai';
+          handleBoronganTypeChange('Borongan Cudai');
+        }
+      } else {
+        document.getElementById('workerCategorySelect').value = 'Pengawas';
+        handleCategoryChange('Pengawas');
+      }
+
+      switchMainTab('slip');
+      updateReceipt();
+    }
+
+    function renderRekapTable() {
+      const tbody = document.getElementById('rekapTableBody');
+      const search = (document.getElementById('searchRekapInput').value || '').toLowerCase();
+      tbody.innerHTML = '';
+
+      rekapData.forEach(r => {
+        if (!search || r.name.toLowerCase().includes(search) || (r.regu || '').toLowerCase().includes(search)) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>#${r.no}</td>
+            <td style="font-weight: 700; color: #0f172a;">${r.name}</td>
+            <td><span class="tag tag-category">${r.regu || '-'}</span></td>
+            <td style="font-weight: 600;">${r.hasilKg || 0} kg</td>
+            <td>Rp ${r.subTotal || '0'}</td>
+            <td style="color: #dc2626;">${r.kasbon || '-'}</td>
+            <td style="font-weight: 700; color: #16a34a;">${r.totalGaji || 'Rp 0'}</td>
+            <td>
+              <button class="btn btn-secondary" onclick="createSlipForWorker('${r.name}', 'Borongan Pemetik', '${r.regu}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                Buat Slip
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+    }
+
+    function filterRekap() {
+      renderRekapTable();
+    }
+
+    function syncWithGoogleSheets() {
+      alert('Memulai sinkronisasi data langsung dari Google Sheets...');
+
+      const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
+      const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja`;
+
+      fetch(urlPekerja)
+        .then(res => res.text())
+        .then(csvText => {
+          const lines = csvText.split('\n');
+          let newWorkers = [];
+          lines.forEach(line => {
+            const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
+            if (fields.length >= 8) {
+              const no = fields[1];
+              const name = fields[2];
+              const category = fields[3];
+              const regu = fields[4];
+              const schema = fields[5];
+              const status = fields[7];
+
+              if (/^\d+$/.test(no) && name && isNaN(name)) {
+                newWorkers.push({
+                  no: parseInt(no),
+                  name: name,
+                  category: category,
+                  regu: regu || "-",
+                  schema: schema || "-",
+                  status: status || "Aktif"
+                });
+              }
+            }
+          });
+
+          if (newWorkers.length > 0) {
+            workersData = newWorkers;
+            localStorage.setItem('workersData', JSON.stringify(workersData));
+            renderWorkerGrid();
+            alert(`Sinkronisasi berhasil! Memuat ${newWorkers.length} data pekerja dari Google Sheets.`);
+          } else {
+            alert('Sinkronisasi selesai: Data sudah paling mutakhir.');
+          }
+        })
+        .catch(err => {
+          alert('Gagal sinkronisasi Google Sheets (cek koneksi internet): ' + err.message);
+        });
+    }
 
     function checkBtStatusOnLoad() {
       if (typeof AndroidPrint !== 'undefined' && AndroidPrint.isBluetoothConnected && AndroidPrint.isBluetoothConnected()) {
@@ -962,7 +2644,7 @@
       const status = document.getElementById('btStatus');
       const directBox = document.getElementById('directBtBtnBox');
       if (status) {
-        status.innerText = '✅ Terhubung ke ' + (devName || 'Printer Bluetooth');
+        status.innerText = 'Terhubung ke ' + (devName || 'Printer Bluetooth');
         status.style.color = '#10b981';
       }
       if (directBox) {
@@ -974,7 +2656,7 @@
       const status = document.getElementById('btStatus');
       const directBox = document.getElementById('directBtBtnBox');
       if (status) {
-        status.innerText = '❌ Terputus: ' + (msg || '');
+        status.innerText = 'Terputus: ' + (msg || '');
         status.style.color = '#ef4444';
       }
       if (directBox) {
@@ -1013,7 +2695,6 @@
       return "Pengawas";
     }
 
-    // Period Date Picker Helper
     function updatePeriodFromDates() {
       const startVal = document.getElementById('periodStart').value;
       const endVal = document.getElementById('periodEnd').value;
@@ -1035,7 +2716,6 @@
       updateReceipt();
     }
 
-    // Worker Templates (Daftar / Folder Pekerja)
     function renderWorkerTemplateDropdown() {
       const select = document.getElementById('workerTemplateSelect');
       select.innerHTML = '<option value="">-- Pilih Nama Pekerja --</option>';
@@ -1206,7 +2886,7 @@
         return;
       }
       if (typeof AndroidPrint !== 'undefined' && AndroidPrint.connectBluetoothDevice) {
-        status.innerText = '⏳ Menghubungkan ke printer... Mohon tunggu.';
+        status.innerText = 'Menghubungkan ke printer... Mohon tunggu.';
         status.style.color = '#f59e0b';
         AndroidPrint.connectBluetoothDevice(address);
       }
@@ -1237,12 +2917,12 @@
 
       // Bold Business Title
       bytes.push(0x1B, 0x45, 0x01);
-      pushString((document.getElementById('businessName').value || 'KOPERASI ILANTAT JAYA') + "\n");
+      pushString((document.getElementById('businessName').value || 'KOPERASI ILANTAT JAYA') + "\\n");
       bytes.push(0x1B, 0x45, 0x00);
 
-      pushString((document.getElementById('businessUnit').value || 'Slip Gaji & Upah Kerja') + "\n");
-      pushString((document.getElementById('businessAddress').value || 'Desa Lungkap') + "\n");
-      pushString("--------------------------------\n");
+      pushString((document.getElementById('businessUnit').value || 'Slip Gaji & Upah Kerja') + "\\n");
+      pushString((document.getElementById('businessAddress').value || 'Desa Lungkap') + "\\n");
+      pushString("--------------------------------\\n");
 
       // Left Align for Details
       bytes.push(0x1B, 0x61, 0x00);
@@ -1252,7 +2932,7 @@
         let r = val || "";
         let spaces = 32 - (l.length + r.length);
         if (spaces < 1) spaces = 1;
-        pushString(l + " ".repeat(spaces) + r + "\n");
+        pushString(l + " ".repeat(spaces) + r + "\\n");
       }
 
       addRow("No.Bukti", document.getElementById('refNo').value || '-');
@@ -1274,11 +2954,11 @@
       const period = document.getElementById('periodText').value || '-';
       addRow("Periode", period);
 
-      pushString("--------------------------------\n");
+      pushString("--------------------------------\\n");
 
       // Income Items
       bytes.push(0x1B, 0x45, 0x01);
-      pushString("RINCIAN PENDAPATAN:\n");
+      pushString("RINCIAN PENDAPATAN:\\n");
       bytes.push(0x1B, 0x45, 0x00);
 
       let totalIncome = 0;
@@ -1286,7 +2966,7 @@
         totalIncome += (item.amount || 0);
         addRow(item.desc || 'Item', formatRupiah(item.amount));
         if (item.weightKg && item.pricePerKg) {
-          pushString(`  ${item.weightKg} kg x @${formatRupiah(item.pricePerKg)}\n`);
+          pushString(`  ${item.weightKg} kg x @${formatRupiah(item.pricePerKg)}\\n`);
         }
       });
 
@@ -1294,7 +2974,7 @@
       let totalDeductions = 0;
       if (deductionItems.length > 0) {
         bytes.push(0x1B, 0x45, 0x01);
-        pushString("POTONGAN / KASBON:\n");
+        pushString("POTONGAN / KASBON:\\n");
         bytes.push(0x1B, 0x45, 0x00);
 
         deductionItems.forEach(item => {
@@ -1303,7 +2983,7 @@
         });
       }
 
-      pushString("--------------------------------\n");
+      pushString("--------------------------------\\n");
 
       // Total
       bytes.push(0x1B, 0x45, 0x01);
@@ -1312,19 +2992,19 @@
       bytes.push(0x1B, 0x45, 0x00);
 
       addRow("Metode", document.getElementById('paymentMethod').value);
-      pushString("--------------------------------\n");
+      pushString("--------------------------------\\n");
 
       // Signatures
-      pushString("Penerima               Pengesah \n\n\n");
+      pushString("Penerima               Pengesah \\n\\n\\n");
       const pic = document.getElementById('picName').value || 'Koperasi';
       addRow(`(${worker.substring(0, 12)})`, `(${pic.substring(0, 12)})`);
 
-      pushString("--------------------------------\n");
+      pushString("--------------------------------\\n");
 
       // Center Footer Note
       bytes.push(0x1B, 0x61, 0x01);
-      pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\n");
-      pushString("--- Simpan bukti ini ---\n\n\n\n");
+      pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\\n");
+      pushString("--- Simpan bukti ini ---\\n\\n\\n\\n");
 
       // Feed & Cut
       bytes.push(0x1D, 0x56, 0x42, 0x00);
@@ -1540,7 +3220,7 @@
       document.getElementById('prevBusinessAddress').innerText = document.getElementById('businessAddress').value || '';
 
       document.getElementById('prevRefNo').innerText = document.getElementById('refNo').value || '-';
-      
+
       const dateVal = document.getElementById('payDate').value;
       if (dateVal) {
         const parts = dateVal.split('-');
@@ -1632,3 +3312,4 @@
   </script>
 </body>
 </html>
+

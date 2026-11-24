@@ -1,0 +1,605 @@
+﻿[
+    {
+        "subTotal":  "124,600.00",
+        "name":  "Alfiki Paputungan",
+        "no":  1,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 124,600",
+        "hasilKg":  17.8
+    },
+    {
+        "subTotal":  "196,000.00",
+        "name":  "Akmaludin Tombo",
+        "no":  2,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 196,000",
+        "hasilKg":  28
+    },
+    {
+        "subTotal":  "92,400.00",
+        "name":  "Wahyudin Paputungan",
+        "no":  3,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 92,400",
+        "hasilKg":  13.2
+    },
+    {
+        "subTotal":  "448,000.00",
+        "name":  "Malik Paputungan",
+        "no":  4,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 448,000",
+        "hasilKg":  64
+    },
+    {
+        "subTotal":  "60,900.00",
+        "name":  "Alvin Paputungan",
+        "no":  5,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 60,900",
+        "hasilKg":  8.7
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Fajrin Paputungan",
+        "no":  6,
+        "regu":  "PGWS",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Iki",
+        "no":  7,
+        "regu":  "Sabua Miring",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,135,400.00",
+        "name":  "Yaya",
+        "no":  8,
+        "regu":  "Sabua Miring",
+        "kasbon":  "Rp 50,000",
+        "totalGaji":  "Rp 1,085,400",
+        "hasilKg":  162.2
+    },
+    {
+        "subTotal":  "251,300.00",
+        "name":  "Yudi",
+        "no":  9,
+        "regu":  "Sabua Miring",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 251,300",
+        "hasilKg":  35.9
+    },
+    {
+        "subTotal":  "686,700.00",
+        "name":  "Darman",
+        "no":  1,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 50,000",
+        "totalGaji":  "Rp 636,700",
+        "hasilKg":  98.1
+    },
+    {
+        "subTotal":  "646,100.00",
+        "name":  "Amran",
+        "no":  2,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 546,100",
+        "hasilKg":  92.3
+    },
+    {
+        "subTotal":  "300,300.00",
+        "name":  "Heru",
+        "no":  3,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 150,000",
+        "totalGaji":  "Rp 150,300",
+        "hasilKg":  42.9
+    },
+    {
+        "subTotal":  "736,400.00",
+        "name":  "Sastra",
+        "no":  4,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 150,000",
+        "totalGaji":  "Rp 586,400",
+        "hasilKg":  105.2
+    },
+    {
+        "subTotal":  "483,700.00",
+        "name":  "Gusti",
+        "no":  5,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 70,000",
+        "totalGaji":  "Rp 413,700",
+        "hasilKg":  69.1
+    },
+    {
+        "subTotal":  "211,400.00",
+        "name":  "Nugi",
+        "no":  6,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 111,400",
+        "hasilKg":  30.2
+    },
+    {
+        "subTotal":  "308,700.00",
+        "name":  "Adil",
+        "no":  7,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 308,700",
+        "hasilKg":  44.1
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Tian",
+        "no":  8,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "262,500.00",
+        "name":  "Daffa",
+        "no":  9,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 50,000",
+        "totalGaji":  "Rp 212,500",
+        "hasilKg":  37.5
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Agung",
+        "no":  10,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Rehan",
+        "no":  11,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "274,400.00",
+        "name":  "Begi",
+        "no":  12,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 274,400",
+        "hasilKg":  39.2
+    },
+    {
+        "subTotal":  "50,400.00",
+        "name":  "Mama Acin",
+        "no":  13,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 50,400",
+        "hasilKg":  7.2
+    },
+    {
+        "subTotal":  "784,000.00",
+        "name":  "Mama Tar",
+        "no":  14,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 684,000",
+        "hasilKg":  112
+    },
+    {
+        "subTotal":  "920,500.00",
+        "name":  "Mama Tina",
+        "no":  15,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 920,500",
+        "hasilKg":  131.5
+    },
+    {
+        "subTotal":  "1,231,300.00",
+        "name":  "Fandi",
+        "no":  16,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 1,231,300",
+        "hasilKg":  175.9
+    },
+    {
+        "subTotal":  "947,800.00",
+        "name":  "Papa Dian",
+        "no":  17,
+        "regu":  "LGKP",
+        "kasbon":  "Rp 100,000",
+        "totalGaji":  "Rp 847,800",
+        "hasilKg":  135.4
+    },
+    {
+        "subTotal":  "595,000.00",
+        "name":  "Deni",
+        "no":  18,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 595,000",
+        "hasilKg":  85
+    },
+    {
+        "subTotal":  "459,200.00",
+        "name":  "Acin",
+        "no":  19,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 459,200",
+        "hasilKg":  65.6
+    },
+    {
+        "subTotal":  "95,900.00",
+        "name":  "Adnan",
+        "no":  20,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 95,900",
+        "hasilKg":  13.7
+    },
+    {
+        "subTotal":  "84,700.00",
+        "name":  "Dalin",
+        "no":  21,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 84,700",
+        "hasilKg":  12.1
+    },
+    {
+        "subTotal":  "324,100.00",
+        "name":  "Yudi",
+        "no":  22,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 324,100",
+        "hasilKg":  46.3
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Dandi",
+        "no":  23,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Salman",
+        "no":  24,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Asis",
+        "no":  25,
+        "regu":  "LGKP",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Rako",
+        "no":  1,
+        "regu":  "Due 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Om Deni",
+        "no":  2,
+        "regu":  "Due 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Aldo",
+        "no":  3,
+        "regu":  "Due 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Alfred",
+        "no":  2,
+        "regu":  "Due 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Boy",
+        "no":  1,
+        "regu":  "Due 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Jems",
+        "no":  3,
+        "regu":  "Due 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,814,400.00",
+        "name":  "Alan",
+        "no":  1,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 1,000,000",
+        "totalGaji":  "Rp 814,400",
+        "hasilKg":  259.2
+    },
+    {
+        "subTotal":  "2,129,750.00",
+        "name":  "Opal",
+        "no":  2,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 1,600,000",
+        "totalGaji":  "Rp 529,750",
+        "hasilKg":  304.25
+    },
+    {
+        "subTotal":  "2,230,900.00",
+        "name":  "Amin",
+        "no":  3,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 750,000",
+        "totalGaji":  "Rp 1,480,900",
+        "hasilKg":  318.7
+    },
+    {
+        "subTotal":  "936,600.00",
+        "name":  "Gilang",
+        "no":  4,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "Rp 70,000",
+        "totalGaji":  "Rp 866,600",
+        "hasilKg":  133.8
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Ka Undu",
+        "no":  5,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Lendy",
+        "no":  6,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Ako",
+        "no":  7,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,043,000.00",
+        "name":  "Alis",
+        "no":  8,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 1,043,000",
+        "hasilKg":  149
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "NENEK",
+        "no":  9,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Omin",
+        "no":  10,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Tutun",
+        "no":  11,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Dandi",
+        "no":  12,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Yapin",
+        "no":  13,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Gina",
+        "no":  14,
+        "regu":  "Sabua Miring 1",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "515,900.00",
+        "name":  "Iyal",
+        "no":  1,
+        "regu":  "Sabua Miring 2",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 515,900",
+        "hasilKg":  73.7
+    },
+    {
+        "subTotal":  "1,051,400.00",
+        "name":  "Riyan",
+        "no":  2,
+        "regu":  "Sabua Miring 2",
+        "kasbon":  "Rp 400,000",
+        "totalGaji":  "Rp 651,400",
+        "hasilKg":  150.2
+    },
+    {
+        "subTotal":  "436,100.00",
+        "name":  "Saprian",
+        "no":  3,
+        "regu":  "Sabua Miring 2",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 436,100",
+        "hasilKg":  62.3
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Dolpi",
+        "no":  1,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Alex",
+        "no":  2,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Male",
+        "no":  3,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Maikel",
+        "no":  4,
+        "regu":  "Sabua Miring 3",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "1,191,400.00",
+        "name":  "Bojes",
+        "no":  1,
+        "regu":  "Kaki Seribu 1",
+        "kasbon":  "Rp 800,000",
+        "totalGaji":  "Rp 391,400",
+        "hasilKg":  170.2
+    },
+    {
+        "subTotal":  "1,307,600.00",
+        "name":  "Jun",
+        "no":  2,
+        "regu":  "Kaki Seribu 1",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 1,307,600",
+        "hasilKg":  186.8
+    },
+    {
+        "subTotal":  "735,000.00",
+        "name":  "Handi",
+        "no":  3,
+        "regu":  "Kaki Seribu 1",
+        "kasbon":  "-",
+        "totalGaji":  "Rp 735,000",
+        "hasilKg":  105
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Bobon",
+        "no":  1,
+        "regu":  "Kaki Seribu 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Ray",
+        "no":  2,
+        "regu":  "Kaki Seribu 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    },
+    {
+        "subTotal":  "0.00",
+        "name":  "Oni",
+        "no":  3,
+        "regu":  "Kaki Seribu 2",
+        "kasbon":  "-",
+        "totalGaji":  "-",
+        "hasilKg":  0
+    }
+]
