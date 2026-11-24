@@ -98,6 +98,10 @@ class MainActivity : AppCompatActivity() {
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "GET"
                 conn.setRequestProperty("User-Agent", "Mozilla/5.0")
+                conn.useCaches = false
+                conn.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate")
+                conn.setRequestProperty("Pragma", "no-cache")
+                conn.setRequestProperty("Expires", "0")
                 conn.connectTimeout = 12000
                 conn.readTimeout = 12000
                 conn.instanceFollowRedirects = true
@@ -105,6 +109,7 @@ class MainActivity : AppCompatActivity() {
                     val stream = if (conn.responseCode == 302) {
                         val redirectUrl = conn.getHeaderField("Location")
                         val redir = URL(redirectUrl).openConnection() as HttpURLConnection
+                        redir.useCaches = false
                         redir.setRequestProperty("User-Agent", "Mozilla/5.0")
                         redir.inputStream
                     } else {
