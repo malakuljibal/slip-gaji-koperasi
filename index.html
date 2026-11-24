@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1e293b">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <title>Aplikasi Cetak Bukti Pembayaran Pekerja - Koperasi Ilantat Jaya</title>
+  <title>Finance Ilantat Jaya - Aplikasi Slip Gaji Koperasi</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -521,7 +521,7 @@
   <header>
     <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
       <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <h1>Slip Gaji Koperasi</h1>
+        <h1>Finance Ilantat Jaya</h1>
         <span class="badge">Thermal 57x30 / 58mm</span>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
@@ -693,7 +693,7 @@
         </div>
         <div class="form-group">
           <label>Nama Penanggung Jawab</label>
-          <input type="text" id="picName" value="H. Hendra (Admin)" oninput="updateReceipt()">
+          <input type="text" id="picName" value="Koperasi" oninput="updateReceipt()">
         </div>
       </div>
       <div class="form-group">
@@ -789,7 +789,7 @@
           <div class="sign-box">
             <div>Pengesah,</div>
             <div class="sign-space"></div>
-            <div id="prevSignPic">( H. Hendra )</div>
+            <div id="prevSignPic">( Koperasi )</div>
           </div>
         </div>
 
@@ -1336,7 +1336,7 @@
 
       // Signatures
       pushString("Penerima               Pengesah \n\n\n");
-      const pic = document.getElementById('picName').value || 'Admin';
+      const pic = document.getElementById('picName').value || 'Koperasi';
       addRow(`(${worker.substring(0, 12)})`, `(${pic.substring(0, 12)})`);
 
       pushString("--------------------------------\n");
@@ -1529,7 +1529,7 @@
 
       document.getElementById('prevPeriod').innerText = document.getElementById('periodText').value || '-';
 
-      const pic = document.getElementById('picName').value || 'Admin';
+      const pic = document.getElementById('picName').value || 'Koperasi';
       document.getElementById('prevSignPic').innerText = `( ${pic} )`;
 
       document.getElementById('prevPaymentMethod').innerText = document.getElementById('paymentMethod').value;
