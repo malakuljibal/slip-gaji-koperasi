@@ -1199,7 +1199,7 @@ html_template = """<!DOCTYPE html>
     let pengawasRole = "Pengawas Lapangan";
 
     let incomeItems = [
-      { desc: "Gaji Pengawas Lapangan", workDays: 6, dailyRate: 150000, amount: 900000 }
+      { desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: 150000, amount: 1050000 }
     ];
 
     let deductionItems = [
@@ -1254,6 +1254,19 @@ html_template = """<!DOCTYPE html>
       }
     }
 
+    function getDaysFromPeriod() {
+      const startVal = document.getElementById('periodStart').value;
+      const endVal = document.getElementById('periodEnd').value;
+      if (startVal && endVal) {
+        const start = new Date(startVal);
+        const end = new Date(endVal);
+        const diffTime = end.getTime() - start.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 3600 * 24)) + 1;
+        if (diffDays > 0) return diffDays;
+      }
+      return 7;
+    }
+
     function handleCategoryChange(cat) {
       workerCategory = cat;
       const pGroup = document.getElementById('pengawasSubGroup');
@@ -1275,7 +1288,8 @@ html_template = """<!DOCTYPE html>
         else if (pengawasRole === "Penjemur") defaultRate = 100000;
         else if (pengawasRole === "Pengawas Malam") defaultRate = 100000;
 
-        incomeItems = [{ desc: "Gaji " + pengawasRole, workDays: 6, dailyRate: defaultRate, amount: 6 * defaultRate }];
+        let days = getDaysFromPeriod();
+        incomeItems = [{ desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate }];
       }
       renderItemsInput();
       updateReceipt();
@@ -1289,7 +1303,7 @@ html_template = """<!DOCTYPE html>
       else if (role === "Penjemur") defaultRate = 100000;
       else if (role === "Pengawas Malam") defaultRate = 100000;
 
-      let currentDays = (incomeItems.length > 0 && incomeItems[0].workDays) ? incomeItems[0].workDays : 6;
+      let currentDays = getDaysFromPeriod();
 
       if (incomeItems.length > 0) {
         incomeItems[0].desc = "Gaji " + role;
@@ -1352,7 +1366,6 @@ html_template = """<!DOCTYPE html>
       } else {
         // Pengawas / Penjemur / Harian
         document.getElementById('workerCategorySelect').value = 'Pengawas';
-        handleCategoryChange('Pengawas');
 
         let exactRole = "Pengawas Lapangan";
         if (catLower.includes('malam')) {
@@ -1365,6 +1378,8 @@ html_template = """<!DOCTYPE html>
           exactRole = "Pengawas Koperasi";
         }
 
+        document.getElementById('pengawasSubGroup').style.display = 'block';
+        document.getElementById('boronganSubGroup').style.display = 'none';
         document.getElementById('pengawasRoleSelect').value = exactRole;
         pengawasRole = exactRole;
 
@@ -1374,13 +1389,13 @@ html_template = """<!DOCTYPE html>
         else if (exactRole === "Penjemur") defaultRate = 100000;
         else if (exactRole === "Pengawas Malam") defaultRate = 100000;
 
-        let days = 6;
+        let days = getDaysFromPeriod();
 
         if (rekap && rekap.subTotal) {
           let cleaned = rekap.subTotal.replace(/[^0-9.]/g, '');
           let subTot = parseFloat(cleaned) || 0;
           if (subTot > 0) {
-            days = Math.round(subTot / defaultRate) || 6;
+            days = Math.round(subTot / defaultRate) || days;
           }
         }
 
@@ -1420,7 +1435,8 @@ html_template = """<!DOCTYPE html>
 
       workersData.forEach(w => {
         const matchesSearch = !search || w.name.toLowerCase().includes(search) || (w.regu || '').toLowerCase().includes(search);
-        const matchesStatus = !statusFilter || (w.paymentStatus === statusFilter);
+        const wStatus = w.paymentStatus || 'Belum Dibayarkan';
+        const matchesStatus = !statusFilter || (wStatus === statusFilter);
         const matchesCategory = !categoryFilter || w.category === categoryFilter;
         const matchesRegu = !reguFilter || w.regu === reguFilter;
 
@@ -1430,7 +1446,7 @@ html_template = """<!DOCTYPE html>
           card.className = 'worker-card';
 
           const initial = w.name.charAt(0).toUpperCase();
-          const statusClass = (w.paymentStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
+          const statusClass = (wStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
 
           card.innerHTML = `
             <div>
@@ -1443,7 +1459,7 @@ html_template = """<!DOCTYPE html>
               </div>
               <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
                 <span class="tag tag-category">${w.category}</span>
-                <span class="tag ${statusClass}">🟡 ${w.paymentStatus || 'Belum Dibayarkan'}</span>
+                <span class="tag ${statusClass}">🟡 ${wStatus}</span>
               </div>
             </div>
             <button class="btn btn-primary" onclick="createSlipForWorker('${w.name}', '${w.category}', '${w.regu}')" style="width: 100%; justify-content: center; font-size: 0.8rem;">
@@ -1476,11 +1492,12 @@ html_template = """<!DOCTYPE html>
 
       rekapData.forEach(r => {
         const matchesSearch = !search || r.name.toLowerCase().includes(search) || (r.regu || '').toLowerCase().includes(search);
-        const matchesStatus = !statusFilter || (r.paymentStatus === statusFilter);
+        const rStatus = r.paymentStatus || 'Belum Dibayarkan';
+        const matchesStatus = !statusFilter || (rStatus === statusFilter);
 
         if (matchesSearch && matchesStatus) {
           const tr = document.createElement('tr');
-          const statusClass = (r.paymentStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
+          const statusClass = (rStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
 
           tr.innerHTML = `
             <td>#${r.no}</td>
@@ -1490,7 +1507,7 @@ html_template = """<!DOCTYPE html>
             <td>Rp ${r.subTotal || '0'}</td>
             <td><span style="color: #dc2626;">${r.kasbon || '-'}</span></td>
             <td style="font-weight: 700; color: #16a34a;">${r.totalGaji || 'Rp 0'}</td>
-            <td><span class="tag ${statusClass}">🟡 ${r.paymentStatus || 'Belum Dibayarkan'}</span></td>
+            <td><span class="tag ${statusClass}">🟡 ${rStatus}</span></td>
             <td>
               <button class="btn btn-secondary" onclick="createSlipForWorker('${r.name}', 'Borongan Pemetik', '${r.regu}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                 Buat Slip
@@ -1504,54 +1521,6 @@ html_template = """<!DOCTYPE html>
 
     function filterRekap() {
       renderRekapTable();
-    }
-
-    function processParsedCsv(csvText) {
-      if (!csvText || csvText.trim().length === 0) {
-        alert('❌ Data dari Google Sheets tidak dapat diakses atau kosong.');
-        return;
-      }
-
-      const lines = csvText.split('\\n');
-      let newWorkers = [];
-      lines.forEach(line => {
-        const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
-        if (fields.length >= 6) {
-          const no = fields[0];
-          const desc = fields[2];
-          const debit = fields[3];
-          const credit = fields[4];
-          const status = fields[5];
-
-          if (desc && (desc.toLowerCase().includes('upah') || desc.toLowerCase().includes('gaji') || desc.toLowerCase().includes('borongan'))) {
-            const isUnpaid = (status && status.toLowerCase().includes('hutang')) || status === "Belum Dibayarkan" || !status;
-            if (isUnpaid) {
-              let cleanName = desc.replace(/^upah\\s+/i, '').replace(/^gaji\\s+/i, '').replace(/^borongan\\s+/i, '').trim();
-              if (cleanName.length > 2) {
-                newWorkers.push({
-                  no: newWorkers.length + 1,
-                  name: cleanName,
-                  category: desc.toLowerCase().includes('pengawas') ? "Pengawas Lapangan" : "Borongan Pemetik",
-                  regu: "-",
-                  schema: desc.toLowerCase().includes('pengawas') ? "Harian" : "Borongan",
-                  status: "Aktif",
-                  paymentStatus: "Belum Dibayarkan"
-                });
-              }
-            }
-          }
-        }
-      });
-
-      if (newWorkers.length > 0) {
-        workersData = newWorkers;
-        localStorage.setItem('workersData', JSON.stringify(workersData));
-        renderWorkerGrid();
-        renderWorkerTemplateDropdown();
-        alert(`✅ Sinkronisasi Dasbor Gaji Berhasil! Memuat ${newWorkers.length} data tagihan yang BELUM DIBAYARKAN dari Google Sheets.`);
-      } else {
-        alert('ℹ️ Sinkronisasi Dasbor Gaji Selesai: Semua tagihan terdeteksi sudah Lunas!');
-      }
     }
 
     function syncWithGoogleSheets() {
@@ -1646,7 +1615,7 @@ html_template = """<!DOCTYPE html>
         renderRekapTable();
         renderWorkerTemplateDropdown();
 
-        let unpaidCount = workersData.filter(w => w.paymentStatus === 'Belum Dibayarkan').length;
+        let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
         alert(`✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: \${workersData.length} orang\\n• Status Belum Dibayarkan: \${unpaidCount} orang\\n\\nData ter-update langsung dari Google Sheets!`);
       }
 
@@ -1696,6 +1665,18 @@ html_template = """<!DOCTYPE html>
         const endFormatted = endDate.toLocaleDateString('id-ID', formatOptions);
 
         document.getElementById('periodText').value = `${startFormatted} - ${endFormatted}`;
+
+        // Auto update workDays for Pengawas / Harian items
+        const newDays = getDaysFromPeriod();
+        if (workerCategory === "Pengawas") {
+          incomeItems.forEach((item) => {
+            if (item.workDays !== undefined && item.dailyRate !== undefined) {
+              item.workDays = newDays;
+              item.amount = newDays * item.dailyRate;
+            }
+          });
+          renderItemsInput();
+        }
       } else if (startVal) {
         const startDate = new Date(startVal);
         const formatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
@@ -2191,7 +2172,8 @@ html_template = """<!DOCTYPE html>
         let defaultRate = 100000;
         if (pengawasRole === "Pengawas Lapangan") defaultRate = 150000;
         else if (pengawasRole === "Pengawas Cudai") defaultRate = 120000;
-        incomeItems.push({ desc: "Gaji " + pengawasRole, workDays: 6, dailyRate: defaultRate, amount: 6 * defaultRate });
+        let days = getDaysFromPeriod();
+        incomeItems.push({ desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate });
       }
       renderItemsInput();
       updateReceipt();
