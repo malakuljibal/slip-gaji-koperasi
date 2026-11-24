@@ -700,8 +700,8 @@
         <textarea id="noteText" rows="2" oninput="updateReceipt()">Terima kasih atas kerja keras &amp; dedikasinya!</textarea>
       </div>
 
-      <button class="btn btn-print" onclick="window.print()">
-        🖨️ Cetak ke Printer Thermal (57x30)
+      <button class="btn btn-print" onclick="handleMainPrint()">
+        🖨️ Cetak Slip Gaji (Thermal 57x30)
       </button>
     </div>
 
@@ -821,14 +821,19 @@
           </select>
           <button class="btn btn-secondary" onclick="loadBtDevices()">🔄 Cari</button>
         </div>
-        <div style="display: flex; gap: 0.5rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <button class="btn btn-primary" onclick="connectBtDevice()" style="flex: 1; justify-content: center;">
             🔗 Hubungkan
           </button>
           <button class="btn btn-danger" onclick="disconnectBtDevice()" style="flex: 1; justify-content: center;">
-            🔌 Putus Koneksi
+            🔌 Putus
           </button>
         </div>
+
+        <button class="btn btn-primary" onclick="printDirectBluetooth()" style="width: 100%; margin-top: 1rem; justify-content: center; background: #10b981; font-size: 0.95rem; padding: 0.65rem;">
+          🖨️ Cetak Langsung via Bluetooth
+        </button>
+
         <div id="btStatus" style="margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; text-align: center; min-height: 1.5rem;"></div>
       </div>
     </div>
@@ -893,7 +898,7 @@
       const today = todayDate.toISOString().split('T')[0];
       document.getElementById('payDate').value = today;
 
-      // Set default period start & end (e.g. 7 days range)
+      // Set default period start & end (7 days range)
       const startDate = new Date();
       startDate.setDate(todayDate.getDate() - 6);
       document.getElementById('periodStart').value = startDate.toISOString().split('T')[0];
@@ -1205,6 +1210,147 @@
         const status = document.getElementById('btStatus');
         status.innerText = 'Koneksi Bluetooth diputus.';
         status.style.color = '#ef4444';
+      }
+    }
+
+    // Direct ESC/POS Thermal Printing
+    function generateEscPosBytes() {
+      let bytes = [];
+
+      function pushString(str) {
+        for (let i = 0; i < str.length; i++) {
+          bytes.push(str.charCodeAt(i));
+        }
+      }
+
+      // Initialize
+      bytes.push(0x1B, 0x40);
+
+      // Center Align
+      bytes.push(0x1B, 0x61, 0x01);
+
+      // Bold Business Title
+      bytes.push(0x1B, 0x45, 0x01);
+      pushString((document.getElementById('businessName').value || 'KOPERASI ILANTAT JAYA') + "\n");
+      bytes.push(0x1B, 0x45, 0x00);
+
+      pushString((document.getElementById('businessUnit').value || 'Slip Gaji & Upah Kerja') + "\n");
+      pushString((document.getElementById('businessAddress').value || 'Desa Lungkap') + "\n");
+      pushString("--------------------------------\n");
+
+      // Left Align for Details
+      bytes.push(0x1B, 0x61, 0x00);
+
+      function addRow(label, val) {
+        let l = label || "";
+        let r = val || "";
+        let spaces = 32 - (l.length + r.length);
+        if (spaces < 1) spaces = 1;
+        pushString(l + " ".repeat(spaces) + r + "\n");
+      }
+
+      addRow("No.Bukti", document.getElementById('refNo').value || '-');
+
+      const dateVal = document.getElementById('payDate').value;
+      let dateStr = '-';
+      if (dateVal) {
+        const parts = dateVal.split('-');
+        dateStr = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      addRow("Tanggal", dateStr);
+
+      const worker = document.getElementById('workerName').value || 'Nama Pekerja';
+      addRow("Pekerja", worker);
+
+      const role = getSelectedRole();
+      addRow("Jabatan", role);
+
+      const period = document.getElementById('periodText').value || '-';
+      addRow("Periode", period);
+
+      pushString("--------------------------------\n");
+
+      // Income Items
+      bytes.push(0x1B, 0x45, 0x01);
+      pushString("RINCIAN PENDAPATAN:\n");
+      bytes.push(0x1B, 0x45, 0x00);
+
+      let totalIncome = 0;
+      incomeItems.forEach(item => {
+        totalIncome += (item.amount || 0);
+        addRow(item.desc || 'Item', formatRupiah(item.amount));
+      });
+
+      // Deduction Items
+      let totalDeductions = 0;
+      if (deductionItems.length > 0) {
+        bytes.push(0x1B, 0x45, 0x01);
+        pushString("POTONGAN / KASBON:\n");
+        bytes.push(0x1B, 0x45, 0x00);
+
+        deductionItems.forEach(item => {
+          totalDeductions += (item.amount || 0);
+          addRow(item.desc || 'Potongan', "-" + formatRupiah(item.amount));
+        });
+      }
+
+      pushString("--------------------------------\n");
+
+      // Total
+      bytes.push(0x1B, 0x45, 0x01);
+      const grandTotal = totalIncome - totalDeductions;
+      addRow("TOTAL DITERIMA", formatRupiah(grandTotal));
+      bytes.push(0x1B, 0x45, 0x00);
+
+      addRow("Metode", document.getElementById('paymentMethod').value);
+      pushString("--------------------------------\n");
+
+      // Signatures
+      pushString("Penerima               Pengesah \n\n\n");
+      const pic = document.getElementById('picName').value || 'Admin';
+      addRow(`(${worker.substring(0, 12)})`, `(${pic.substring(0, 12)})`);
+
+      pushString("--------------------------------\n");
+
+      // Center Footer Note
+      bytes.push(0x1B, 0x61, 0x01);
+      pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\n");
+      pushString("--- Simpan bukti ini ---\n\n\n\n");
+
+      // Feed & Cut
+      bytes.push(0x1D, 0x56, 0x42, 0x00);
+
+      return new Uint8Array(bytes);
+    }
+
+    function printDirectBluetooth() {
+      if (typeof AndroidPrint === 'undefined' || !AndroidPrint.isBluetoothConnected || !AndroidPrint.isBluetoothConnected()) {
+        openBluetoothModal();
+        alert('Printer Bluetooth belum terhubung! Silakan hubungkan printer di modal terlebih dahulu.');
+        return;
+      }
+
+      try {
+        const rawBytes = generateEscPosBytes();
+        let binaryStr = "";
+        for (let i = 0; i < rawBytes.length; i++) {
+          binaryStr += String.fromCharCode(rawBytes[i]);
+        }
+        const base64Str = btoa(binaryStr);
+        const ok = AndroidPrint.sendRawBytes(base64Str);
+        if (!ok) {
+          alert('Gagal mengirim data ke printer Bluetooth.');
+        }
+      } catch (e) {
+        alert('Error cetak Bluetooth: ' + e.message);
+      }
+    }
+
+    function handleMainPrint() {
+      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.isBluetoothConnected && AndroidPrint.isBluetoothConnected()) {
+        printDirectBluetooth();
+      } else {
+        openBluetoothModal();
       }
     }
 

@@ -142,14 +142,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
+        fun isBluetoothConnected(): Boolean {
+            return bluetoothSocket != null && bluetoothSocket!!.isConnected
+        }
+
+        @JavascriptInterface
         fun sendRawBytes(bytesBase64: String): Boolean {
             return try {
+                if (outputStream == null) return false
                 val bytes = android.util.Base64.decode(bytesBase64, android.util.Base64.DEFAULT)
                 outputStream?.write(bytes)
                 outputStream?.flush()
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Berhasil mencetak ke printer Bluetooth!", Toast.LENGTH_SHORT).show()
+                }
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Gagal mencetak: ${e.message}", Toast.LENGTH_LONG).show()
+                }
                 false
             }
         }
