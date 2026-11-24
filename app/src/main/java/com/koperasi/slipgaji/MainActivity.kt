@@ -119,26 +119,39 @@ class MainActivity : AppCompatActivity() {
 
         @SuppressLint("MissingPermission")
         @JavascriptInterface
-        fun connectBluetoothDevice(address: String): Boolean {
-            val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter() ?: return false
-            try {
-                disconnectBluetooth()
-                val device = bluetoothAdapter.getRemoteDevice(address)
-                val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP UUID
-                bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
-                bluetoothSocket?.connect()
-                outputStream = bluetoothSocket?.outputStream
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "Terhubung ke printer Bluetooth!", Toast.LENGTH_SHORT).show()
+        fun connectBluetoothDevice(address: String) {
+            Thread {
+                val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+                if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, "Bluetooth tidak aktif!", Toast.LENGTH_SHORT).show()
+                        webView.evaluateJavascript("if (typeof onBtDisconnected === 'function') onBtDisconnected('Bluetooth tidak aktif');", null)
+                    }
+                    return@Thread
                 }
-                return true
-            } catch (e: Exception) {
-                e.printStackTrace()
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "Gagal terhubung ke printer: ${e.message}", Toast.LENGTH_LONG).show()
+                try {
+                    disconnectBluetooth()
+                    val device = bluetoothAdapter.getRemoteDevice(address)
+                    val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP UUID
+                    bluetoothAdapter.cancelDiscovery()
+                    val socket = device.createRfcommSocketToServiceRecord(uuid)
+                    socket.connect()
+                    bluetoothSocket = socket
+                    outputStream = socket.outputStream
+                    val devName = device.name ?: address
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, "Terhubung ke $devName!", Toast.LENGTH_SHORT).show()
+                        webView.evaluateJavascript("if (typeof onBtConnected === 'function') onBtConnected('$devName');", null)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    val errMsg = e.message ?: "Gagal konek"
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, "Gagal terhubung: $errMsg", Toast.LENGTH_LONG).show()
+                        webView.evaluateJavascript("if (typeof onBtDisconnected === 'function') onBtDisconnected('$errMsg');", null)
+                    }
                 }
-                return false
-            }
+            }.start()
         }
 
         @JavascriptInterface
@@ -149,12 +162,17 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun sendRawBytes(bytesBase64: String): Boolean {
             return try {
-                if (outputStream == null) return false
+                if (outputStream == null || bluetoothSocket == null || !bluetoothSocket!!.isConnected) {
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, "Printer Bluetooth belum terhubung!", Toast.LENGTH_SHORT).show()
+                    }
+                    return false
+                }
                 val bytes = android.util.Base64.decode(bytesBase64, android.util.Base64.DEFAULT)
                 outputStream?.write(bytes)
                 outputStream?.flush()
                 activity.runOnUiThread {
-                    Toast.makeText(activity, "Berhasil mencetak ke printer Bluetooth!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "Berhasil mencetak ke printer!", Toast.LENGTH_SHORT).show()
                 }
                 true
             } catch (e: Exception) {

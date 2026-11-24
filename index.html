@@ -168,11 +168,12 @@
     .btn-print {
       background: #10b981;
       color: white;
-      font-size: 1rem;
-      padding: 0.75rem 1.5rem;
+      font-size: 1.05rem;
+      padding: 0.85rem 1.5rem;
       width: 100%;
       justify-content: center;
       margin-top: 1rem;
+      font-weight: 700;
     }
     .btn-print:hover {
       background: #059669;
@@ -703,6 +704,10 @@
       <button class="btn btn-print" onclick="handleMainPrint()">
         🖨️ Cetak Slip Gaji (Thermal 57x30)
       </button>
+
+      <button class="btn btn-secondary" onclick="AndroidPrint.printPage()" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.85rem;">
+        📄 Simpan PDF / Cetak Sistem
+      </button>
     </div>
 
     <!-- Preview Thermal -->
@@ -830,9 +835,11 @@
           </button>
         </div>
 
-        <button class="btn btn-primary" onclick="printDirectBluetooth()" style="width: 100%; margin-top: 1rem; justify-content: center; background: #10b981; font-size: 0.95rem; padding: 0.65rem;">
-          🖨️ Cetak Langsung via Bluetooth
-        </button>
+        <div id="directBtBtnBox" style="margin-top: 1rem; display: none;">
+          <button class="btn btn-primary" onclick="printDirectBluetooth()" style="width: 100%; justify-content: center; background: #10b981; font-size: 1rem; padding: 0.75rem; font-weight: 700;">
+            🖨️ CETAK LANGSUNG VIA BLUETOOTH
+          </button>
+        </div>
 
         <div id="btStatus" style="margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; text-align: center; min-height: 1.5rem;"></div>
       </div>
@@ -929,7 +936,40 @@
       renderWorkerTemplateDropdown();
       renderItemsInput();
       updateReceipt();
+
+      // Check if bluetooth already connected on load
+      checkBtStatusOnLoad();
     };
+
+    function checkBtStatusOnLoad() {
+      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.isBluetoothConnected && AndroidPrint.isBluetoothConnected()) {
+        onBtConnected('Printer Bluetooth');
+      }
+    }
+
+    function onBtConnected(devName) {
+      const status = document.getElementById('btStatus');
+      const directBox = document.getElementById('directBtBtnBox');
+      if (status) {
+        status.innerText = '✅ Terhubung ke ' + (devName || 'Printer Bluetooth');
+        status.style.color = '#10b981';
+      }
+      if (directBox) {
+        directBox.style.display = 'block';
+      }
+    }
+
+    function onBtDisconnected(msg) {
+      const status = document.getElementById('btStatus');
+      const directBox = document.getElementById('directBtBtnBox');
+      if (status) {
+        status.innerText = '❌ Terputus: ' + (msg || '');
+        status.style.color = '#ef4444';
+      }
+      if (directBox) {
+        directBox.style.display = 'none';
+      }
+    }
 
     function initRoleOptions() {
       const select = document.getElementById('workerRoleSelect');
@@ -1189,27 +1229,16 @@
         return;
       }
       if (typeof AndroidPrint !== 'undefined' && AndroidPrint.connectBluetoothDevice) {
-        status.innerText = 'Menghubungkan ke printer...';
+        status.innerText = '⏳ Menghubungkan ke printer... Mohon tunggu.';
         status.style.color = '#f59e0b';
-        setTimeout(() => {
-          const ok = AndroidPrint.connectBluetoothDevice(address);
-          if (ok) {
-            status.innerText = '✅ Terhubung ke printer Bluetooth (' + address + ')';
-            status.style.color = '#10b981';
-          } else {
-            status.innerText = '❌ Gagal terhubung ke printer.';
-            status.style.color = '#ef4444';
-          }
-        }, 300);
+        AndroidPrint.connectBluetoothDevice(address);
       }
     }
 
     function disconnectBtDevice() {
       if (typeof AndroidPrint !== 'undefined' && AndroidPrint.disconnectBluetooth) {
         AndroidPrint.disconnectBluetooth();
-        const status = document.getElementById('btStatus');
-        status.innerText = 'Koneksi Bluetooth diputus.';
-        status.style.color = '#ef4444';
+        onBtDisconnected('Terputus');
       }
     }
 
@@ -1340,6 +1369,8 @@
         const ok = AndroidPrint.sendRawBytes(base64Str);
         if (!ok) {
           alert('Gagal mengirim data ke printer Bluetooth.');
+        } else {
+          closeBluetoothModal();
         }
       } catch (e) {
         alert('Error cetak Bluetooth: ' + e.message);
