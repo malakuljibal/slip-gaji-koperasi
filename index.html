@@ -75,6 +75,7 @@
       padding: 1.5rem;
       max-height: calc(100vh - 120px);
       overflow-y: auto;
+      transition: all 0.2s ease;
     }
 
     .section-title {
@@ -124,24 +125,6 @@
     input:focus, textarea:focus, select:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
-    }
-
-    .items-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .items-table th {
-      text-align: left;
-      font-size: 0.75rem;
-      color: #64748b;
-      padding: 0.35rem;
-    }
-
-    .items-table td {
-      padding: 0.35rem;
     }
 
     .btn {
@@ -201,6 +184,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: all 0.2s ease;
     }
 
     .preview-header {
@@ -308,6 +292,81 @@
       height: 35px;
     }
 
+    /* Toggle & Responsive Mode Styles */
+    .preview-section.hidden {
+      display: none !important;
+    }
+
+    .editor-section.full-width {
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
+    }
+
+    .mode-toggle-bar {
+      display: none;
+      background: #cbd5e1;
+      padding: 0.3rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      gap: 0.4rem;
+    }
+
+    .mode-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.55rem 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #334155;
+      background: transparent;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab.active {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 900px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.85rem 1rem;
+      }
+
+      .container {
+        flex-direction: column;
+        padding: 0.75rem;
+        gap: 1rem;
+      }
+
+      .editor-section {
+        max-height: none;
+        overflow-y: visible;
+        width: 100%;
+        padding: 1rem;
+      }
+
+      .preview-section {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .mode-toggle-bar {
+        display: flex;
+      }
+    }
+
     /* Print Stylesheet */
     @media print {
       body * {
@@ -341,16 +400,26 @@
 <body>
 
   <header>
-    <div style="display: flex; align-items: center;">
-      <h1>Slip Pembayaran Pekerja</h1>
-      <span class="badge">Thermal 57x30 / 58mm</span>
-    </div>
-    <div style="font-size: 0.85rem; color: #94a3b8;">
-      Praktis &amp; Langsung Cetak via Printer Thermal
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <h1>Slip Pembayaran Pekerja</h1>
+        <span class="badge">Thermal 57x30 / 58mm</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <button class="btn btn-secondary" id="togglePreviewBtn" onclick="togglePreview()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
+          👁️ <span id="toggleText">Sembunyikan Preview</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <div class="container">
+    <!-- Mode Switcher for Mobile -->
+    <div class="mode-toggle-bar">
+      <button class="mode-tab active" id="tabEdit" onclick="switchMobileTab('edit')">✏️ Edit Form Data</button>
+      <button class="mode-tab" id="tabPreview" onclick="switchMobileTab('preview')">📄 Lihat Preview (57mm)</button>
+    </div>
+
     <!-- Form Input / Editor -->
     <div class="editor-section">
       <div class="section-title">
@@ -563,6 +632,52 @@
       renderItemsInput();
       updateReceipt();
     };
+
+    function togglePreview() {
+      const previewSec = document.querySelector('.preview-section');
+      const editorSec = document.querySelector('.editor-section');
+      const toggleBtn = document.getElementById('togglePreviewBtn');
+      const toggleText = document.getElementById('toggleText');
+
+      if (previewSec.classList.contains('hidden')) {
+        previewSec.classList.remove('hidden');
+        editorSec.classList.remove('full-width');
+        if (toggleText) toggleText.innerText = 'Sembunyikan Preview';
+        if (toggleBtn) {
+          toggleBtn.classList.remove('btn-primary');
+          toggleBtn.classList.add('btn-secondary');
+        }
+      } else {
+        previewSec.classList.add('hidden');
+        editorSec.classList.add('full-width');
+        if (toggleText) toggleText.innerText = 'Tampilkan Preview';
+        if (toggleBtn) {
+          toggleBtn.classList.remove('btn-secondary');
+          toggleBtn.classList.add('btn-primary');
+        }
+      }
+    }
+
+    function switchMobileTab(mode) {
+      const editorSec = document.querySelector('.editor-section');
+      const previewSec = document.querySelector('.preview-section');
+      const tabEdit = document.getElementById('tabEdit');
+      const tabPreview = document.getElementById('tabPreview');
+
+      if (mode === 'edit') {
+        editorSec.style.display = 'block';
+        previewSec.style.display = 'none';
+        previewSec.classList.add('hidden');
+        tabEdit.classList.add('active');
+        tabPreview.classList.remove('active');
+      } else if (mode === 'preview') {
+        editorSec.style.display = 'none';
+        previewSec.style.display = 'flex';
+        previewSec.classList.remove('hidden');
+        tabEdit.classList.remove('active');
+        tabPreview.classList.add('active');
+      }
+    }
 
     function formatRupiah(num) {
       return "Rp " + Number(num || 0).toLocaleString("id-ID");
