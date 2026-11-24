@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1e293b">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <title>Aplikasi Cetak Bukti Pembayaran Pekerja (Thermal 58mm / 57x30)</title>
+  <title>Aplikasi Cetak Bukti Pembayaran Pekerja - Koperasi Ilantat Jaya</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -520,7 +520,7 @@
   <header>
     <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
       <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <h1>Slip Pembayaran Pekerja</h1>
+        <h1>Slip Gaji Koperasi</h1>
         <span class="badge">Thermal 57x30 / 58mm</span>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
@@ -543,13 +543,33 @@
 
     <!-- Form Input / Editor -->
     <div class="editor-section">
+
+      <!-- Master Data Template Pekerja -->
+      <div class="section-title">
+        <span>👥 Pilih / Kelola Template Pekerja</span>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
+        <label>Daftar Nama Pekerja (Pilih untuk memuat template):</label>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem; flex-wrap: wrap;">
+          <select id="workerTemplateSelect" onchange="loadWorkerTemplate(this.value)" style="flex: 2; min-width: 180px;">
+            <option value="">-- Pilih Nama Pekerja --</option>
+          </select>
+          <button class="btn btn-primary" onclick="saveWorkerTemplate()" style="font-size: 0.8rem;">
+            💾 Simpan
+          </button>
+          <button class="btn btn-danger" onclick="deleteWorkerTemplate()" style="font-size: 0.8rem;">
+            🗑️ Hapus
+          </button>
+        </div>
+      </div>
+
       <div class="section-title">
         <span>Informasi Usaha / Tempat Kerja</span>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Nama Usaha / Toko / Perusahaan</label>
-          <input type="text" id="businessName" value="KEDAI MAKMUR JAYA" oninput="updateReceipt()">
+          <input type="text" id="businessName" value="KOPERASI ILANTAT JAYA" oninput="updateReceipt()">
         </div>
         <div class="form-group">
           <label>Sub-judul / Unit Kerja</label>
@@ -558,7 +578,7 @@
       </div>
       <div class="form-group">
         <label>Alamat / Kontak Singkat</label>
-        <input type="text" id="businessAddress" value="Jl. Sudirman No. 45 | 0812-3456-7890" oninput="updateReceipt()">
+        <input type="text" id="businessAddress" value="Desa Lungkap, Bolaang Mongondow Selatan" oninput="updateReceipt()">
       </div>
 
       <div class="section-title" style="margin-top: 1.25rem;">
@@ -571,7 +591,12 @@
         </div>
         <div class="form-group">
           <label>Jabatan / Peran</label>
-          <input type="text" id="workerRole" value="Staf Gudang &amp; Packing" oninput="updateReceipt()">
+          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+            <select id="workerRoleSelect" onchange="handleRoleChange(this.value)">
+              <!-- Dynamically populated -->
+            </select>
+            <input type="text" id="customRoleInput" placeholder="Ketikkan jabatan baru..." style="display: none;" oninput="updateReceipt()">
+          </div>
         </div>
       </div>
       <div class="form-row">
@@ -584,8 +609,20 @@
           <input type="date" id="payDate" oninput="updateReceipt()">
         </div>
       </div>
+
+      <!-- Kalender Periode Kerja -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Periode Kerja (Mulai)</label>
+          <input type="date" id="periodStart" oninput="updatePeriodFromDates()">
+        </div>
+        <div class="form-group">
+          <label>Periode Kerja (Sampai)</label>
+          <input type="date" id="periodEnd" oninput="updatePeriodFromDates()">
+        </div>
+      </div>
       <div class="form-group">
-        <label>Periode Kerja</label>
+        <label>Format Teks Periode (Otomatis / Custom)</label>
         <input type="text" id="periodText" value="16 Nov 2026 - 22 Nov 2026 (Mingguan)" oninput="updateReceipt()">
       </div>
 
@@ -678,9 +715,9 @@
       <div class="receipt-container" id="receiptPrintArea">
         <!-- Header Usaha -->
         <div class="receipt-center">
-          <div class="receipt-title" id="prevBusinessName">KEDAI MAKMUR JAYA</div>
+          <div class="receipt-title" id="prevBusinessName">KOPERASI ILANTAT JAYA</div>
           <div class="receipt-sub" id="prevBusinessUnit">Slip Gaji &amp; Upah Kerja</div>
-          <div class="receipt-sub" id="prevBusinessAddress" style="font-size: 9px;">Jl. Sudirman No. 45</div>
+          <div class="receipt-sub" id="prevBusinessAddress" style="font-size: 9px;">Desa Lungkap, Bolaang Mongondow Selatan</div>
         </div>
 
         <div class="divider"></div>
@@ -847,13 +884,209 @@
       { desc: "BPJS / Iuran", amount: 25000 }
     ];
 
+    let customRoles = JSON.parse(localStorage.getItem('customRoles') || '[]');
+    let workerTemplates = JSON.parse(localStorage.getItem('workerTemplates') || '{}');
+
     // Set default date to today
     window.onload = function() {
-      const today = new Date().toISOString().split('T')[0];
+      const todayDate = new Date();
+      const today = todayDate.toISOString().split('T')[0];
       document.getElementById('payDate').value = today;
+
+      // Set default period start & end (e.g. 7 days range)
+      const startDate = new Date();
+      startDate.setDate(todayDate.getDate() - 6);
+      document.getElementById('periodStart').value = startDate.toISOString().split('T')[0];
+      document.getElementById('periodEnd').value = today;
+      updatePeriodFromDates();
+
+      initRoleOptions();
+
+      // Seed sample template if empty
+      if (Object.keys(workerTemplates).length === 0) {
+        workerTemplates["Ahmad Maulana"] = {
+          name: "Ahmad Maulana",
+          role: "Staf Gudang & Packing",
+          incomeItems: [
+            { desc: "Gaji Pokok / Upah Dasar", amount: 1200000 },
+            { desc: "Uang Makan (6 hari x 25rb)", amount: 150000 },
+            { desc: "Lembur (5 jam x 20rb)", amount: 100000 },
+            { desc: "Bonus Performa", amount: 50000 }
+          ],
+          deductionItems: [
+            { desc: "Kasbon / Pinjaman", amount: 100000 },
+            { desc: "BPJS / Iuran", amount: 25000 }
+          ]
+        };
+        localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
+      }
+
+      renderWorkerTemplateDropdown();
       renderItemsInput();
       updateReceipt();
     };
+
+    function initRoleOptions() {
+      const select = document.getElementById('workerRoleSelect');
+      const defaultRoles = [
+        "Staf Gudang & Packing",
+        "Pengurus Koperasi",
+        "Kasir & Administrasi",
+        "Petugas Lapangan",
+        "Driver & Operasional",
+        "Bendahara / Akuntansi"
+      ];
+      select.innerHTML = '';
+      defaultRoles.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r;
+        opt.innerText = r;
+        select.appendChild(opt);
+      });
+      customRoles.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r;
+        opt.innerText = r;
+        select.appendChild(opt);
+      });
+      const customOpt = document.createElement('option');
+      customOpt.value = "CUSTOM";
+      customOpt.innerText = "+ Tambah / Ketik Jabatan Lain...";
+      select.appendChild(customOpt);
+    }
+
+    function handleRoleChange(val) {
+      const customInput = document.getElementById('customRoleInput');
+      if (val === 'CUSTOM') {
+        customInput.style.display = 'block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+        customInput.value = '';
+      }
+      updateReceipt();
+    }
+
+    function getSelectedRole() {
+      const select = document.getElementById('workerRoleSelect');
+      if (select.value === 'CUSTOM') {
+        return document.getElementById('customRoleInput').value || 'Pekerja';
+      }
+      return select.value;
+    }
+
+    // Period Date Picker Helper
+    function updatePeriodFromDates() {
+      const startVal = document.getElementById('periodStart').value;
+      const endVal = document.getElementById('periodEnd').value;
+
+      if (startVal && endVal) {
+        const startDate = new Date(startVal);
+        const endDate = new Date(endVal);
+
+        const formatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+        const startFormatted = startDate.toLocaleDateString('id-ID', formatOptions);
+        const endFormatted = endDate.toLocaleDateString('id-ID', formatOptions);
+
+        document.getElementById('periodText').value = `${startFormatted} - ${endFormatted}`;
+      } else if (startVal) {
+        const startDate = new Date(startVal);
+        const formatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+        document.getElementById('periodText').value = startDate.toLocaleDateString('id-ID', formatOptions);
+      }
+      updateReceipt();
+    }
+
+    // Worker Templates (Daftar / Folder Pekerja)
+    function renderWorkerTemplateDropdown() {
+      const select = document.getElementById('workerTemplateSelect');
+      select.innerHTML = '<option value="">-- Pilih Nama Pekerja --</option>';
+      for (const name in workerTemplates) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.innerText = `${name} (${workerTemplates[name].role || 'Pekerja'})`;
+        select.appendChild(opt);
+      }
+    }
+
+    function saveWorkerTemplate() {
+      const name = document.getElementById('workerName').value.trim();
+      if (!name) {
+        alert('Tuliskan Nama Pekerja terlebih dahulu!');
+        return;
+      }
+      const role = getSelectedRole();
+
+      if (document.getElementById('workerRoleSelect').value === 'CUSTOM' && role) {
+        if (!customRoles.includes(role)) {
+          customRoles.push(role);
+          localStorage.setItem('customRoles', JSON.stringify(customRoles));
+          initRoleOptions();
+          document.getElementById('workerRoleSelect').value = role;
+          document.getElementById('customRoleInput').style.display = 'none';
+        }
+      }
+
+      workerTemplates[name] = {
+        name: name,
+        role: role,
+        incomeItems: JSON.parse(JSON.stringify(incomeItems)),
+        deductionItems: JSON.parse(JSON.stringify(deductionItems))
+      };
+
+      localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
+      renderWorkerTemplateDropdown();
+      document.getElementById('workerTemplateSelect').value = name;
+      alert(`Data pekerja "${name}" berhasil disimpan ke daftar template!`);
+    }
+
+    function loadWorkerTemplate(name) {
+      if (!name || !workerTemplates[name]) return;
+      const data = workerTemplates[name];
+      document.getElementById('workerName').value = data.name;
+
+      const select = document.getElementById('workerRoleSelect');
+      let found = false;
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === data.role) {
+          select.selectedIndex = i;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        select.value = 'CUSTOM';
+        document.getElementById('customRoleInput').style.display = 'block';
+        document.getElementById('customRoleInput').value = data.role;
+      } else {
+        document.getElementById('customRoleInput').style.display = 'none';
+      }
+
+      if (data.incomeItems) {
+        incomeItems = JSON.parse(JSON.stringify(data.incomeItems));
+      }
+      if (data.deductionItems) {
+        deductionItems = JSON.parse(JSON.stringify(data.deductionItems));
+      }
+
+      renderItemsInput();
+      updateReceipt();
+    }
+
+    function deleteWorkerTemplate() {
+      const select = document.getElementById('workerTemplateSelect');
+      const name = select.value;
+      if (!name || !workerTemplates[name]) {
+        alert('Pilih pekerja dari daftar yang ingin dihapus!');
+        return;
+      }
+      if (confirm(`Apakah Anda yakin ingin menghapus template pekerja "${name}"?`)) {
+        delete workerTemplates[name];
+        localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
+        renderWorkerTemplateDropdown();
+        alert(`Template "${name}" telah dihapus.`);
+      }
+    }
 
     function togglePreview() {
       const previewSec = document.querySelector('.preview-section');
@@ -1114,7 +1347,7 @@
       document.getElementById('prevWorker').innerText = worker;
       document.getElementById('prevSignWorker').innerText = `( ${worker} )`;
 
-      const role = document.getElementById('workerRole').value || '-';
+      const role = getSelectedRole();
       document.getElementById('prevRole').innerText = role;
 
       document.getElementById('prevPeriod').innerText = document.getElementById('periodText').value || '-';
