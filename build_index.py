@@ -6,21 +6,18 @@ with open("workers_data.json", "r", encoding="utf-8") as f:
 with open("rekap_data.json", "r", encoding="utf-8") as f:
     rekap_data = json.load(f)
 
-# Annotate payment status for each rekap entry
 for r in rekap_data:
     if r.get("hasilKg", 0) > 0 or (r.get("totalGaji") and r.get("totalGaji") != "-"):
         r["paymentStatus"] = "Belum Dibayarkan"
     else:
         r["paymentStatus"] = "Lunas"
 
-# Annotate payment status for workers based on rekap
 rekap_dict = {r["name"].lower(): r["paymentStatus"] for r in rekap_data}
 for w in workers_data:
     name_lower = w["name"].lower()
     if name_lower in rekap_dict:
         w["paymentStatus"] = rekap_dict[name_lower]
     else:
-        # Default active workers without rekap entry are ready for new slip
         w["paymentStatus"] = "Belum Dibayarkan"
 
 workers_json_str = json.dumps(workers_data, ensure_ascii=False)
@@ -282,14 +279,17 @@ html_template = """<!DOCTYPE html>
     /* Thermal Receipt Simulation (57mm / 58mm printer) */
     .receipt-container {
       width: 58mm;
+      max-width: 100%;
       background: #ffffff;
       box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-      padding: 3mm 2mm;
-      color: #000;
+      padding: 4mm 3mm;
+      color: #000000;
       font-family: 'Courier New', Courier, monospace;
       font-size: 11px;
-      line-height: 1.25;
-      border-radius: 4px;
+      line-height: 1.3;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      margin: 0 auto;
     }
 
     .receipt-center {
@@ -297,42 +297,49 @@ html_template = """<!DOCTYPE html>
     }
 
     .receipt-title {
-      font-size: 13px;
-      font-weight: bold;
+      font-size: 13.5px;
+      font-weight: 800;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin-bottom: 2px;
+      color: #0f172a;
     }
 
     .receipt-sub {
       font-size: 10px;
       margin-bottom: 2px;
+      color: #334155;
     }
 
     .divider {
-      border-top: 1px dashed #000;
-      margin: 5px 0;
+      border-top: 1px dashed #000000;
+      margin: 6px 0;
     }
 
     .receipt-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 2px;
-      word-break: break-all;
+      align-items: flex-start;
+      margin-bottom: 3px;
+      gap: 4px;
+      font-size: 10.5px;
     }
 
     .receipt-row.bold {
-      font-weight: bold;
+      font-weight: 800;
     }
 
     .receipt-row .label {
       text-align: left;
       flex: 1;
+      word-break: break-word;
+      color: #1e293b;
     }
 
     .receipt-row .val {
       text-align: right;
       white-space: nowrap;
-      margin-left: 4px;
+      color: #0f172a;
     }
 
     .receipt-table {
@@ -342,35 +349,38 @@ html_template = """<!DOCTYPE html>
     }
 
     .receipt-table td {
-      padding: 1px 0;
+      padding: 2px 0;
       vertical-align: top;
     }
 
     .receipt-table td.col-item {
       text-align: left;
       font-size: 10.5px;
+      color: #0f172a;
     }
 
     .receipt-table td.col-val {
       text-align: right;
       white-space: nowrap;
       font-size: 10.5px;
+      font-weight: 700;
+      color: #0f172a;
     }
 
     .signatures {
       display: flex;
       justify-content: space-between;
-      margin-top: 15px;
+      margin-top: 16px;
       text-align: center;
       font-size: 10px;
     }
 
     .sign-box {
-      width: 45%;
+      width: 48%;
     }
 
     .sign-space {
-      height: 35px;
+      height: 32px;
     }
 
     /* Database Pekerja Styles */
@@ -668,28 +678,28 @@ html_template = """<!DOCTYPE html>
       }
     }
 
-    /* Print Stylesheet */
+    /* Print Stylesheet for System Print & PDF */
     @media print {
       body * {
-        visibility: hidden;
+        visibility: hidden !important;
       }
       body {
-        background: transparent !important;
+        background: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
       }
-      .receipt-container, .receipt-container * {
-        visibility: visible;
+      #receiptPrintArea, #receiptPrintArea * {
+        visibility: visible !important;
       }
-      .receipt-container {
-        position: absolute;
-        left: 0;
-        top: 0;
+      #receiptPrintArea {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
         width: 58mm !important;
-        padding: 0 1mm !important;
+        margin: 0 auto !important;
+        padding: 2mm !important;
         box-shadow: none !important;
-        border-radius: 0 !important;
-        margin: 0 !important;
+        border: none !important;
       }
       @page {
         size: 58mm auto;
@@ -1478,7 +1488,7 @@ html_template = """<!DOCTYPE html>
             <td><span class="tag tag-category">${r.regu || '-'}</span></td>
             <td style="font-weight: 600;">${r.hasilKg || 0} kg</td>
             <td>Rp ${r.subTotal || '0'}</td>
-            <td style="color: #dc2626;">${r.kasbon || '-'}</td>
+            <td><span style="color: #dc2626;">${r.kasbon || '-'}</span></td>
             <td style="font-weight: 700; color: #16a34a;">${r.totalGaji || 'Rp 0'}</td>
             <td><span class="tag ${statusClass}">🟡 ${r.paymentStatus || 'Belum Dibayarkan'}</span></td>
             <td>
@@ -1496,54 +1506,151 @@ html_template = """<!DOCTYPE html>
       renderRekapTable();
     }
 
-    function syncWithGoogleSheets() {
-      alert('Memulai sinkronisasi data yang BELUM DIBAYARKAN dari Dasbor Gaji Google Sheets...');
+    function processParsedCsv(csvText) {
+      if (!csvText || csvText.trim().length === 0) {
+        alert('❌ Data dari Google Sheets tidak dapat diakses atau kosong.');
+        return;
+      }
 
-      const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
-      const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja`;
+      const lines = csvText.split('\\n');
+      let newWorkers = [];
+      lines.forEach(line => {
+        const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
+        if (fields.length >= 6) {
+          const no = fields[0];
+          const desc = fields[2];
+          const debit = fields[3];
+          const credit = fields[4];
+          const status = fields[5];
 
-      fetch(urlPekerja)
-        .then(res => res.text())
-        .then(csvText => {
-          const lines = csvText.split('\\n');
-          let newWorkers = [];
-          lines.forEach(line => {
-            const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
-            if (fields.length >= 8) {
-              const no = fields[1];
-              const name = fields[2];
-              const category = fields[3];
-              const regu = fields[4];
-              const schema = fields[5];
-              const status = fields[7];
-
-              if (/^\\d+$/.test(no) && name && isNaN(name)) {
+          if (desc && (desc.toLowerCase().includes('upah') || desc.toLowerCase().includes('gaji') || desc.toLowerCase().includes('borongan'))) {
+            const isUnpaid = (status && status.toLowerCase().includes('hutang')) || status === "Belum Dibayarkan" || !status;
+            if (isUnpaid) {
+              let cleanName = desc.replace(/^upah\\s+/i, '').replace(/^gaji\\s+/i, '').replace(/^borongan\\s+/i, '').trim();
+              if (cleanName.length > 2) {
                 newWorkers.push({
-                  no: parseInt(no),
-                  name: name,
-                  category: category,
-                  regu: regu || "-",
-                  schema: schema || "-",
-                  status: status || "Aktif",
+                  no: newWorkers.length + 1,
+                  name: cleanName,
+                  category: desc.toLowerCase().includes('pengawas') ? "Pengawas Lapangan" : "Borongan Pemetik",
+                  regu: "-",
+                  schema: desc.toLowerCase().includes('pengawas') ? "Harian" : "Borongan",
+                  status: "Aktif",
                   paymentStatus: "Belum Dibayarkan"
                 });
               }
             }
-          });
-
-          if (newWorkers.length > 0) {
-            workersData = newWorkers;
-            localStorage.setItem('workersData', JSON.stringify(workersData));
-            renderWorkerGrid();
-            renderWorkerTemplateDropdown();
-            alert(`✅ Sinkronisasi berhasil! Memuat ${newWorkers.length} data pekerja (Status: Belum Dibayarkan) dari Google Sheets.`);
-          } else {
-            alert('Sinkronisasi selesai: Data sudah paling mutakhir.');
           }
-        })
-        .catch(err => {
-          alert('Gagal sinkronisasi Google Sheets (cek koneksi internet): ' + err.message);
+        }
+      });
+
+      if (newWorkers.length > 0) {
+        workersData = newWorkers;
+        localStorage.setItem('workersData', JSON.stringify(workersData));
+        renderWorkerGrid();
+        renderWorkerTemplateDropdown();
+        alert(`✅ Sinkronisasi Dasbor Gaji Berhasil! Memuat ${newWorkers.length} data tagihan yang BELUM DIBAYARKAN dari Google Sheets.`);
+      } else {
+        alert('ℹ️ Sinkronisasi Dasbor Gaji Selesai: Semua tagihan terdeteksi sudah Lunas!');
+      }
+    }
+
+    function syncWithGoogleSheets() {
+      alert('Memulai sinkronisasi Dasbor Gaji (Hanya Belum Dibayarkan) dari Google Sheets...');
+
+      const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
+      const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja`;
+      const urlPemetik = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Pembayaran%20Pemetik`;
+
+      function performSync() {
+        let csvPekerja = "";
+        let csvPemetik = "";
+
+        if (typeof AndroidPrint !== 'undefined' && AndroidPrint.fetchUrlText) {
+          csvPekerja = AndroidPrint.fetchUrlText(urlPekerja);
+          csvPemetik = AndroidPrint.fetchUrlText(urlPemetik);
+        }
+
+        if (!csvPekerja || csvPekerja.trim().length === 0) {
+          alert('❌ Gagal sinkronisasi: Tidak dapat mengakses data Google Sheets. Cek koneksi internet.');
+          return;
+        }
+
+        let linesP = csvPekerja.split('\\n');
+        let newWorkers = [];
+        linesP.forEach(line => {
+          const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
+          if (fields.length >= 8) {
+            const no = fields[1];
+            const name = fields[2];
+            const category = fields[3];
+            const regu = fields[4];
+            const schema = fields[5];
+            const status = fields[7];
+
+            if (/^\\d+$/.test(no) && name && isNaN(name)) {
+              newWorkers.push({
+                no: parseInt(no),
+                name: name,
+                category: category,
+                regu: regu || "-",
+                schema: schema || "-",
+                status: status || "Aktif",
+                paymentStatus: "Belum Dibayarkan"
+              });
+            }
+          }
         });
+
+        let newRekap = [];
+        if (csvPemetik && csvPemetik.trim().length > 0) {
+          let linesM = csvPemetik.split('\\n');
+          linesM.forEach(line => {
+            const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
+            if (fields.length >= 8) {
+              const no = fields[1];
+              const name = fields[2];
+              const regu = fields[3];
+              const hasilKg = fields[4];
+              const subTotal = fields[5];
+              const kasbon = fields[6];
+              const totalGaji = fields[7];
+
+              if (/^\\d+$/.test(no) && name) {
+                const kgVal = parseFloat(hasilKg) || 0;
+                const statusVal = (kgVal > 0 || (totalGaji && totalGaji !== "-")) ? "Belum Dibayarkan" : "Lunas";
+                newRekap.push({
+                  no: parseInt(no),
+                  name: name,
+                  regu: regu,
+                  hasilKg: kgVal,
+                  subTotal: subTotal || "0",
+                  kasbon: kasbon || "-",
+                  totalGaji: totalGaji || "Rp 0",
+                  paymentStatus: statusVal
+                });
+              }
+            }
+          });
+        }
+
+        if (newWorkers.length > 0) {
+          workersData = newWorkers;
+          localStorage.setItem('workersData', JSON.stringify(workersData));
+        }
+        if (newRekap.length > 0) {
+          rekapData = newRekap;
+          localStorage.setItem('rekapData', JSON.stringify(rekapData));
+        }
+
+        renderWorkerGrid();
+        renderRekapTable();
+        renderWorkerTemplateDropdown();
+
+        let unpaidCount = workersData.filter(w => w.paymentStatus === 'Belum Dibayarkan').length;
+        alert(`✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: \${workersData.length} orang\\n• Status Belum Dibayarkan: \${unpaidCount} orang\\n\\nData ter-update langsung dari Google Sheets!`);
+      }
+
+      setTimeout(performSync, 100);
     }
 
     function checkBtStatusOnLoad() {
@@ -1799,7 +1906,7 @@ html_template = """<!DOCTYPE html>
       }
     }
 
-    // Direct ESC/POS Thermal Printing
+    // Direct ESC/POS Thermal Printing (Clean 32-column alignment)
     function generateEscPosBytes() {
       let bytes = [];
 
@@ -1828,8 +1935,14 @@ html_template = """<!DOCTYPE html>
       bytes.push(0x1B, 0x61, 0x00);
 
       function addRow(label, val) {
-        let l = label || "";
-        let r = val || "";
+        let l = (label || "").trim();
+        let r = (val || "").trim();
+        let maxLabelLen = 32 - r.length - 1;
+        if (maxLabelLen < 4) maxLabelLen = 4;
+        if (l.length > maxLabelLen) {
+          pushString(l + "\\n");
+          l = "";
+        }
         let spaces = 32 - (l.length + r.length);
         if (spaces < 1) spaces = 1;
         pushString(l + " ".repeat(spaces) + r + "\\n");
@@ -1897,9 +2010,15 @@ html_template = """<!DOCTYPE html>
       pushString("--------------------------------\\n");
 
       // Signatures
-      pushString("Penerima               Pengesah \\n\\n\\n");
+      pushString("Penerima,              Pengesah,\\n\\n\\n");
       const pic = document.getElementById('picName').value || 'Koperasi';
-      addRow(`(${worker.substring(0, 12)})`, `(${pic.substring(0, 12)})`);
+      let wSign = worker.length > 14 ? worker.substring(0, 14) : worker;
+      let pSign = pic.length > 14 ? pic.substring(0, 14) : pic;
+      let leftStr = "(" + wSign + ")";
+      let rightStr = "(" + pSign + ")";
+      let signSpaces = 32 - (leftStr.length + rightStr.length);
+      if (signSpaces < 1) signSpaces = 1;
+      pushString(leftStr + " ".repeat(signSpaces) + rightStr + "\\n");
 
       pushString("--------------------------------\\n");
 

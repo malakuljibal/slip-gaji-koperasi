@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.OutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
@@ -36,11 +38,14 @@ class MainActivity : AppCompatActivity() {
 
         webView = findViewById(R.id.webView)
 
+        @Suppress("DEPRECATION")
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
+            allowFileAccessFromFileURLs = true
+            allowUniversalAccessFromFileURLs = true
             useWideViewPort = true
             loadWithOverviewMode = true
         }
@@ -85,6 +90,35 @@ class MainActivity : AppCompatActivity() {
 
         private var bluetoothSocket: BluetoothSocket? = null
         private var outputStream: OutputStream? = null
+
+        @JavascriptInterface
+        fun fetchUrlText(urlStr: String): String {
+            return try {
+                val url = URL(urlStr)
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "GET"
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0")
+                conn.connectTimeout = 12000
+                conn.readTimeout = 12000
+                conn.instanceFollowRedirects = true
+                if (conn.responseCode == 200 || conn.responseCode == 302) {
+                    val stream = if (conn.responseCode == 302) {
+                        val redirectUrl = conn.getHeaderField("Location")
+                        val redir = URL(redirectUrl).openConnection() as HttpURLConnection
+                        redir.setRequestProperty("User-Agent", "Mozilla/5.0")
+                        redir.inputStream
+                    } else {
+                        conn.inputStream
+                    }
+                    stream.bufferedReader().use { it.readText() }
+                } else {
+                    ""
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ""
+            }
+        }
 
         @JavascriptInterface
         fun printPage() {
@@ -132,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                 try {
                     disconnectBluetooth()
                     val device = bluetoothAdapter.getRemoteDevice(address)
-                    val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP UUID
+                    val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
                     bluetoothAdapter.cancelDiscovery()
                     val socket = device.createRfcommSocketToServiceRecord(uuid)
                     socket.connect()
