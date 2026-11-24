@@ -331,6 +331,124 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
 
+    /* Modal & Calculator Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: #cbd5e1;
+    }
+
+    .modal-body {
+      padding: 1.25rem;
+    }
+
+    .calc-summary-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .calc-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.85rem;
+      margin-top: 1.25rem;
+    }
+
+    .calc-box-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .calc-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      color: #334155;
+    }
+
+    .calc-item.bold {
+      font-weight: 700;
+    }
+
+    .calc-divider {
+      border-top: 1px dashed #93c5fd;
+      margin: 0.5rem 0;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+
+    .calc-btn {
+      padding: 0.75rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    .calc-btn:active {
+      background: #e2e8f0;
+    }
+
     @media (max-width: 900px) {
       header {
         flex-direction: column;
@@ -405,7 +523,10 @@
         <h1>Slip Pembayaran Pekerja</h1>
         <span class="badge">Thermal 57x30 / 58mm</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="openBluetoothModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
+          📶 Printer Bluetooth
+        </button>
         <button class="btn btn-secondary" id="togglePreviewBtn" onclick="togglePreview()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
           👁️ <span id="toggleText">Sembunyikan Preview</span>
         </button>
@@ -474,6 +595,12 @@
         <button class="btn btn-secondary" onclick="addIncomeItem()">+ Tambah Baris</button>
       </div>
       <div id="incomeItemsContainer"></div>
+      <div class="calc-summary-card">
+        <div class="calc-row">
+          <span>Subtotal Pendapatan (+):</span>
+          <strong id="editorTotalIncome" style="color: #16a34a;">Rp 0</strong>
+        </div>
+      </div>
 
       <!-- Potongan / Kasbon -->
       <div class="section-title" style="margin-top: 1.25rem;">
@@ -481,6 +608,35 @@
         <button class="btn btn-secondary" onclick="addDeductionItem()">+ Tambah Baris</button>
       </div>
       <div id="deductionItemsContainer"></div>
+      <div class="calc-summary-card">
+        <div class="calc-row">
+          <span>Subtotal Potongan / Kasbon (-):</span>
+          <strong id="editorTotalDeduction" style="color: #ef4444;">-Rp 0</strong>
+        </div>
+      </div>
+
+      <!-- Ringkasan Kalkulator Otomatis Gaji -->
+      <div class="calc-box">
+        <div class="calc-box-title">
+          <span>🧮 Kalkulator Ringkasan Gaji</span>
+          <button class="btn btn-secondary" onclick="openCalcModal()" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+            🧮 Buka Kalkulator Hitung
+          </button>
+        </div>
+        <div class="calc-item">
+          <span>Total Pendapatan (+)</span>
+          <span id="sumIncome" style="color: #16a34a; font-weight: 600;">Rp 0</span>
+        </div>
+        <div class="calc-item">
+          <span>Total Potongan / Kasbon (-)</span>
+          <span id="sumDeduction" style="color: #dc2626; font-weight: 600;">-Rp 0</span>
+        </div>
+        <div class="calc-divider"></div>
+        <div class="calc-item bold">
+          <span>Gaji Bersih / Total Diterima (=)</span>
+          <span id="sumGrandTotal" style="color: #2563eb; font-size: 1.05rem;">Rp 0</span>
+        </div>
+      </div>
 
       <!-- Pembayaran & Tanda Tangan -->
       <div class="section-title" style="margin-top: 1.25rem;">
@@ -611,6 +767,72 @@
     </div>
   </div>
 
+  <!-- Modal Bluetooth Settings -->
+  <div id="btModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📶 Koneksi Printer Bluetooth</h3>
+        <span class="close-btn" onclick="closeBluetoothModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.75rem;">
+          Pilih printer thermal Bluetooth yang sudah terpasang (paired) di HP Anda:
+        </p>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <select id="btDeviceSelect" style="flex: 1;">
+            <option value="">-- Cari / Pilih Perangkat --</option>
+          </select>
+          <button class="btn btn-secondary" onclick="loadBtDevices()">🔄 Cari</button>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary" onclick="connectBtDevice()" style="flex: 1; justify-content: center;">
+            🔗 Hubungkan
+          </button>
+          <button class="btn btn-danger" onclick="disconnectBtDevice()" style="flex: 1; justify-content: center;">
+            🔌 Putus Koneksi
+          </button>
+        </div>
+        <div id="btStatus" style="margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; text-align: center; min-height: 1.5rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Kalkulator -->
+  <div id="calcModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 320px;">
+      <div class="modal-header">
+        <h3>🧮 Kalkulator Hitung Gaji</h3>
+        <span class="close-btn" onclick="closeCalcModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="calcDisplay" value="0" readonly style="font-size: 1.35rem; text-align: right; margin-bottom: 0.75rem; font-weight: bold; background: #f8fafc;">
+        <div class="calc-grid">
+          <button class="calc-btn btn-danger" onclick="calcClear()">C</button>
+          <button class="calc-btn" onclick="calcOp('/')">÷</button>
+          <button class="calc-btn" onclick="calcOp('*')">×</button>
+          <button class="calc-btn" onclick="calcOp('-')">-</button>
+
+          <button class="calc-btn" onclick="calcNum('7')">7</button>
+          <button class="calc-btn" onclick="calcNum('8')">8</button>
+          <button class="calc-btn" onclick="calcNum('9')">9</button>
+          <button class="calc-btn" onclick="calcOp('+')">+</button>
+
+          <button class="calc-btn" onclick="calcNum('4')">4</button>
+          <button class="calc-btn" onclick="calcNum('5')">5</button>
+          <button class="calc-btn" onclick="calcNum('6')">6</button>
+          <button class="calc-btn btn-primary" onclick="calcEqual()" style="grid-row: span 2; display: flex; align-items: center; justify-content: center;">=</button>
+
+          <button class="calc-btn" onclick="calcNum('1')">1</button>
+          <button class="calc-btn" onclick="calcNum('2')">2</button>
+          <button class="calc-btn" onclick="calcNum('3')">3</button>
+
+          <button class="calc-btn" onclick="calcNum('0')" style="grid-column: span 2;">0</button>
+          <button class="calc-btn" onclick="calcNum('000')">000</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State items
     let incomeItems = [
@@ -676,6 +898,121 @@
         previewSec.classList.remove('hidden');
         tabEdit.classList.remove('active');
         tabPreview.classList.add('active');
+      }
+    }
+
+    // Bluetooth Printer Functions
+    function openBluetoothModal() {
+      document.getElementById('btModal').style.display = 'flex';
+      loadBtDevices();
+    }
+
+    function closeBluetoothModal() {
+      document.getElementById('btModal').style.display = 'none';
+    }
+
+    function loadBtDevices() {
+      const select = document.getElementById('btDeviceSelect');
+      const status = document.getElementById('btStatus');
+      select.innerHTML = '<option value="">-- Pilih Perangkat Bluetooth --</option>';
+
+      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.getPairedBluetoothDevices) {
+        try {
+          const jsonStr = AndroidPrint.getPairedBluetoothDevices();
+          const devices = JSON.parse(jsonStr);
+          if (devices.length === 0) {
+            status.innerText = 'Belum ada printer Bluetooth terpasang. Pastikan sudah di-pair di Pengaturan HP.';
+            status.style.color = '#ef4444';
+          } else {
+            devices.forEach(d => {
+              const opt = document.createElement('option');
+              opt.value = d.address;
+              opt.innerText = `${d.name} (${d.address})`;
+              select.appendChild(opt);
+            });
+            status.innerText = `Ditemukan ${devices.length} perangkat Bluetooth terpasang.`;
+            status.style.color = '#10b981';
+          }
+        } catch (e) {
+          status.innerText = 'Gagal memuat list Bluetooth: ' + e.message;
+          status.style.color = '#ef4444';
+        }
+      } else {
+        status.innerText = 'Pencarian Bluetooth siap digunakan pada aplikasi Android.';
+        status.style.color = '#64748b';
+      }
+    }
+
+    function connectBtDevice() {
+      const address = document.getElementById('btDeviceSelect').value;
+      const status = document.getElementById('btStatus');
+      if (!address) {
+        alert('Silakan pilih perangkat Bluetooth terlebih dahulu!');
+        return;
+      }
+      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.connectBluetoothDevice) {
+        status.innerText = 'Menghubungkan ke printer...';
+        status.style.color = '#f59e0b';
+        setTimeout(() => {
+          const ok = AndroidPrint.connectBluetoothDevice(address);
+          if (ok) {
+            status.innerText = '✅ Terhubung ke printer Bluetooth (' + address + ')';
+            status.style.color = '#10b981';
+          } else {
+            status.innerText = '❌ Gagal terhubung ke printer.';
+            status.style.color = '#ef4444';
+          }
+        }, 300);
+      }
+    }
+
+    function disconnectBtDevice() {
+      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.disconnectBluetooth) {
+        AndroidPrint.disconnectBluetooth();
+        const status = document.getElementById('btStatus');
+        status.innerText = 'Koneksi Bluetooth diputus.';
+        status.style.color = '#ef4444';
+      }
+    }
+
+    // Interactive Calculator
+    let calcExpr = "";
+    function openCalcModal() {
+      calcExpr = "0";
+      document.getElementById('calcDisplay').value = "0";
+      document.getElementById('calcModal').style.display = 'flex';
+    }
+
+    function closeCalcModal() {
+      document.getElementById('calcModal').style.display = 'none';
+    }
+
+    function calcNum(n) {
+      if (calcExpr === "0" || calcExpr === "Error") calcExpr = "";
+      calcExpr += n;
+      document.getElementById('calcDisplay').value = calcExpr;
+    }
+
+    function calcOp(op) {
+      if (calcExpr === "Error") calcExpr = "0";
+      calcExpr += " " + op + " ";
+      document.getElementById('calcDisplay').value = calcExpr;
+    }
+
+    function calcClear() {
+      calcExpr = "0";
+      document.getElementById('calcDisplay').value = "0";
+    }
+
+    function calcEqual() {
+      try {
+        const sanitized = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
+        const res = Function('"use strict";return (' + sanitized + ')')();
+        calcExpr = res.toString();
+        document.getElementById('calcDisplay').value = formatRupiah(res) + " (" + res + ")";
+      } catch (e) {
+        calcExpr = "Error";
+        document.getElementById('calcDisplay').value = "Error";
       }
     }
 
@@ -823,6 +1160,16 @@
       }
 
       const grandTotal = totalIncome - totalDeduction;
+
+      // Update Form Editor Calculation Badges & Summary
+      document.getElementById('editorTotalIncome').innerText = formatRupiah(totalIncome);
+      document.getElementById('editorTotalDeduction').innerText = "-" + formatRupiah(totalDeduction);
+
+      document.getElementById('sumIncome').innerText = formatRupiah(totalIncome);
+      document.getElementById('sumDeduction').innerText = "-" + formatRupiah(totalDeduction);
+      document.getElementById('sumGrandTotal').innerText = formatRupiah(grandTotal);
+
+      // Update Receipt Preview Total
       document.getElementById('prevTotal').innerText = formatRupiah(grandTotal);
     }
 
