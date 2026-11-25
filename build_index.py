@@ -719,6 +719,9 @@ html_template = """<!DOCTYPE html>
         <span class="badge">Thermal 57x30 / 58mm</span>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="openRatesModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem; background: #3b82f6; color: white;">
+          ⚙️ Kelola Tarif
+        </button>
         <button class="btn btn-secondary" onclick="openBluetoothModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
           Printer Bluetooth
         </button>
@@ -1120,6 +1123,55 @@ html_template = """<!DOCTYPE html>
 
   </div>
 
+  <!-- Modal Settings Tarif Pokok / Gaji Bawaan -->
+  <div id="ratesModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>⚙️ Pengaturan Tarif Pokok / Gaji Per Hari</h3>
+        <span class="close-btn" onclick="closeRatesModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.85rem;">
+          Atur default tarif/hari dan tarif/kg untuk setiap jabatan/peran. Angka ini juga tersinkronisasi dari Google Sheets:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+          <div>
+            <label style="font-size: 0.78rem;">Pengawas Lapangan (Rp/hari)</label>
+            <input type="number" id="input_rate_pengawas_lapangan" value="150000">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem;">Pengawas Cudai (Rp/hari)</label>
+            <input type="number" id="input_rate_pengawas_cudai" value="120000">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem;">Penjemur (Rp/hari)</label>
+            <input type="number" id="input_rate_penjemur" value="100000">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem;">Pengawas Malam (Rp/hari)</label>
+            <input type="number" id="input_rate_pengawas_malam" value="100000">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem;">Pengawas Koperasi (Rp/hari)</label>
+            <input type="number" id="input_rate_pengawas_koperasi" value="150000">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem;">Borongan Petik (Rp/kg)</label>
+            <input type="number" id="input_rate_borongan_petik" value="7000">
+          </div>
+        </div>
+        <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary" onclick="saveCustomRates()" style="flex: 1; justify-content: center;">
+            Simpan Tarif Pokok
+          </button>
+          <button class="btn btn-secondary" onclick="resetDefaultRates()" style="flex: 1; justify-content: center;">
+            Reset Bawaan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Bluetooth Settings -->
   <div id="btModal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -1221,7 +1273,7 @@ html_template = """<!DOCTYPE html>
     let pengawasRole = "Pengawas Lapangan";
 
     let incomeItems = [
-      { desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: roleRates["Pengawas Lapangan"] || 150000, amount: 7 * (roleRates["Pengawas Lapangan"] || 150000) }
+      { desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: getRoleRate("Pengawas Lapangan"), amount: 7 * getRoleRate("Pengawas Lapangan") }
     ];
 
     let deductionItems = [
@@ -1252,7 +1304,59 @@ html_template = """<!DOCTYPE html>
     };
 
     function getRoleRate(roleName) {
-      return roleRates[roleName] || defaultRoleRates[roleName] || 100000;
+      if (roleRates && roleRates[roleName] && roleRates[roleName] > 0) {
+        return roleRates[roleName];
+      }
+      return defaultRoleRates[roleName] || 100000;
+    }
+
+    function openRatesModal() {
+      document.getElementById('input_rate_pengawas_lapangan').value = getRoleRate("Pengawas Lapangan");
+      document.getElementById('input_rate_pengawas_cudai').value = getRoleRate("Pengawas Cudai");
+      document.getElementById('input_rate_penjemur').value = getRoleRate("Penjemur");
+      document.getElementById('input_rate_pengawas_malam').value = getRoleRate("Pengawas Malam");
+      document.getElementById('input_rate_pengawas_koperasi').value = getRoleRate("Pengawas Koperasi");
+      document.getElementById('input_rate_borongan_petik').value = getRoleRate("Borongan Petik");
+      document.getElementById('ratesModal').style.display = 'flex';
+    }
+
+    function closeRatesModal() {
+      document.getElementById('ratesModal').style.display = 'none';
+    }
+
+    function saveCustomRates() {
+      roleRates["Pengawas Lapangan"] = parseInt(document.getElementById('input_rate_pengawas_lapangan').value) || 150000;
+      roleRates["Pengawas Cudai"] = parseInt(document.getElementById('input_rate_pengawas_cudai').value) || 120000;
+      roleRates["Penjemur"] = parseInt(document.getElementById('input_rate_penjemur').value) || 100000;
+      roleRates["Pengawas Malam"] = parseInt(document.getElementById('input_rate_pengawas_malam').value) || 100000;
+      roleRates["Pengawas Koperasi"] = parseInt(document.getElementById('input_rate_pengawas_koperasi').value) || 150000;
+
+      let pRate = parseInt(document.getElementById('input_rate_borongan_petik').value) || 7000;
+      roleRates["Borongan Petik"] = pRate;
+      roleRates["Borongan Cudai"] = pRate;
+      savedTarif = pRate;
+
+      localStorage.setItem('roleRates', JSON.stringify(roleRates));
+      localStorage.setItem('tarifBorongan', savedTarif);
+
+      closeRatesModal();
+
+      if (workerCategory === "Pengawas") {
+        handlePengawasRoleChange(pengawasRole);
+      } else {
+        handleBoronganTypeChange(boronganType);
+      }
+      alert('✅ Tarif pokok berhasil disimpan dan diperbarui!');
+    }
+
+    function resetDefaultRates() {
+      roleRates = JSON.parse(JSON.stringify(defaultRoleRates));
+      localStorage.setItem('roleRates', JSON.stringify(roleRates));
+      savedTarif = 7000;
+      localStorage.setItem('tarifBorongan', 7000);
+      closeRatesModal();
+      handleCategoryChange(workerCategory);
+      alert('Tarif dikembalikan ke standar bawaan.');
     }
 
     function prepareAndPrintSystem() {
@@ -1577,17 +1681,22 @@ html_template = """<!DOCTYPE html>
           return;
         }
 
-        // Scan text for role rate definitions across sheets
+        // Scan text for role rate definitions in CSV
         const combinedText = csvPekerja + "\n" + csvPemetik;
-        const rolesToScan = ["Pengawas Lapangan", "Pengawas Cudai", "Penjemur", "Pengawas Malam", "Pengawas Koperasi", "Borongan Petik", "Borongan Cudai"];
-        rolesToScan.forEach(rName => {
-          const rLower = rName.toLowerCase();
-          const regex = new RegExp(rLower + "[^0-9\\n\\r]{1,25}(?:rp)?\\s*([0-9.,]+)", "i");
-          const match = combinedText.match(regex);
-          if (match && match[1]) {
-            let parsed = parseInt(match[1].replace(/\\./g, '').replace(/,/g, ''));
-            if (parsed > 1000) {
-              roleRates[rName] = parsed;
+        const linesAll = combinedText.split('\\n');
+        linesAll.forEach(line => {
+          const lLower = line.toLowerCase();
+          for (let rName in defaultRoleRates) {
+            if (lLower.includes(rName.toLowerCase())) {
+              const nums = line.match(/(?:rp)?\\s*([0-9]{1,3}(?:\\.[0-9]{3})+|[0-9]{4,6})/gi);
+              if (nums) {
+                nums.forEach(nStr => {
+                  let p = parseInt(nStr.replace(/[^0-9]/g, ''));
+                  if (p >= 5000 && p <= 1000000) {
+                    roleRates[rName] = p;
+                  }
+                });
+              }
             }
           }
         });
@@ -1688,8 +1797,14 @@ html_template = """<!DOCTYPE html>
         renderRekapTable();
         renderWorkerTemplateDropdown();
 
+        if (workerCategory === "Pengawas") {
+          handlePengawasRoleChange(pengawasRole);
+        } else {
+          handleBoronganTypeChange(boronganType);
+        }
+
         let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Tarif Borongan: Rp " + (roleRates["Borongan Petik"] || 7000) + "/kg\\n• Periode: " + savedPeriode + "\\n\\nData ter-update langsung dari Google Sheets!");
+        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Tarif Pengawas Lapangan: Rp " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\\n• Tarif Pengawas Cudai: Rp " + formatRupiah(getRoleRate("Pengawas Cudai")) + "\\n• Tarif Pengawas Malam/Penjemur: Rp " + formatRupiah(getRoleRate("Pengawas Malam")) + "\\n• Periode: " + savedPeriode + "\\n\\nData ter-update langsung dari Google Sheets!");
       }
 
       setTimeout(performSync, 100);
