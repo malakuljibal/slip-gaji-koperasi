@@ -680,16 +680,21 @@ html_template = """<!DOCTYPE html>
 
     /* Print Stylesheet for System Print & PDF */
     @media print {
+      html, body {
+        width: 58mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+      }
       body > *:not(#printableReceiptContainer) {
         display: none !important;
       }
       #printableReceiptContainer {
         display: block !important;
         visibility: visible !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
         width: 58mm !important;
+        max-width: 58mm !important;
+        margin: 0 auto !important;
         padding: 3mm 2mm !important;
         background: #ffffff !important;
         color: #000000 !important;
@@ -702,7 +707,7 @@ html_template = """<!DOCTYPE html>
       }
       @page {
         size: 58mm auto;
-        margin: 0;
+        margin: 0mm;
       }
     }
   </style>
@@ -2095,21 +2100,23 @@ html_template = """<!DOCTYPE html>
       // Left Align for Details
       bytes.push(0x1B, 0x61, 0x00);
 
-      function addRow(label, val) {
-        let l = (label || "").trim();
-        let r = (val || "").trim();
-        let maxLabelLen = 32 - r.length - 1;
-        if (maxLabelLen < 4) maxLabelLen = 4;
-        if (l.length > maxLabelLen) {
-          pushString(l + "\\n");
-          l = "";
+      function addKeyValue(key, val) {
+        let k = (key || "").trim();
+        let v = (val || "").trim();
+        if (k.length + v.length + 1 <= 32) {
+          let spaces = 32 - (k.length + v.length);
+          pushString(k + " ".repeat(spaces) + v + "\\n");
+        } else {
+          pushString(k + ":\\n");
+          if (v.length <= 30) {
+            pushString("  " + v + "\\n");
+          } else {
+            pushString("  " + v.substring(0, 30) + "\\n");
+          }
         }
-        let spaces = 32 - (l.length + r.length);
-        if (spaces < 1) spaces = 1;
-        pushString(l + " ".repeat(spaces) + r + "\\n");
       }
 
-      addRow("No.Bukti", document.getElementById('refNo').value || '-');
+      addKeyValue("No.Bukti", document.getElementById('refNo').value || '-');
 
       const dateVal = document.getElementById('payDate').value;
       let dateStr = '-';
@@ -2117,16 +2124,16 @@ html_template = """<!DOCTYPE html>
         const parts = dateVal.split('-');
         dateStr = `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
-      addRow("Tanggal", dateStr);
+      addKeyValue("Tanggal", dateStr);
 
       const worker = document.getElementById('workerName').value || 'Nama Pekerja';
-      addRow("Pekerja", worker);
+      addKeyValue("Pekerja", worker);
 
       const role = getSelectedRole();
-      addRow("Jabatan", role);
+      addKeyValue("Jabatan", role);
 
       const period = document.getElementById('periodText').value || '-';
-      addRow("Periode", period);
+      addKeyValue("Periode", period);
 
       pushString("--------------------------------\\n");
 
@@ -2138,36 +2145,67 @@ html_template = """<!DOCTYPE html>
       let totalIncome = 0;
       incomeItems.forEach(item => {
         totalIncome += (item.amount || 0);
-        addRow(item.desc || 'Item', formatRupiah(item.amount));
+        let name = item.desc || 'Pendapatan';
+        let amtStr = formatRupiah(item.amount);
+
+        pushString(name + "\\n");
+
+        let subDetail = "";
         if (item.type === 'borongan' || (item.weightKg !== undefined && item.pricePerKg !== undefined)) {
-          pushString(`  (${item.weightKg || 0} kg x @${formatRupiah(item.pricePerKg || 0)})\\n`);
+          subDetail = `  ${item.weightKg || 0} kg x @${formatRupiah(item.pricePerKg || 0)}`;
         } else if (item.type === 'harian' || (item.workDays !== undefined && item.dailyRate !== undefined)) {
-          pushString(`  (${item.workDays || 0} hari x @${formatRupiah(item.dailyRate || 0)})\\n`);
+          subDetail = `  ${item.workDays || 0} hari x @${formatRupiah(item.dailyRate || 0)}`;
+        } else {
+          subDetail = `  Nominal Tetap`;
+        }
+
+        if (subDetail.length + amtStr.length + 1 <= 32) {
+          let sp = 32 - (subDetail.length + amtStr.length);
+          pushString(subDetail + " ".repeat(sp) + amtStr + "\\n");
+        } else {
+          pushString(subDetail + "\\n");
+          let sp = 32 - amtStr.length;
+          pushString(" ".repeat(sp) + amtStr + "\\n");
         }
       });
 
       // Deduction Items
       let totalDeductions = 0;
       if (deductionItems.length > 0) {
+        pushString("--------------------------------\\n");
         bytes.push(0x1B, 0x45, 0x01);
         pushString("POTONGAN / KASBON:\\n");
         bytes.push(0x1B, 0x45, 0x00);
 
         deductionItems.forEach(item => {
           totalDeductions += (item.amount || 0);
-          addRow(item.desc || 'Potongan', "-" + formatRupiah(item.amount));
+          let dName = item.desc || 'Potongan';
+          let dAmtStr = "-" + formatRupiah(item.amount);
+
+          if (dName.length + dAmtStr.length + 1 <= 32) {
+            let sp = 32 - (dName.length + dAmtStr.length);
+            pushString(dName + " ".repeat(sp) + dAmtStr + "\\n");
+          } else {
+            pushString(dName + "\\n");
+            let sp = 32 - dAmtStr.length;
+            pushString(" ".repeat(sp) + dAmtStr + "\\n");
+          }
         });
       }
 
       pushString("--------------------------------\\n");
 
-      // Total
+      // Total Diterima
       bytes.push(0x1B, 0x45, 0x01);
       const grandTotal = totalIncome - totalDeductions;
-      addRow("TOTAL DITERIMA", formatRupiah(grandTotal));
+      let totStr = "TOTAL DITERIMA";
+      let totAmt = formatRupiah(grandTotal);
+      let totSp = 32 - (totStr.length + totAmt.length);
+      if (totSp < 1) totSp = 1;
+      pushString(totStr + " ".repeat(totSp) + totAmt + "\\n");
       bytes.push(0x1B, 0x45, 0x00);
 
-      addRow("Metode", document.getElementById('paymentMethod').value);
+      addKeyValue("Metode", document.getElementById('paymentMethod').value);
       pushString("--------------------------------\\n");
 
       // Signatures
@@ -2183,7 +2221,7 @@ html_template = """<!DOCTYPE html>
 
       pushString("--------------------------------\\n");
 
-      // Center Footer Note
+      // Footer
       bytes.push(0x1B, 0x61, 0x01);
       pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\\n");
       pushString("--- Simpan bukti ini ---\\n\\n\\n\\n");
