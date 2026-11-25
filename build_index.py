@@ -803,7 +803,10 @@ html_template = """<!DOCTYPE html>
 
         <!-- Sub-Kategori Pengawas / Harian -->
         <div class="form-group" id="pengawasSubGroup" style="display: block;">
-          <label>Jabatan / Peran Pengawas</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <label style="margin-bottom: 0;">Jabatan / Peran Pengawas</label>
+            <span id="roleRateDisplayBadge" style="font-size: 0.72rem; color: #1e40af; font-weight: 700; background: #dbeafe; padding: 0.15rem 0.45rem; border-radius: 4px;">Tarif: Rp 150.000/hari</span>
+          </div>
           <select id="pengawasRoleSelect" onchange="handlePengawasRoleChange(this.value)">
             <option value="Pengawas Lapangan">Pengawas Lapangan</option>
             <option value="Pengawas Cudai">Pengawas Cudai</option>
@@ -815,7 +818,10 @@ html_template = """<!DOCTYPE html>
 
         <!-- Sub-Kategori Borongan -->
         <div class="form-group" id="boronganSubGroup" style="display: none;">
-          <label>Jenis Borongan</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <label style="margin-bottom: 0;">Jenis Borongan</label>
+            <span id="boronganRateDisplayBadge" style="font-size: 0.72rem; color: #92400e; font-weight: 700; background: #fef3c7; padding: 0.15rem 0.45rem; border-radius: 4px;">Tarif: Rp 7.000/kg</span>
+          </div>
           <select id="boronganTypeSelect" onchange="handleBoronganTypeChange(this.value)">
             <option value="Borongan Petik">Borongan Petik</option>
             <option value="Borongan Cudai">Borongan Cudai</option>
@@ -1192,9 +1198,21 @@ html_template = """<!DOCTYPE html>
     let defaultWorkersData = WORKERS_JSON_PLACEHOLDER;
     let defaultRekapData = REKAP_JSON_PLACEHOLDER;
 
+    let defaultRoleRates = {
+      "Pengawas Lapangan": 150000,
+      "Pengawas Cudai": 120000,
+      "Penjemur": 100000,
+      "Pengawas Malam": 100000,
+      "Pengawas Koperasi": 150000,
+      "Borongan Petik": 7000,
+      "Borongan Cudai": 7000
+    };
+
     let workersData = JSON.parse(localStorage.getItem('workersData') || 'null') || defaultWorkersData;
     let rekapData = JSON.parse(localStorage.getItem('rekapData') || 'null') || defaultRekapData;
-    let savedTarif = parseInt(localStorage.getItem('tarifBorongan')) || 7000;
+    let roleRates = JSON.parse(localStorage.getItem('roleRates') || 'null') || defaultRoleRates;
+
+    let savedTarif = roleRates["Borongan Petik"] || 7000;
     let savedPeriode = localStorage.getItem('periodeSync') || "";
 
     // Category & Worker State
@@ -1203,7 +1221,7 @@ html_template = """<!DOCTYPE html>
     let pengawasRole = "Pengawas Lapangan";
 
     let incomeItems = [
-      { desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: 150000, amount: 1050000 }
+      { desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: roleRates["Pengawas Lapangan"] || 150000, amount: 7 * (roleRates["Pengawas Lapangan"] || 150000) }
     ];
 
     let deductionItems = [
@@ -1232,6 +1250,10 @@ html_template = """<!DOCTYPE html>
 
       checkBtStatusOnLoad();
     };
+
+    function getRoleRate(roleName) {
+      return roleRates[roleName] || defaultRoleRates[roleName] || 100000;
+    }
 
     function prepareAndPrintSystem() {
       const source = document.getElementById('receiptPrintArea');
@@ -1293,17 +1315,16 @@ html_template = """<!DOCTYPE html>
         pGroup.style.display = "none";
         bGroup.style.display = "block";
         boronganType = document.getElementById('boronganTypeSelect').value || "Borongan Petik";
-        incomeItems = [{ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: savedTarif, amount: 0 }];
+        let price = getRoleRate(boronganType);
+        document.getElementById('boronganRateDisplayBadge').innerText = "Tarif: " + formatRupiah(price) + "/kg";
+        incomeItems = [{ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 }];
       } else {
         pGroup.style.display = "block";
         bGroup.style.display = "none";
         pengawasRole = document.getElementById('pengawasRoleSelect').value || "Pengawas Lapangan";
 
-        let defaultRate = 100000;
-        if (pengawasRole === "Pengawas Lapangan") defaultRate = 150000;
-        else if (pengawasRole === "Pengawas Cudai") defaultRate = 120000;
-        else if (pengawasRole === "Penjemur") defaultRate = 100000;
-        else if (pengawasRole === "Pengawas Malam") defaultRate = 100000;
+        let defaultRate = getRoleRate(pengawasRole);
+        document.getElementById('roleRateDisplayBadge').innerText = "Tarif: " + formatRupiah(defaultRate) + "/hari";
 
         let days = getDaysFromPeriod();
         incomeItems = [{ desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate }];
@@ -1314,11 +1335,8 @@ html_template = """<!DOCTYPE html>
 
     function handlePengawasRoleChange(role) {
       pengawasRole = role;
-      let defaultRate = 100000;
-      if (role === "Pengawas Lapangan") defaultRate = 150000;
-      else if (role === "Pengawas Cudai") defaultRate = 120000;
-      else if (role === "Penjemur") defaultRate = 100000;
-      else if (role === "Pengawas Malam") defaultRate = 100000;
+      let defaultRate = getRoleRate(role);
+      document.getElementById('roleRateDisplayBadge').innerText = "Tarif: " + formatRupiah(defaultRate) + "/hari";
 
       let currentDays = getDaysFromPeriod();
 
@@ -1334,8 +1352,12 @@ html_template = """<!DOCTYPE html>
 
     function handleBoronganTypeChange(type) {
       boronganType = type;
+      let price = getRoleRate(type);
+      document.getElementById('boronganRateDisplayBadge').innerText = "Tarif: " + formatRupiah(price) + "/kg";
       if (incomeItems.length > 0 && incomeItems[0].desc.startsWith("Hasil ")) {
         incomeItems[0].desc = "Hasil " + type;
+        incomeItems[0].pricePerKg = price;
+        incomeItems[0].amount = (incomeItems[0].weightKg || 0) * price;
       }
       renderItemsInput();
       updateReceipt();
@@ -1371,7 +1393,7 @@ html_template = """<!DOCTYPE html>
         handleBoronganTypeChange(type);
 
         let kg = rekap ? parseFloat(rekap.hasilKg) || 0 : 0;
-        let price = savedTarif;
+        let price = getRoleRate(type);
         let total = kg * price;
 
         incomeItems = [{
@@ -1400,11 +1422,8 @@ html_template = """<!DOCTYPE html>
         document.getElementById('pengawasRoleSelect').value = exactRole;
         pengawasRole = exactRole;
 
-        let defaultRate = 100000;
-        if (exactRole === "Pengawas Lapangan") defaultRate = 150000;
-        else if (exactRole === "Pengawas Cudai") defaultRate = 120000;
-        else if (exactRole === "Penjemur") defaultRate = 100000;
-        else if (exactRole === "Pengawas Malam") defaultRate = 100000;
+        let defaultRate = getRoleRate(exactRole);
+        document.getElementById('roleRateDisplayBadge').innerText = "Tarif: " + formatRupiah(defaultRate) + "/hari";
 
         let days = getDaysFromPeriod();
 
@@ -1558,6 +1577,22 @@ html_template = """<!DOCTYPE html>
           return;
         }
 
+        // Scan text for role rate definitions across sheets
+        const combinedText = csvPekerja + "\n" + csvPemetik;
+        const rolesToScan = ["Pengawas Lapangan", "Pengawas Cudai", "Penjemur", "Pengawas Malam", "Pengawas Koperasi", "Borongan Petik", "Borongan Cudai"];
+        rolesToScan.forEach(rName => {
+          const rLower = rName.toLowerCase();
+          const regex = new RegExp(rLower + "[^0-9\\n\\r]{1,25}(?:rp)?\\s*([0-9.,]+)", "i");
+          const match = combinedText.match(regex);
+          if (match && match[1]) {
+            let parsed = parseInt(match[1].replace(/\\./g, '').replace(/,/g, ''));
+            if (parsed > 1000) {
+              roleRates[rName] = parsed;
+            }
+          }
+        });
+        localStorage.setItem('roleRates', JSON.stringify(roleRates));
+
         let linesP = csvPekerja.split('\\n');
         let newWorkers = [];
         linesP.forEach(line => {
@@ -1588,15 +1623,17 @@ html_template = """<!DOCTYPE html>
         if (csvPemetik && csvPemetik.trim().length > 0) {
           let linesM = csvPemetik.split('\\n');
 
-          // Try parse Tarif and Period from header lines
           if (linesM.length > 2) {
             const h1 = linesM[0];
             const tMatch = h1.match(/Tarif Borongan:\\s*Rp\\s*([0-9.,]+)/i);
             if (tMatch && tMatch[1]) {
                let parsedTarif = parseInt(tMatch[1].replace(/\\./g, ''));
                if (parsedTarif > 0) {
+                 roleRates["Borongan Petik"] = parsedTarif;
+                 roleRates["Borongan Cudai"] = parsedTarif;
                  savedTarif = parsedTarif;
                  localStorage.setItem('tarifBorongan', savedTarif);
+                 localStorage.setItem('roleRates', JSON.stringify(roleRates));
                }
             }
 
@@ -1652,7 +1689,7 @@ html_template = """<!DOCTYPE html>
         renderWorkerTemplateDropdown();
 
         let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Tarif Borongan: Rp " + savedTarif + "\\n• Periode: " + savedPeriode + "\\n\\nData ter-update langsung dari Google Sheets!");
+        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Tarif Borongan: Rp " + (roleRates["Borongan Petik"] || 7000) + "/kg\\n• Periode: " + savedPeriode + "\\n\\nData ter-update langsung dari Google Sheets!");
       }
 
       setTimeout(performSync, 100);
@@ -2203,11 +2240,10 @@ html_template = """<!DOCTYPE html>
 
     function addIncomeItem() {
       if (workerCategory === "Borongan") {
-        incomeItems.push({ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: savedTarif, amount: 0 });
+        let price = getRoleRate(boronganType);
+        incomeItems.push({ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 });
       } else {
-        let defaultRate = 100000;
-        if (pengawasRole === "Pengawas Lapangan") defaultRate = 150000;
-        else if (pengawasRole === "Pengawas Cudai") defaultRate = 120000;
+        let defaultRate = getRoleRate(pengawasRole);
         let days = getDaysFromPeriod();
         incomeItems.push({ desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate });
       }
