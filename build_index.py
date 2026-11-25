@@ -1257,7 +1257,7 @@ html_template = """<!DOCTYPE html>
         </div>
       </div>
     </div>
-  </script>
+  </div>
 
   <script>
     // Embedded Database Datasets from Google Sheets
@@ -1714,7 +1714,7 @@ html_template = """<!DOCTYPE html>
           return;
         }
 
-        let linesP = csvPekerja.split('\\n');
+        let linesP = csvPekerja.split('\n');
         let newWorkers = [];
         linesP.forEach(line => {
           const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
@@ -1726,7 +1726,7 @@ html_template = """<!DOCTYPE html>
             const schema = fields[5];
             const status = fields[7];
 
-            if (/^\\d+$/.test(no) && name && isNaN(name)) {
+            if (/^\d+$/.test(no) && name && isNaN(name)) {
               newWorkers.push({
                 no: parseInt(no),
                 name: name,
@@ -1742,13 +1742,13 @@ html_template = """<!DOCTYPE html>
 
         let newRekap = [];
         if (csvPemetik && csvPemetik.trim().length > 0) {
-          let linesM = csvPemetik.split('\\n');
+          let linesM = csvPemetik.split('\n');
 
           if (linesM.length > 2) {
             const h1 = linesM[0];
-            const tMatch = h1.match(/Tarif Borongan:\\s*Rp\\s*([0-9.,]+)/i);
+            const tMatch = h1.match(/Tarif Borongan:\s*Rp\s*([0-9.,]+)/i);
             if (tMatch && tMatch[1]) {
-               let parsedTarif = parseInt(tMatch[1].replace(/\\./g, ''));
+               let parsedTarif = parseInt(tMatch[1].replace(/\./g, ''));
                if (parsedTarif > 0) {
                  roleRates["Borongan Petik"] = parsedTarif;
                  savedTarif = parsedTarif;
@@ -1758,7 +1758,7 @@ html_template = """<!DOCTYPE html>
             }
 
             const h2 = linesM[1];
-            const pMatch = h2.match(/Periode Gaji\\s*\\(([^)]+)\\)/i);
+            const pMatch = h2.match(/Periode Gaji\s*\(([^)]+)\)/i);
             if (pMatch && pMatch[1]) {
                savedPeriode = pMatch[1];
                localStorage.setItem('periodeSync', savedPeriode);
@@ -1777,7 +1777,7 @@ html_template = """<!DOCTYPE html>
               const kasbon = fields[6];
               const totalGaji = fields[7];
 
-              if (/^\\d+$/.test(no) && name) {
+              if (/^\d+$/.test(no) && name) {
                 const kgVal = parseFloat(hasilKg) || 0;
                 const statusVal = (kgVal > 0 || (totalGaji && totalGaji !== "-")) ? "Belum Dibayarkan" : "Lunas";
                 newRekap.push({
@@ -1815,7 +1815,7 @@ html_template = """<!DOCTYPE html>
         }
 
         let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Pengawas Lapangan: Rp " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\\n• Penjemur: Rp " + formatRupiah(getRoleRate("Penjemur")) + "\\n• Pengawas Malam/Cudai: Rp " + formatRupiah(getRoleRate("Pengawas Malam")) + "\\n• Borongan Cudai: Rp " + formatRupiah(getRoleRate("Borongan Cudai")) + "/kg\\n• Borongan Petik: Rp " + formatRupiah(getRoleRate("Borongan Petik")) + "/kg\\n\\nData ter-update langsung dari Google Sheets!");
+        alert("✅ Sinkronisasi Berhasil!\n\n• Total Pekerja: " + workersData.length + " orang\n• Pengawas Lapangan: Rp " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\n• Penjemur: Rp " + formatRupiah(getRoleRate("Penjemur")) + "\n• Pengawas Malam/Cudai: Rp " + formatRupiah(getRoleRate("Pengawas Malam")) + "\n• Borongan Cudai: Rp " + formatRupiah(getRoleRate("Borongan Cudai")) + "/kg\n• Borongan Petik: Rp " + formatRupiah(getRoleRate("Borongan Petik")) + "/kg\n\nData ter-update langsung dari Google Sheets!");
       }
 
       setTimeout(performSync, 100);
@@ -2105,12 +2105,12 @@ html_template = """<!DOCTYPE html>
 
       // Bold Business Title
       bytes.push(0x1B, 0x45, 0x01);
-      pushString((document.getElementById('businessName').value || 'KOPERASI ILANTAT JAYA') + "\\n");
+      pushString((document.getElementById('businessName').value || 'KOPERASI ILANTAT JAYA') + "\n");
       bytes.push(0x1B, 0x45, 0x00);
 
-      pushString((document.getElementById('businessUnit').value || 'Slip Gaji & Upah Kerja') + "\\n");
-      pushString((document.getElementById('businessAddress').value || 'Desa Lungkap') + "\\n");
-      pushString("------------------------------\\n");
+      pushString((document.getElementById('businessUnit').value || 'Slip Gaji & Upah Kerja') + "\n");
+      pushString((document.getElementById('businessAddress').value || 'Desa Lungkap') + "\n");
+      pushString("------------------------------\n");
 
       // Left Align for Details
       bytes.push(0x1B, 0x61, 0x00);
@@ -2120,13 +2120,13 @@ html_template = """<!DOCTYPE html>
         let v = (val || "").trim();
         if (k.length + v.length + 1 <= 30) {
           let spaces = 30 - (k.length + v.length);
-          pushString(k + " ".repeat(spaces) + v + "\\n");
+          pushString(k + " ".repeat(spaces) + v + "\n");
         } else {
-          pushString(k + ":\\n");
+          pushString(k + ":\n");
           if (v.length <= 28) {
-            pushString("  " + v + "\\n");
+            pushString("  " + v + "\n");
           } else {
-            pushString("  " + v.substring(0, 28) + "\\n");
+            pushString("  " + v.substring(0, 28) + "\n");
           }
         }
       }
@@ -2150,11 +2150,11 @@ html_template = """<!DOCTYPE html>
       const period = document.getElementById('periodText').value || '-';
       addKeyValue("Periode", period);
 
-      pushString("------------------------------\\n");
+      pushString("------------------------------\n");
 
       // Income Items
       bytes.push(0x1B, 0x45, 0x01);
-      pushString("RINCIAN PENDAPATAN:\\n");
+      pushString("RINCIAN PENDAPATAN:\n");
       bytes.push(0x1B, 0x45, 0x00);
 
       let totalIncome = 0;
@@ -2163,7 +2163,7 @@ html_template = """<!DOCTYPE html>
         let name = item.desc || 'Pendapatan';
         let amtStr = formatRupiah(item.amount);
 
-        pushString(name + "\\n");
+        pushString(name + "\n");
 
         let subDetail = "";
         if (item.type === 'borongan' || (item.weightKg !== undefined && item.pricePerKg !== undefined)) {
@@ -2176,21 +2176,21 @@ html_template = """<!DOCTYPE html>
 
         if (subDetail.length + amtStr.length + 1 <= 30) {
           let sp = 30 - (subDetail.length + amtStr.length);
-          pushString(subDetail + " ".repeat(sp) + amtStr + "\\n");
+          pushString(subDetail + " ".repeat(sp) + amtStr + "\n");
         } else {
-          pushString(subDetail + "\\n");
+          pushString(subDetail + "\n");
           let sp = 30 - amtStr.length;
           if (sp < 1) sp = 1;
-          pushString(" ".repeat(sp) + amtStr + "\\n");
+          pushString(" ".repeat(sp) + amtStr + "\n");
         }
       });
 
       // Deduction Items
       let totalDeductions = 0;
       if (deductionItems.length > 0) {
-        pushString("------------------------------\\n");
+        pushString("------------------------------\n");
         bytes.push(0x1B, 0x45, 0x01);
-        pushString("POTONGAN / KASBON:\\n");
+        pushString("POTONGAN / KASBON:\n");
         bytes.push(0x1B, 0x45, 0x00);
 
         deductionItems.forEach(item => {
@@ -2200,17 +2200,17 @@ html_template = """<!DOCTYPE html>
 
           if (dName.length + dAmtStr.length + 1 <= 30) {
             let sp = 30 - (dName.length + dAmtStr.length);
-            pushString(dName + " ".repeat(sp) + dAmtStr + "\\n");
+            pushString(dName + " ".repeat(sp) + dAmtStr + "\n");
           } else {
-            pushString(dName + "\\n");
+            pushString(dName + "\n");
             let sp = 30 - dAmtStr.length;
             if (sp < 1) sp = 1;
-            pushString(" ".repeat(sp) + dAmtStr + "\\n");
+            pushString(" ".repeat(sp) + dAmtStr + "\n");
           }
         });
       }
 
-      pushString("------------------------------\\n");
+      pushString("------------------------------\n");
 
       // Total Diterima
       bytes.push(0x1B, 0x45, 0x01);
@@ -2219,14 +2219,14 @@ html_template = """<!DOCTYPE html>
       let totAmt = formatRupiah(grandTotal);
       let totSp = 30 - (totStr.length + totAmt.length);
       if (totSp < 1) totSp = 1;
-      pushString(totStr + " ".repeat(totSp) + totAmt + "\\n");
+      pushString(totStr + " ".repeat(totSp) + totAmt + "\n");
       bytes.push(0x1B, 0x45, 0x00);
 
       addKeyValue("Metode", document.getElementById('paymentMethod').value);
-      pushString("------------------------------\\n");
+      pushString("------------------------------\n");
 
       // Signatures
-      pushString("Penerima,            Pengesah,\\n\\n\\n");
+      pushString("Penerima,            Pengesah,\n\n\n");
       const pic = document.getElementById('picName').value || 'Koperasi';
       let wSign = worker.length > 11 ? worker.substring(0, 11) : worker;
       let pSign = pic.length > 11 ? pic.substring(0, 11) : pic;
@@ -2234,14 +2234,14 @@ html_template = """<!DOCTYPE html>
       let rightStr = "(" + pSign + ")";
       let signSpaces = 30 - (leftStr.length + rightStr.length);
       if (signSpaces < 1) signSpaces = 1;
-      pushString(leftStr + " ".repeat(signSpaces) + rightStr + "\\n");
+      pushString(leftStr + " ".repeat(signSpaces) + rightStr + "\n");
 
-      pushString("------------------------------\\n");
+      pushString("------------------------------\n");
 
       // Footer
       bytes.push(0x1B, 0x61, 0x01);
-      pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\\n");
-      pushString("--- Simpan bukti ini ---\\n\\n\\n\\n\\n\\n");
+      pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\n");
+      pushString("--- Simpan bukti ini ---\n\n\n\n\n\n");
 
       // Feed & Cut
       bytes.push(0x1D, 0x56, 0x42, 0x00);
