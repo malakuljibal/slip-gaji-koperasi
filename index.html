@@ -654,12 +654,16 @@
       }
     }
 
-    /* Print Stylesheet for System Print & PDF (Continuous Auto Height) */
+    /* Print Stylesheet for System Print & PDF (Continuous 54mm inside 58mm) */
     @media print {
+      @page {
+        size: 58mm auto;
+        margin: 0mm;
+      }
       html, body {
         width: 58mm !important;
         height: auto !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         padding: 0 !important;
         background: #ffffff !important;
         overflow: visible !important;
@@ -670,24 +674,20 @@
       #printableReceiptContainer {
         display: block !important;
         visibility: visible !important;
-        width: 58mm !important;
-        max-width: 58mm !important;
+        width: 54mm !important;
+        max-width: 54mm !important;
         height: auto !important;
         margin: 0 auto !important;
-        padding: 3mm 2mm !important;
+        padding: 2mm 1mm !important;
         background: #ffffff !important;
         color: #000000 !important;
         font-family: 'Courier New', Courier, monospace !important;
-        font-size: 11px !important;
-        line-height: 1.3 !important;
+        font-size: 10.5px !important;
+        line-height: 1.25 !important;
         overflow: visible !important;
       }
       #printableReceiptContainer * {
         visibility: visible !important;
-      }
-      @page {
-        size: 58mm auto;
-        margin: 0mm;
       }
     }
   </style>
@@ -1232,7 +1232,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </script>
 
   <script>
     // Embedded Database Datasets from Google Sheets
@@ -2591,6 +2591,15 @@
       checkBtStatusOnLoad();
     };
 
+    function sanitizeAscii(str) {
+      return (str || "")
+        .replace(/[–—]/g, '-')
+        .replace(/…/g, '...')
+        .replace(/‘|’/g, "'")
+        .replace(/“|”/g, '"')
+        .replace(/[^\x20-\x7E\n\r]/g, '');
+    }
+
     function getRoleRate(roleName) {
       if (roleRates && roleRates[roleName] && roleRates[roleName] > 0) {
         return roleRates[roleName];
@@ -3347,20 +3356,21 @@
       }
     }
 
-    // Direct ESC/POS Thermal Printing (32-column precise alignment)
+    // Direct ESC/POS Thermal Printing (30-column ultra-safe alignment)
     function generateEscPosBytes() {
       let bytes = [];
 
       function pushString(str) {
-        for (let i = 0; i < str.length; i++) {
-          bytes.push(str.charCodeAt(i));
+        let clean = sanitizeAscii(str);
+        for (let i = 0; i < clean.length; i++) {
+          bytes.push(clean.charCodeAt(i));
         }
       }
 
       // Initialize
       bytes.push(0x1B, 0x40);
 
-      // Center Align
+      // Center Align Header
       bytes.push(0x1B, 0x61, 0x01);
 
       // Bold Business Title
@@ -3370,7 +3380,7 @@
 
       pushString((document.getElementById('businessUnit').value || 'Slip Gaji & Upah Kerja') + "\\n");
       pushString((document.getElementById('businessAddress').value || 'Desa Lungkap') + "\\n");
-      pushString("--------------------------------\\n");
+      pushString("------------------------------\\n");
 
       // Left Align for Details
       bytes.push(0x1B, 0x61, 0x00);
@@ -3378,15 +3388,15 @@
       function addKeyValue(key, val) {
         let k = (key || "").trim();
         let v = (val || "").trim();
-        if (k.length + v.length + 1 <= 32) {
-          let spaces = 32 - (k.length + v.length);
+        if (k.length + v.length + 1 <= 30) {
+          let spaces = 30 - (k.length + v.length);
           pushString(k + " ".repeat(spaces) + v + "\\n");
         } else {
           pushString(k + ":\\n");
-          if (v.length <= 30) {
+          if (v.length <= 28) {
             pushString("  " + v + "\\n");
           } else {
-            pushString("  " + v.substring(0, 30) + "\\n");
+            pushString("  " + v.substring(0, 28) + "\\n");
           }
         }
       }
@@ -3410,7 +3420,7 @@
       const period = document.getElementById('periodText').value || '-';
       addKeyValue("Periode", period);
 
-      pushString("--------------------------------\\n");
+      pushString("------------------------------\\n");
 
       // Income Items
       bytes.push(0x1B, 0x45, 0x01);
@@ -3434,12 +3444,13 @@
           subDetail = `  Nominal Tetap`;
         }
 
-        if (subDetail.length + amtStr.length + 1 <= 32) {
-          let sp = 32 - (subDetail.length + amtStr.length);
+        if (subDetail.length + amtStr.length + 1 <= 30) {
+          let sp = 30 - (subDetail.length + amtStr.length);
           pushString(subDetail + " ".repeat(sp) + amtStr + "\\n");
         } else {
           pushString(subDetail + "\\n");
-          let sp = 32 - amtStr.length;
+          let sp = 30 - amtStr.length;
+          if (sp < 1) sp = 1;
           pushString(" ".repeat(sp) + amtStr + "\\n");
         }
       });
@@ -3447,7 +3458,7 @@
       // Deduction Items
       let totalDeductions = 0;
       if (deductionItems.length > 0) {
-        pushString("--------------------------------\\n");
+        pushString("------------------------------\\n");
         bytes.push(0x1B, 0x45, 0x01);
         pushString("POTONGAN / KASBON:\\n");
         bytes.push(0x1B, 0x45, 0x00);
@@ -3457,44 +3468,45 @@
           let dName = item.desc || 'Potongan';
           let dAmtStr = "-" + formatRupiah(item.amount);
 
-          if (dName.length + dAmtStr.length + 1 <= 32) {
-            let sp = 32 - (dName.length + dAmtStr.length);
+          if (dName.length + dAmtStr.length + 1 <= 30) {
+            let sp = 30 - (dName.length + dAmtStr.length);
             pushString(dName + " ".repeat(sp) + dAmtStr + "\\n");
           } else {
             pushString(dName + "\\n");
-            let sp = 32 - dAmtStr.length;
+            let sp = 30 - dAmtStr.length;
+            if (sp < 1) sp = 1;
             pushString(" ".repeat(sp) + dAmtStr + "\\n");
           }
         });
       }
 
-      pushString("--------------------------------\\n");
+      pushString("------------------------------\\n");
 
       // Total Diterima
       bytes.push(0x1B, 0x45, 0x01);
       const grandTotal = totalIncome - totalDeductions;
       let totStr = "TOTAL DITERIMA";
       let totAmt = formatRupiah(grandTotal);
-      let totSp = 32 - (totStr.length + totAmt.length);
+      let totSp = 30 - (totStr.length + totAmt.length);
       if (totSp < 1) totSp = 1;
       pushString(totStr + " ".repeat(totSp) + totAmt + "\\n");
       bytes.push(0x1B, 0x45, 0x00);
 
       addKeyValue("Metode", document.getElementById('paymentMethod').value);
-      pushString("--------------------------------\\n");
+      pushString("------------------------------\\n");
 
       // Signatures
-      pushString("Penerima,              Pengesah,\\n\\n\\n");
+      pushString("Penerima,            Pengesah,\\n\\n\\n");
       const pic = document.getElementById('picName').value || 'Koperasi';
-      let wSign = worker.length > 12 ? worker.substring(0, 12) : worker;
-      let pSign = pic.length > 12 ? pic.substring(0, 12) : pic;
+      let wSign = worker.length > 11 ? worker.substring(0, 11) : worker;
+      let pSign = pic.length > 11 ? pic.substring(0, 11) : pic;
       let leftStr = "(" + wSign + ")";
       let rightStr = "(" + pSign + ")";
-      let signSpaces = 32 - (leftStr.length + rightStr.length);
+      let signSpaces = 30 - (leftStr.length + rightStr.length);
       if (signSpaces < 1) signSpaces = 1;
       pushString(leftStr + " ".repeat(signSpaces) + rightStr + "\\n");
 
-      pushString("--------------------------------\\n");
+      pushString("------------------------------\\n");
 
       // Footer
       bytes.push(0x1B, 0x61, 0x01);
