@@ -1107,7 +1107,7 @@
       </div>
       <div class="modal-body">
         <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.85rem;">
-          Atur default tarif/hari dan tarif/kg untuk setiap jabatan/peran. Angka ini juga tersinkronisasi dari Google Sheets:
+          Atur default tarif/hari dan tarif/kg untuk setiap jabatan/peran:
         </p>
         <div style="display: flex; flex-direction: column; gap: 0.65rem;">
           <div>
@@ -1116,15 +1116,15 @@
           </div>
           <div>
             <label style="font-size: 0.78rem;">Pengawas Cudai (Rp/hari)</label>
-            <input type="number" id="input_rate_pengawas_cudai" value="120000">
+            <input type="number" id="input_rate_pengawas_cudai" value="75000">
           </div>
           <div>
             <label style="font-size: 0.78rem;">Penjemur (Rp/hari)</label>
-            <input type="number" id="input_rate_penjemur" value="100000">
+            <input type="number" id="input_rate_penjemur" value="125000">
           </div>
           <div>
             <label style="font-size: 0.78rem;">Pengawas Malam (Rp/hari)</label>
-            <input type="number" id="input_rate_pengawas_malam" value="100000">
+            <input type="number" id="input_rate_pengawas_malam" value="75000">
           </div>
           <div>
             <label style="font-size: 0.78rem;">Pengawas Koperasi (Rp/hari)</label>
@@ -1133,6 +1133,10 @@
           <div>
             <label style="font-size: 0.78rem;">Borongan Petik (Rp/kg)</label>
             <input type="number" id="input_rate_borongan_petik" value="7000">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem;">Borongan Cudai (Rp/kg)</label>
+            <input type="number" id="input_rate_borongan_cudai" value="1500">
           </div>
         </div>
         <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem;">
@@ -2520,19 +2524,23 @@
 ]
 ;
 
+    // Exact user specified rates
     let defaultRoleRates = {
       "Pengawas Lapangan": 150000,
-      "Pengawas Cudai": 120000,
-      "Penjemur": 100000,
-      "Pengawas Malam": 100000,
+      "Pengawas Cudai": 75000,
+      "Penjemur": 125000,
+      "Pengawas Malam": 75000,
       "Pengawas Koperasi": 150000,
       "Borongan Petik": 7000,
-      "Borongan Cudai": 7000
+      "Borongan Cudai": 1500
     };
+
+    // Force update roleRates in localStorage to match exact user specifications
+    let roleRates = defaultRoleRates;
+    localStorage.setItem('roleRates', JSON.stringify(roleRates));
 
     let workersData = JSON.parse(localStorage.getItem('workersData') || 'null') || defaultWorkersData;
     let rekapData = JSON.parse(localStorage.getItem('rekapData') || 'null') || defaultRekapData;
-    let roleRates = JSON.parse(localStorage.getItem('roleRates') || 'null') || defaultRoleRates;
 
     let savedTarif = roleRates["Borongan Petik"] || 7000;
     let savedPeriode = localStorage.getItem('periodeSync') || "";
@@ -2543,7 +2551,7 @@
     let pengawasRole = "Pengawas Lapangan";
 
     let incomeItems = [
-      { desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: getRoleRate("Pengawas Lapangan"), amount: 7 * getRoleRate("Pengawas Lapangan") }
+      { type: "harian", desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: getRoleRate("Pengawas Lapangan"), amount: 7 * getRoleRate("Pengawas Lapangan") }
     ];
 
     let deductionItems = [
@@ -2587,6 +2595,7 @@
       document.getElementById('input_rate_pengawas_malam').value = getRoleRate("Pengawas Malam");
       document.getElementById('input_rate_pengawas_koperasi').value = getRoleRate("Pengawas Koperasi");
       document.getElementById('input_rate_borongan_petik').value = getRoleRate("Borongan Petik");
+      document.getElementById('input_rate_borongan_cudai').value = getRoleRate("Borongan Cudai");
       document.getElementById('ratesModal').style.display = 'flex';
     }
 
@@ -2596,14 +2605,15 @@
 
     function saveCustomRates() {
       roleRates["Pengawas Lapangan"] = parseInt(document.getElementById('input_rate_pengawas_lapangan').value) || 150000;
-      roleRates["Pengawas Cudai"] = parseInt(document.getElementById('input_rate_pengawas_cudai').value) || 120000;
-      roleRates["Penjemur"] = parseInt(document.getElementById('input_rate_penjemur').value) || 100000;
-      roleRates["Pengawas Malam"] = parseInt(document.getElementById('input_rate_pengawas_malam').value) || 100000;
+      roleRates["Pengawas Cudai"] = parseInt(document.getElementById('input_rate_pengawas_cudai').value) || 75000;
+      roleRates["Penjemur"] = parseInt(document.getElementById('input_rate_penjemur').value) || 125000;
+      roleRates["Pengawas Malam"] = parseInt(document.getElementById('input_rate_pengawas_malam').value) || 75000;
       roleRates["Pengawas Koperasi"] = parseInt(document.getElementById('input_rate_pengawas_koperasi').value) || 150000;
 
       let pRate = parseInt(document.getElementById('input_rate_borongan_petik').value) || 7000;
+      let cRate = parseInt(document.getElementById('input_rate_borongan_cudai').value) || 1500;
       roleRates["Borongan Petik"] = pRate;
-      roleRates["Borongan Cudai"] = pRate;
+      roleRates["Borongan Cudai"] = cRate;
       savedTarif = pRate;
 
       localStorage.setItem('roleRates', JSON.stringify(roleRates));
@@ -2691,7 +2701,7 @@
         boronganType = document.getElementById('boronganTypeSelect').value || "Borongan Petik";
         let price = getRoleRate(boronganType);
         document.getElementById('boronganRateDisplayBadge').innerText = "Tarif: " + formatRupiah(price) + "/kg";
-        incomeItems = [{ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 }];
+        incomeItems = [{ type: "borongan", desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 }];
       } else {
         pGroup.style.display = "block";
         bGroup.style.display = "none";
@@ -2701,7 +2711,7 @@
         document.getElementById('roleRateDisplayBadge').innerText = "Tarif: " + formatRupiah(defaultRate) + "/hari";
 
         let days = getDaysFromPeriod();
-        incomeItems = [{ desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate }];
+        incomeItems = [{ type: "harian", desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate }];
       }
       renderItemsInput();
       updateReceipt();
@@ -2715,6 +2725,7 @@
       let currentDays = getDaysFromPeriod();
 
       if (incomeItems.length > 0) {
+        incomeItems[0].type = "harian";
         incomeItems[0].desc = "Gaji " + role;
         incomeItems[0].dailyRate = defaultRate;
         incomeItems[0].workDays = currentDays;
@@ -2729,6 +2740,7 @@
       let price = getRoleRate(type);
       document.getElementById('boronganRateDisplayBadge').innerText = "Tarif: " + formatRupiah(price) + "/kg";
       if (incomeItems.length > 0 && incomeItems[0].desc.startsWith("Hasil ")) {
+        incomeItems[0].type = "borongan";
         incomeItems[0].desc = "Hasil " + type;
         incomeItems[0].pricePerKg = price;
         incomeItems[0].amount = (incomeItems[0].weightKg || 0) * price;
@@ -2771,6 +2783,7 @@
         let total = kg * price;
 
         incomeItems = [{
+          type: "borongan",
           desc: "Hasil " + type,
           weightKg: kg,
           pricePerKg: price,
@@ -2802,6 +2815,7 @@
         let days = getDaysFromPeriod();
 
         incomeItems = [{
+          type: "harian",
           desc: "Gaji " + exactRole,
           workDays: days,
           dailyRate: defaultRate,
@@ -2951,27 +2965,6 @@
           return;
         }
 
-        // Scan text for role rate definitions in CSV
-        const combinedText = csvPekerja + "\n" + csvPemetik;
-        const linesAll = combinedText.split('\\n');
-        linesAll.forEach(line => {
-          const lLower = line.toLowerCase();
-          for (let rName in defaultRoleRates) {
-            if (lLower.includes(rName.toLowerCase())) {
-              const nums = line.match(/(?:rp)?\\s*([0-9]{1,3}(?:\\.[0-9]{3})+|[0-9]{4,6})/gi);
-              if (nums) {
-                nums.forEach(nStr => {
-                  let p = parseInt(nStr.replace(/[^0-9]/g, ''));
-                  if (p >= 5000 && p <= 1000000) {
-                    roleRates[rName] = p;
-                  }
-                });
-              }
-            }
-          }
-        });
-        localStorage.setItem('roleRates', JSON.stringify(roleRates));
-
         let linesP = csvPekerja.split('\\n');
         let newWorkers = [];
         linesP.forEach(line => {
@@ -3009,7 +3002,6 @@
                let parsedTarif = parseInt(tMatch[1].replace(/\\./g, ''));
                if (parsedTarif > 0) {
                  roleRates["Borongan Petik"] = parsedTarif;
-                 roleRates["Borongan Cudai"] = parsedTarif;
                  savedTarif = parsedTarif;
                  localStorage.setItem('tarifBorongan', savedTarif);
                  localStorage.setItem('roleRates', JSON.stringify(roleRates));
@@ -3074,7 +3066,7 @@
         }
 
         let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Tarif Pengawas Lapangan: Rp " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\\n• Tarif Pengawas Cudai: Rp " + formatRupiah(getRoleRate("Pengawas Cudai")) + "\\n• Tarif Pengawas Malam/Penjemur: Rp " + formatRupiah(getRoleRate("Pengawas Malam")) + "\\n• Periode: " + savedPeriode + "\\n\\nData ter-update langsung dari Google Sheets!");
+        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Pengawas Lapangan: Rp " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\\n• Penjemur: Rp " + formatRupiah(getRoleRate("Penjemur")) + "\\n• Pengawas Malam/Cudai: Rp " + formatRupiah(getRoleRate("Pengawas Malam")) + "\\n• Borongan Cudai: Rp " + formatRupiah(getRoleRate("Borongan Cudai")) + "/kg\\n• Borongan Petik: Rp " + formatRupiah(getRoleRate("Borongan Petik")) + "/kg\\n\\nData ter-update langsung dari Google Sheets!");
       }
 
       setTimeout(performSync, 100);
@@ -3417,10 +3409,10 @@
       incomeItems.forEach(item => {
         totalIncome += (item.amount || 0);
         addRow(item.desc || 'Item', formatRupiah(item.amount));
-        if (item.weightKg !== undefined && item.pricePerKg !== undefined) {
-          pushString(`  (${item.weightKg} kg x @${formatRupiah(item.pricePerKg)})\\n`);
-        } else if (item.workDays !== undefined && item.dailyRate !== undefined) {
-          pushString(`  (${item.workDays} hari x @${formatRupiah(item.dailyRate)})\\n`);
+        if (item.type === 'borongan' || (item.weightKg !== undefined && item.pricePerKg !== undefined)) {
+          pushString(`  (${item.weightKg || 0} kg x @${formatRupiah(item.pricePerKg || 0)})\\n`);
+        } else if (item.type === 'harian' || (item.workDays !== undefined && item.dailyRate !== undefined)) {
+          pushString(`  (${item.workDays || 0} hari x @${formatRupiah(item.dailyRate || 0)})\\n`);
         }
       });
 
@@ -3550,6 +3542,23 @@
       return "Rp " + Number(num || 0).toLocaleString("id-ID");
     }
 
+    function updateIncomeType(index, newType) {
+      incomeItems[index].type = newType;
+      if (newType === "harian") {
+        incomeItems[index].workDays = incomeItems[index].workDays || getDaysFromPeriod();
+        incomeItems[index].dailyRate = incomeItems[index].dailyRate || getRoleRate(pengawasRole);
+        incomeItems[index].amount = (incomeItems[index].workDays || 0) * (incomeItems[index].dailyRate || 0);
+      } else if (newType === "borongan") {
+        incomeItems[index].weightKg = incomeItems[index].weightKg || 0;
+        incomeItems[index].pricePerKg = incomeItems[index].pricePerKg || getRoleRate(boronganType);
+        incomeItems[index].amount = (incomeItems[index].weightKg || 0) * (incomeItems[index].pricePerKg || 0);
+      } else {
+        incomeItems[index].amount = incomeItems[index].amount || 0;
+      }
+      renderItemsInput();
+      updateReceipt();
+    }
+
     function renderItemsInput() {
       // Income Inputs
       const incomeContainer = document.getElementById('incomeItemsContainer');
@@ -3558,53 +3567,73 @@
       incomeItems.forEach((item, idx) => {
         const row = document.createElement('div');
         row.className = 'form-row';
-        row.style.cssText = "flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;";
+        row.style.cssText = "flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; background: #f8fafc; padding: 0.65rem; border-radius: 6px; border: 1px solid #e2e8f0;";
 
-        if (workerCategory === "Borongan") {
-          row.innerHTML = `
-            <div style="flex: 2; min-width: 140px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Deskripsi Komponen</label>
-              <input type="text" placeholder="Deskripsi" value="${item.desc}" oninput="updateIncomeDesc(${idx}, this.value)">
-            </div>
+        const itemType = item.type || (workerCategory === "Borongan" ? "borongan" : "harian");
+
+        let typeSelectHtml = `
+          <div style="flex: 1.2; min-width: 140px;">
+            <label style="font-size: 0.75rem; color: #475569;">Jenis Hitungan</label>
+            <select onchange="updateIncomeType(${idx}, this.value)" style="font-size: 0.8rem; font-weight: bold;">
+              <option value="harian" ${itemType === 'harian' ? 'selected' : ''}>📅 Harian (Hari x Rp)</option>
+              <option value="borongan" ${itemType === 'borongan' ? 'selected' : ''}>⚖️ Borongan (Kg x Rp)</option>
+              <option value="flat" ${itemType === 'flat' ? 'selected' : ''}>💵 Nominal Tetap</option>
+            </select>
+          </div>
+        `;
+
+        let descHtml = `
+          <div style="flex: 2; min-width: 140px;">
+            <label style="font-size: 0.75rem; color: #475569;">Deskripsi Komponen</label>
+            <input type="text" placeholder="Deskripsi" value="${item.desc || ''}" oninput="updateIncomeDesc(${idx}, this.value)">
+          </div>
+        `;
+
+        let fieldsHtml = '';
+
+        if (itemType === "borongan") {
+          fieldsHtml = `
             <div style="flex: 1; min-width: 90px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Jumlah (kg)</label>
+              <label style="font-size: 0.75rem; color: #475569;">Jumlah (kg)</label>
               <input type="number" placeholder="0" value="${item.weightKg !== undefined ? item.weightKg : ''}" oninput="updateIncomeWeight(${idx}, this.value)">
             </div>
             <div style="flex: 1; min-width: 100px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Harga/kg (Rp)</label>
+              <label style="font-size: 0.75rem; color: #475569;">Harga/kg (Rp)</label>
               <input type="number" placeholder="0" value="${item.pricePerKg !== undefined ? item.pricePerKg : ''}" oninput="updateIncomePrice(${idx}, this.value)">
             </div>
-            <div style="flex: 1.2; min-width: 110px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Total (Rp)</label>
-              <input type="text" placeholder="Rp 0" value="${formatRupiah(item.amount)}" readonly style="background: #f1f5f9; font-weight: bold; color: #16a34a;">
-            </div>
-            <div style="display: flex; align-items: flex-end; padding-top: 1.25rem;">
-              <button class="btn btn-danger" onclick="removeIncomeItem(${idx})" title="Hapus">✕</button>
-            </div>
           `;
-        } else {
-          row.innerHTML = `
-            <div style="flex: 2; min-width: 140px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Deskripsi Komponen</label>
-              <input type="text" placeholder="Deskripsi" value="${item.desc}" oninput="updateIncomeDesc(${idx}, this.value)">
-            </div>
+        } else if (itemType === "harian") {
+          fieldsHtml = `
             <div style="flex: 1; min-width: 90px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Jumlah Hari</label>
+              <label style="font-size: 0.75rem; color: #475569;">Jumlah Hari Kerja</label>
               <input type="number" placeholder="0" value="${item.workDays !== undefined ? item.workDays : ''}" oninput="updateIncomeDays(${idx}, this.value)">
             </div>
             <div style="flex: 1; min-width: 100px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Tarif/Hari (Rp)</label>
+              <label style="font-size: 0.75rem; color: #475569;">Gaji/Tarif Harian (Rp)</label>
               <input type="number" placeholder="0" value="${item.dailyRate !== undefined ? item.dailyRate : ''}" oninput="updateIncomeRate(${idx}, this.value)">
             </div>
-            <div style="flex: 1.2; min-width: 110px;">
-              <label style="font-size: 0.75rem; color: #64748b;">Total (Rp)</label>
-              <input type="text" placeholder="Rp 0" value="${formatRupiah(item.amount)}" readonly style="background: #f1f5f9; font-weight: bold; color: #16a34a;">
-            </div>
-            <div style="display: flex; align-items: flex-end; padding-top: 1.25rem;">
-              <button class="btn btn-danger" onclick="removeIncomeItem(${idx})" title="Hapus">✕</button>
+          `;
+        } else {
+          // flat
+          fieldsHtml = `
+            <div style="flex: 1.5; min-width: 110px;">
+              <label style="font-size: 0.75rem; color: #475569;">Nominal (Rp)</label>
+              <input type="number" placeholder="0" value="${item.amount || ''}" oninput="updateIncomeAmount(${idx}, this.value)">
             </div>
           `;
         }
+
+        let totalAndDeleteHtml = `
+          <div style="flex: 1.2; min-width: 110px;">
+            <label style="font-size: 0.75rem; color: #475569;">Total (Rp)</label>
+            <input type="text" placeholder="Rp 0" value="${formatRupiah(item.amount)}" readonly style="background: #e2e8f0; font-weight: bold; color: #16a34a;">
+          </div>
+          <div style="display: flex; align-items: flex-end; padding-top: 1.25rem;">
+            <button class="btn btn-danger" onclick="removeIncomeItem(${idx})" title="Hapus">✕</button>
+          </div>
+        `;
+
+        row.innerHTML = typeSelectHtml + descHtml + fieldsHtml + totalAndDeleteHtml;
         incomeContainer.appendChild(row);
       });
 
@@ -3626,11 +3655,11 @@
     function addIncomeItem() {
       if (workerCategory === "Borongan") {
         let price = getRoleRate(boronganType);
-        incomeItems.push({ desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 });
+        incomeItems.push({ type: "borongan", desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 });
       } else {
         let defaultRate = getRoleRate(pengawasRole);
         let days = getDaysFromPeriod();
-        incomeItems.push({ desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate });
+        incomeItems.push({ type: "harian", desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate });
       }
       renderItemsInput();
       updateReceipt();
@@ -3749,19 +3778,19 @@
         totalIncome += (item.amount || 0);
         const tr = document.createElement('tr');
 
-        if (item.weightKg !== undefined && item.pricePerKg !== undefined) {
+        if (item.type === 'borongan' || (item.weightKg !== undefined && item.pricePerKg !== undefined)) {
           tr.innerHTML = `
             <td class="col-item">
               <div>${item.desc || 'Item'}</div>
-              <div style="font-size: 9px; color: #555;">(${item.weightKg} kg x @${formatRupiah(item.pricePerKg)})</div>
+              <div style="font-size: 9px; color: #555;">(${item.weightKg || 0} kg x @${formatRupiah(item.pricePerKg || 0)})</div>
             </td>
             <td class="col-val">${formatRupiah(item.amount)}</td>
           `;
-        } else if (item.workDays !== undefined && item.dailyRate !== undefined) {
+        } else if (item.type === 'harian' || (item.workDays !== undefined && item.dailyRate !== undefined)) {
           tr.innerHTML = `
             <td class="col-item">
               <div>${item.desc || 'Item'}</div>
-              <div style="font-size: 9px; color: #555;">(${item.workDays} hari x @${formatRupiah(item.dailyRate)})</div>
+              <div style="font-size: 9px; color: #555;">(${item.workDays || 0} hari x @${formatRupiah(item.dailyRate || 0)})</div>
             </td>
             <td class="col-val">${formatRupiah(item.amount)}</td>
           `;
