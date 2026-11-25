@@ -1075,13 +1075,6 @@ html_template = """<!DOCTYPE html>
           </select>
           <select id="filterReguSelect" onchange="filterWorkers()" style="flex: 1; min-width: 130px;">
             <option value="">-- Semua Regu --</option>
-            <option value="PGWS">PGWS</option>
-            <option value="LGKP">LGKP</option>
-            <option value="Sabua Miring">Sabua Miring</option>
-            <option value="Due 1">Due 1</option>
-            <option value="Due 2">Due 2</option>
-            <option value="Kaki Seribu 1">Kaki Seribu 1</option>
-            <option value="Kaki Seribu 2">Kaki Seribu 2</option>
           </select>
         </div>
 
@@ -1312,6 +1305,7 @@ html_template = """<!DOCTYPE html>
       updatePeriodFromDates();
 
       renderWorkerTemplateDropdown();
+      populateReguDropdown();
       renderItemsInput();
       updateReceipt();
 
@@ -1320,6 +1314,36 @@ html_template = """<!DOCTYPE html>
 
       checkBtStatusOnLoad();
     };
+
+    function populateReguDropdown() {
+      const reguSelect = document.getElementById('filterReguSelect');
+      if (!reguSelect) return;
+
+      const currentVal = reguSelect.value;
+      const reguSet = new Set();
+
+      workersData.forEach(w => {
+        if (w.regu && w.regu !== '-' && w.regu.trim() !== '') {
+          reguSet.add(w.regu.trim());
+        }
+      });
+      rekapData.forEach(r => {
+        if (r.regu && r.regu !== '-' && r.regu.trim() !== '') {
+          reguSet.add(r.regu.trim());
+        }
+      });
+
+      const sortedRegu = Array.from(reguSet).sort();
+
+      reguSelect.innerHTML = '<option value="">-- Semua Regu --</option>';
+      sortedRegu.forEach(reguName => {
+        const opt = document.createElement('option');
+        opt.value = reguName;
+        opt.innerText = reguName;
+        if (reguName === currentVal) opt.selected = true;
+        reguSelect.appendChild(opt);
+      });
+    }
 
     function sanitizeAscii(str) {
       return (str || "")
@@ -1418,6 +1442,7 @@ html_template = """<!DOCTYPE html>
       } else if (tab === 'db') {
         secDb.style.display = 'block';
         document.getElementById('tabNavDb').classList.add('active');
+        populateReguDropdown();
         renderWorkerGrid();
       } else if (tab === 'rekap') {
         secRekap.style.display = 'block';
@@ -1607,7 +1632,11 @@ html_template = """<!DOCTYPE html>
         const wStatus = w.paymentStatus || 'Belum Dibayarkan';
         const matchesStatus = !statusFilter || (wStatus === statusFilter);
         const matchesCategory = !categoryFilter || w.category === categoryFilter;
-        const matchesRegu = !reguFilter || w.regu === reguFilter;
+
+        let matchesRegu = true;
+        if (reguFilter) {
+          matchesRegu = (w.regu || '').toLowerCase().includes(reguFilter.toLowerCase());
+        }
 
         if (matchesSearch && matchesStatus && matchesCategory && matchesRegu) {
           count++;
@@ -1772,22 +1801,37 @@ html_template = """<!DOCTYPE html>
               const no = fields[1];
               const name = fields[2];
               const regu = fields[3];
-              const hasilKg = fields[4];
-              const subTotal = fields[5];
-              const kasbon = fields[6];
-              const totalGaji = fields[7];
+
+              let p2Kg = fields.length >= 9 ? (parseFloat(fields[8]) || 0) : 0;
+              let p1Kg = parseFloat(fields[4]) || 0;
+
+              let hasilKg = 0;
+              let subTotal = "0";
+              let kasbon = "-";
+              let totalGaji = "Rp 0";
+
+              if (p2Kg > 0 || (fields.length >= 12 && fields[11] && fields[11] !== "-")) {
+                hasilKg = p2Kg;
+                subTotal = fields[9] || "0";
+                kasbon = fields[10] || "-";
+                totalGaji = fields[11] || "Rp 0";
+              } else {
+                hasilKg = p1Kg;
+                subTotal = fields[5] || "0";
+                kasbon = fields[6] || "-";
+                totalGaji = fields[7] || "Rp 0";
+              }
 
               if (/^\d+$/.test(no) && name) {
-                const kgVal = parseFloat(hasilKg) || 0;
-                const statusVal = (kgVal > 0 || (totalGaji && totalGaji !== "-")) ? "Belum Dibayarkan" : "Lunas";
+                const statusVal = (hasilKg > 0 || (totalGaji && totalGaji !== "-")) ? "Belum Dibayarkan" : "Lunas";
                 newRekap.push({
                   no: parseInt(no),
                   name: name,
                   regu: regu,
-                  hasilKg: kgVal,
-                  subTotal: subTotal || "0",
-                  kasbon: kasbon || "-",
-                  totalGaji: totalGaji || "Rp 0",
+                  hasilKg: hasilKg,
+                  subTotal: subTotal,
+                  kasbon: kasbon,
+                  totalGaji: totalGaji,
                   paymentStatus: statusVal
                 });
               }
@@ -1804,6 +1848,7 @@ html_template = """<!DOCTYPE html>
           localStorage.setItem('rekapData', JSON.stringify(rekapData));
         }
 
+        populateReguDropdown();
         renderWorkerGrid();
         renderRekapTable();
         renderWorkerTemplateDropdown();
@@ -1815,7 +1860,7 @@ html_template = """<!DOCTYPE html>
         }
 
         let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert("✅ Sinkronisasi Berhasil!\n\n• Total Pekerja: " + workersData.length + " orang\n• Pengawas Lapangan: Rp " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\n• Penjemur: Rp " + formatRupiah(getRoleRate("Penjemur")) + "\n• Pengawas Malam/Cudai: Rp " + formatRupiah(getRoleRate("Pengawas Malam")) + "\n• Borongan Cudai: Rp " + formatRupiah(getRoleRate("Borongan Cudai")) + "/kg\n• Borongan Petik: Rp " + formatRupiah(getRoleRate("Borongan Petik")) + "/kg\n\nData ter-update langsung dari Google Sheets!");
+        alert("✅ Sinkronisasi Berhasil!\n\n• Total Pekerja: " + workersData.length + " orang\n• Pengawas Lapangan: " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\n• Penjemur: " + formatRupiah(getRoleRate("Penjemur")) + "\n• Pengawas Malam/Cudai: " + formatRupiah(getRoleRate("Pengawas Malam")) + "\n• Borongan Cudai: " + formatRupiah(getRoleRate("Borongan Cudai")) + "/kg\n• Borongan Petik: " + formatRupiah(getRoleRate("Borongan Petik")) + "/kg\n\nData ter-update langsung dari Google Sheets!");
       }
 
       setTimeout(performSync, 100);
