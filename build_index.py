@@ -2119,15 +2119,12 @@ html_template = """<!DOCTYPE html>
         let k = (key || "").trim();
         let v = (val || "").trim();
         if (k.length + v.length + 1 <= 30) {
-          let spaces = 30 - (k.length + v.length);
+          let spaces = Math.max(1, 30 - (k.length + v.length));
           pushString(k + " ".repeat(spaces) + v + "\n");
         } else {
           pushString(k + ":\n");
-          if (v.length <= 28) {
-            pushString("  " + v + "\n");
-          } else {
-            pushString("  " + v.substring(0, 28) + "\n");
-          }
+          let vSub = v.length > 28 ? v.substring(0, 28) : v;
+          pushString("  " + vSub + "\n");
         }
       }
 
@@ -2175,12 +2172,11 @@ html_template = """<!DOCTYPE html>
         }
 
         if (subDetail.length + amtStr.length + 1 <= 30) {
-          let sp = 30 - (subDetail.length + amtStr.length);
+          let sp = Math.max(1, 30 - (subDetail.length + amtStr.length));
           pushString(subDetail + " ".repeat(sp) + amtStr + "\n");
         } else {
           pushString(subDetail + "\n");
-          let sp = 30 - amtStr.length;
-          if (sp < 1) sp = 1;
+          let sp = Math.max(1, 30 - amtStr.length);
           pushString(" ".repeat(sp) + amtStr + "\n");
         }
       });
@@ -2199,12 +2195,11 @@ html_template = """<!DOCTYPE html>
           let dAmtStr = "-" + formatRupiah(item.amount);
 
           if (dName.length + dAmtStr.length + 1 <= 30) {
-            let sp = 30 - (dName.length + dAmtStr.length);
+            let sp = Math.max(1, 30 - (dName.length + dAmtStr.length));
             pushString(dName + " ".repeat(sp) + dAmtStr + "\n");
           } else {
             pushString(dName + "\n");
-            let sp = 30 - dAmtStr.length;
-            if (sp < 1) sp = 1;
+            let sp = Math.max(1, 30 - dAmtStr.length);
             pushString(" ".repeat(sp) + dAmtStr + "\n");
           }
         });
@@ -2217,8 +2212,7 @@ html_template = """<!DOCTYPE html>
       const grandTotal = totalIncome - totalDeductions;
       let totStr = "TOTAL DITERIMA";
       let totAmt = formatRupiah(grandTotal);
-      let totSp = 30 - (totStr.length + totAmt.length);
-      if (totSp < 1) totSp = 1;
+      let totSp = Math.max(1, 30 - (totStr.length + totAmt.length));
       pushString(totStr + " ".repeat(totSp) + totAmt + "\n");
       bytes.push(0x1B, 0x45, 0x00);
 
@@ -2232,8 +2226,7 @@ html_template = """<!DOCTYPE html>
       let pSign = pic.length > 11 ? pic.substring(0, 11) : pic;
       let leftStr = "(" + wSign + ")";
       let rightStr = "(" + pSign + ")";
-      let signSpaces = 30 - (leftStr.length + rightStr.length);
-      if (signSpaces < 1) signSpaces = 1;
+      let signSpaces = Math.max(1, 30 - (leftStr.length + rightStr.length));
       pushString(leftStr + " ".repeat(signSpaces) + rightStr + "\n");
 
       pushString("------------------------------\n");
