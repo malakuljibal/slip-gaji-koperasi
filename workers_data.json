@@ -672,8 +672,16 @@
         "status":  "Aktif"
     },
     {
-        "name":  "Papa Yul",
+        "name":  "Rahman Sinalaan",
         "no":  85,
+        "regu":  "-",
+        "schema":  "Harian",
+        "category":  "Pengawas Malam",
+        "status":  "Aktif"
+    },
+    {
+        "name":  "Edu",
+        "no":  86,
         "regu":  "-",
         "schema":  "Harian",
         "category":  "Pengawas Malam",

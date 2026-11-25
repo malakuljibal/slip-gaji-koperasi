@@ -97,25 +97,26 @@ class MainActivity : AppCompatActivity() {
                 val url = URL(urlStr)
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "GET"
-                conn.setRequestProperty("User-Agent", "Mozilla/5.0")
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
                 conn.useCaches = false
+                conn.defaultUseCaches = false
                 conn.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate")
                 conn.setRequestProperty("Pragma", "no-cache")
                 conn.setRequestProperty("Expires", "0")
-                conn.connectTimeout = 12000
-                conn.readTimeout = 12000
+                conn.connectTimeout = 15000
+                conn.readTimeout = 15000
                 conn.instanceFollowRedirects = true
-                if (conn.responseCode == 200 || conn.responseCode == 302) {
-                    val stream = if (conn.responseCode == 302) {
-                        val redirectUrl = conn.getHeaderField("Location")
-                        val redir = URL(redirectUrl).openConnection() as HttpURLConnection
-                        redir.useCaches = false
-                        redir.setRequestProperty("User-Agent", "Mozilla/5.0")
-                        redir.inputStream
+
+                val code = conn.responseCode
+                if (code == HttpURLConnection.HTTP_OK) {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } else if (code == HttpURLConnection.HTTP_MOVED_TEMP || code == HttpURLConnection.HTTP_MOVED_PERM) {
+                    val redirectUrl = conn.getHeaderField("Location")
+                    if (!redirectUrl.isNullOrEmpty()) {
+                        fetchUrlText(redirectUrl)
                     } else {
-                        conn.inputStream
+                        ""
                     }
-                    stream.bufferedReader().use { it.readText() }
                 } else {
                     ""
                 }

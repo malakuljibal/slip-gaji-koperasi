@@ -735,7 +735,7 @@ html_template = """<!DOCTYPE html>
   <!-- Top Main Navigation Bar -->
   <div class="top-nav">
     <button class="nav-btn active" id="tabNavSlip" onclick="switchMainTab('slip')">Cetak Slip Gaji</button>
-    <button class="nav-btn" id="tabNavDb" onclick="switchMainTab('db')">Database Pekerja (<span id="totalWorkerBadge">85</span>)</button>
+    <button class="nav-btn" id="tabNavDb" onclick="switchMainTab('db')">Database Pekerja (<span id="totalWorkerBadge">86</span>)</button>
     <button class="nav-btn" id="tabNavRekap" onclick="switchMainTab('rekap')">Rekapitulasi Gaji &amp; Pemetik</button>
   </div>
 
@@ -1036,7 +1036,7 @@ html_template = """<!DOCTYPE html>
       <div class="db-container">
         <div class="section-title">
           <span>Database Pekerja Koperasi</span>
-          <span style="font-size: 0.8rem; color: #64748b;" id="dbStatsText">Total 85 Pekerja</span>
+          <span style="font-size: 0.8rem; color: #64748b;" id="dbStatsText">Total 86 Pekerja</span>
         </div>
 
         <div class="filter-bar">
@@ -1537,10 +1537,9 @@ html_template = """<!DOCTYPE html>
     }
 
     function syncWithGoogleSheets() {
-      alert('Memulai sinkronisasi Dasbor Gaji (Hanya Belum Dibayarkan) dari Google Sheets...');
+      alert('Memulai sinkronisasi data dari Google Sheets...');
 
       const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
-      // Added cache-busting timestamp to always fetch live data
       const t = new Date().getTime();
       const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja&_t=${t}`;
       const urlPemetik = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Pembayaran%20Pemetik&_t=${t}`;
@@ -1653,7 +1652,7 @@ html_template = """<!DOCTYPE html>
         renderWorkerTemplateDropdown();
 
         let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert(`✅ Sinkronisasi Berhasil!\\n\\n• Pekerja Aktif: \${workersData.length} orang\\n• Tarif Borongan: Rp \${savedTarif}\\n• Periode: \${savedPeriode}\\n\\nData ter-update langsung dari Google Sheets!`);
+        alert("✅ Sinkronisasi Berhasil!\\n\\n• Total Pekerja: " + workersData.length + " orang\\n• Tarif Borongan: Rp " + savedTarif + "\\n• Periode: " + savedPeriode + "\\n\\nData ter-update langsung dari Google Sheets!");
       }
 
       setTimeout(performSync, 100);
