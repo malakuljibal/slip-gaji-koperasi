@@ -276,10 +276,11 @@ html_template = """<!DOCTYPE html>
       max-width: 320px;
     }
 
-    /* Thermal Receipt Simulation (57mm / 58mm printer) */
+    /* Thermal Receipt Simulation (58mm continuous roll) */
     .receipt-container {
       width: 58mm;
       max-width: 100%;
+      height: auto;
       background: #ffffff;
       box-shadow: 0 4px 15px rgba(0,0,0,0.12);
       padding: 4mm 3mm;
@@ -678,13 +679,15 @@ html_template = """<!DOCTYPE html>
       }
     }
 
-    /* Print Stylesheet for System Print & PDF */
+    /* Print Stylesheet for System Print & PDF (Continuous Auto Height) */
     @media print {
       html, body {
         width: 58mm !important;
+        height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
+        overflow: visible !important;
       }
       body > *:not(#printableReceiptContainer) {
         display: none !important;
@@ -694,6 +697,7 @@ html_template = """<!DOCTYPE html>
         visibility: visible !important;
         width: 58mm !important;
         max-width: 58mm !important;
+        height: auto !important;
         margin: 0 auto !important;
         padding: 3mm 2mm !important;
         background: #ffffff !important;
@@ -701,6 +705,7 @@ html_template = """<!DOCTYPE html>
         font-family: 'Courier New', Courier, monospace !important;
         font-size: 11px !important;
         line-height: 1.3 !important;
+        overflow: visible !important;
       }
       #printableReceiptContainer * {
         visibility: visible !important;
@@ -721,7 +726,7 @@ html_template = """<!DOCTYPE html>
     <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
       <div style="display: flex; align-items: center; gap: 0.5rem;">
         <h1>Finance Ilantat Jaya</h1>
-        <span class="badge">Thermal 57x30 / 58mm</span>
+        <span class="badge">Thermal 58mm (Roll / Auto Height)</span>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
         <button class="btn btn-secondary" onclick="openRatesModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem; background: #3b82f6; color: white;">
@@ -938,7 +943,7 @@ html_template = """<!DOCTYPE html>
         </div>
 
         <button class="btn btn-print" onclick="handleMainPrint()">
-          Cetak Slip Gaji (Thermal 57x30)
+          Cetak Slip Gaji (Thermal 58mm Roll)
         </button>
 
         <button class="btn btn-secondary" onclick="prepareAndPrintSystem()" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.85rem;">
@@ -949,8 +954,8 @@ html_template = """<!DOCTYPE html>
       <!-- Preview Thermal Section (Di Bawah Form Editor) -->
       <div class="preview-section" id="previewSectionBox">
         <div class="preview-header">
-          <span>Live Preview Thermal (57mm)</span>
-          <span style="color: #64748b; font-size: 0.8rem;">Auto-update</span>
+          <span>Live Preview Thermal (58mm Roll)</span>
+          <span style="color: #64748b; font-size: 0.8rem;">Auto-height</span>
         </div>
 
         <div class="receipt-container" id="receiptPrintArea">
@@ -1040,7 +1045,7 @@ html_template = """<!DOCTYPE html>
         </div>
 
         <div style="margin-top: 15px; font-size: 0.8rem; color: #64748b; max-width: 300px; text-align: center;">
-          <strong>Tips Setting Printer:</strong> Saat jendela print muncul, pilih printer thermal 58mm, margins <strong>None / Minimum</strong>, lalu uncheck <em>Headers and Footers</em>.
+          <strong>Tips Setting Printer:</strong> Panjang kertas otomatis mengikuti isi rincian slip gaji ke bawah (Continuous Roll).
         </div>
       </div>
     </div>
@@ -2224,7 +2229,7 @@ html_template = """<!DOCTYPE html>
       // Footer
       bytes.push(0x1B, 0x61, 0x01);
       pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\\n");
-      pushString("--- Simpan bukti ini ---\\n\\n\\n\\n");
+      pushString("--- Simpan bukti ini ---\\n\\n\\n\\n\\n\\n");
 
       // Feed & Cut
       bytes.push(0x1D, 0x56, 0x42, 0x00);
