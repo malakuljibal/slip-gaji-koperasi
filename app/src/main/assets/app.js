@@ -1,7 +1,15 @@
 // State Management
-let appSettings = JSON.parse(localStorage.getItem('koperasi_settings')) || { ...DEFAULT_SETTINGS };
-let workersDb = JSON.parse(localStorage.getItem('koperasi_workers')) || [...INITIAL_WORKERS];
-let slipHistory = JSON.parse(localStorage.getItem('koperasi_history')) || [];
+let savedSettings = null;
+try { savedSettings = JSON.parse(localStorage.getItem('koperasi_settings')); } catch(e){}
+let appSettings = savedSettings || { ...DEFAULT_SETTINGS };
+
+let savedWorkers = null;
+try { savedWorkers = JSON.parse(localStorage.getItem('koperasi_workers')); } catch(e){}
+let workersDb = (Array.isArray(savedWorkers) && savedWorkers.length > 0) ? savedWorkers : [...INITIAL_WORKERS];
+
+let savedHistory = null;
+try { savedHistory = JSON.parse(localStorage.getItem('koperasi_history')); } catch(e){}
+let slipHistory = Array.isArray(savedHistory) ? savedHistory : [];
 
 let incomeItems = [
   { desc: "Upah Pemetik (0 kg x Rp 7.000)", amount: 0 }
@@ -12,6 +20,12 @@ let deductionItems = [
 
 // Initialization
 window.addEventListener('DOMContentLoaded', () => {
+  // Ensure workersDb is never empty
+  if (!Array.isArray(workersDb) || workersDb.length === 0) {
+    workersDb = [...INITIAL_WORKERS];
+    localStorage.setItem('koperasi_workers', JSON.stringify(workersDb));
+  }
+
   initDropdowns();
   loadSettingsToUI();
   resetSlipForm(false);
@@ -30,14 +44,15 @@ window.addEventListener('DOMContentLoaded', () => {
 const VIEW_META = {
   dashboard: { title: "Dashboard Koperasi", sub: "Ringkasan Anggaran, Realisasi Beban & Operasional" },
   slip: { title: "Buat & Cetak Slip Thermal", sub: "Format Kertas Roll 57x30 / 58mm Fleksibel" },
-  workers: { title: "Database Pekerja & Regu", sub: "86+ Pekerja Aktif (Pemetik, Pengawas, Penjemur, Pemarasan)" },
+  workers: { title: "Database Pekerja & Regu", sub: "98+ Pekerja Aktif (Pemetik, Pengawas, Penjemur, Pemarasan)" },
   history: { title: "Riwayat & Rekap Pembayaran", sub: "Arsip Slip Tercetak & Export Excel/CSV" },
   settings: { title: "Pengaturan Sistem & Printer", sub: "Identitas Koperasi, Tarif Default & Backup Data" }
 };
 
 function switchView(viewName) {
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-  document.getElementById(`view-${viewName}`).classList.add('active');
+  const targetView = document.getElementById(`view-${viewName}`);
+  if (targetView) targetView.classList.add('active');
 
   document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === viewName);
@@ -61,9 +76,11 @@ function formatRupiah(num) {
 
 function showToast(msg) {
   const toast = document.getElementById('toast');
-  toast.innerText = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2800);
+  if (toast) {
+    toast.innerText = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+  }
 }
 
 function generateRefNo() {
@@ -77,8 +94,8 @@ function generateRefNo() {
 function initDropdowns() {
   const reguFilterSlip = document.getElementById('filterSlipRegu');
   const reguFilterDb = document.getElementById('filterWorkerRegu');
-  reguFilterSlip.innerHTML = '<option value="">-- Semua Regu --</option>';
-  reguFilterDb.innerHTML = '<option value="">-- Semua Regu --</option>';
+  if (reguFilterSlip) reguFilterSlip.innerHTML = '<option value="">-- Semua Regu --</option>';
+  if (reguFilterDb) reguFilterDb.innerHTML = '<option value="">-- Semua Regu --</option>';
 
   const reguSet = new Set(REGU_LIST);
   workersDb.forEach(w => {
@@ -88,33 +105,41 @@ function initDropdowns() {
   });
 
   Array.from(reguSet).sort().forEach(r => {
-    reguFilterSlip.add(new Option(r, r));
-    reguFilterDb.add(new Option(r, r));
+    if (reguFilterSlip) reguFilterSlip.add(new Option(r, r));
+    if (reguFilterDb) reguFilterDb.add(new Option(r, r));
   });
 
   const coaSelect = document.getElementById('coaSelect');
   const coaFilterHistory = document.getElementById('filterHistoryCoa');
-  coaSelect.innerHTML = '';
-  coaFilterHistory.innerHTML = '<option value="">-- Semua Akun (COA) --</option>';
+  if (coaSelect) coaSelect.innerHTML = '';
+  if (coaFilterHistory) coaFilterHistory.innerHTML = '<option value="">-- Semua Akun (COA) --</option>';
 
   COA_ACCOUNTS.forEach(c => {
-    coaSelect.add(new Option(`${c.code} - ${c.name}`, c.code));
-    coaFilterHistory.add(new Option(`${c.code} - ${c.name}`, c.code));
+    if (coaSelect) coaSelect.add(new Option(`${c.code} - ${c.name}`, c.code));
+    if (coaFilterHistory) coaFilterHistory.add(new Option(`${c.code} - ${c.name}`, c.code));
   });
 
   populateWorkerSelect();
 }
 
 function populateWorkerSelect() {
-  const regu = document.getElementById('filterSlipRegu').value;
+  const reguFilterEl = document.getElementById('filterSlipRegu');
+  const regu = reguFilterEl ? reguFilterEl.value.toLowerCase() : '';
   const select = document.getElementById('selectWorkerDb');
+  if (!select) return;
+
   select.innerHTML = '<option value="">-- Pilih Pekerja dari Database --</option>';
 
-  workersDb
-    .filter(w => w.status === 'Aktif' && (!regu || w.regu.toLowerCase().includes(regu.toLowerCase())))
+  const availableWorkers = workersDb.filter(w => {
+    if (w.status && w.status !== 'Aktif') return false;
+    if (regu) return (w.regu || '').toLowerCase().includes(regu);
+    return true;
+  });
+
+  availableWorkers
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(w => {
-      select.add(new Option(`${w.name} (${w.regu})`, w.id));
+      select.add(new Option(`${w.name} (${w.role}${w.regu && w.regu !== '-' ? ' - Regu ' + w.regu : ''})`, w.id));
     });
 }
 
@@ -126,7 +151,7 @@ function onSelectWorkerFromDb() {
 
   document.getElementById('workerName').value = w.name;
   document.getElementById('workerRole').value = w.role;
-  document.getElementById('workerRegu').value = w.regu;
+  document.getElementById('workerRegu').value = w.regu || '-';
 
   // Auto-select COA & calculator mode based on role
   if (w.role.includes('Pemetik')) {
@@ -136,10 +161,13 @@ function onSelectWorkerFromDb() {
     if (w.lastKg && w.lastKg > 0) {
       document.getElementById('calcQtyKg').value = w.lastKg;
     }
-  } else if (w.role.includes('Pencudai')) {
+  } else if (w.role.includes('Pencudai') || w.role.includes('Cudai')) {
     document.getElementById('coaSelect').value = '403';
     document.getElementById('calcMode').value = 'borongan_kg';
-    document.getElementById('calcRateKg').value = appSettings.defaultRateCudai;
+    document.getElementById('calcRateKg').value = w.rate || appSettings.defaultRateCudai;
+    if (w.lastKg && w.lastKg > 0) {
+      document.getElementById('calcQtyKg').value = w.lastKg;
+    }
   } else if (w.role.includes('Pengawas')) {
     document.getElementById('coaSelect').value = '404';
     document.getElementById('calcMode').value = 'harian_hok';
@@ -209,6 +237,7 @@ function applyCalculatedIncome() {
 // ================= DYNAMIC ITEMS EDITOR =================
 function renderItemInputs() {
   const incBox = document.getElementById('incomeItemsBox');
+  if (!incBox) return;
   incBox.innerHTML = '';
   incomeItems.forEach((item, idx) => {
     const div = document.createElement('div');
@@ -222,6 +251,7 @@ function renderItemInputs() {
   });
 
   const dedBox = document.getElementById('deductionItemsBox');
+  if (!dedBox) return;
   dedBox.innerHTML = '';
   deductionItems.forEach((item, idx) => {
     const div = document.createElement('div');
@@ -265,69 +295,85 @@ function removeDeductionItem(idx) {
 
 // ================= LIVE RECEIPT UPDATE =================
 function updateReceipt() {
-  document.getElementById('prevBizName').innerText = document.getElementById('businessName').value || appSettings.businessName;
-  document.getElementById('prevBizUnit').innerText = document.getElementById('businessUnit').value || appSettings.businessUnit;
-  document.getElementById('prevBizAddr').innerText = document.getElementById('businessAddress').value || appSettings.businessAddress;
+  const bizName = document.getElementById('businessName');
+  const bizUnit = document.getElementById('businessUnit');
+  const bizAddr = document.getElementById('businessAddress');
+  if (bizName) document.getElementById('prevBizName').innerText = bizName.value || appSettings.businessName;
+  if (bizUnit) document.getElementById('prevBizUnit').innerText = bizUnit.value || appSettings.businessUnit;
+  if (bizAddr) document.getElementById('prevBizAddr').innerText = bizAddr.value || appSettings.businessAddress;
 
-  document.getElementById('prevRefNo').innerText = document.getElementById('refNo').value;
+  const refNoEl = document.getElementById('refNo');
+  if (refNoEl) document.getElementById('prevRefNo').innerText = refNoEl.value;
 
-  const rawDate = document.getElementById('payDate').value;
-  if (rawDate) {
-    const p = rawDate.split('-');
+  const payDateEl = document.getElementById('payDate');
+  if (payDateEl && payDateEl.value) {
+    const p = payDateEl.value.split('-');
     document.getElementById('prevDate').innerText = `${p[2]}/${p[1]}/${p[0]}`;
   }
 
-  const worker = document.getElementById('workerName').value || 'Nama Pekerja';
+  const workerEl = document.getElementById('workerName');
+  const worker = workerEl ? workerEl.value || 'Nama Pekerja' : 'Nama Pekerja';
   document.getElementById('prevWorker').innerText = worker;
   document.getElementById('prevSignWorker').innerText = `(${worker.length > 14 ? worker.substring(0, 14) + '.' : worker})`;
 
-  document.getElementById('prevRole').innerText = document.getElementById('workerRole').value || '-';
-  document.getElementById('prevRegu').innerText = document.getElementById('workerRegu').value || '-';
-  document.getElementById('prevPeriod').innerText = document.getElementById('periodText').value || '-';
+  const roleEl = document.getElementById('workerRole');
+  const reguEl = document.getElementById('workerRegu');
+  const periodEl = document.getElementById('periodText');
+  if (roleEl) document.getElementById('prevRole').innerText = roleEl.value || '-';
+  if (reguEl) document.getElementById('prevRegu').innerText = reguEl.value || '-';
+  if (periodEl) document.getElementById('prevPeriod').innerText = periodEl.value || '-';
 
-  const pic = document.getElementById('picName').value || appSettings.picName;
+  const picEl = document.getElementById('picName');
+  const pic = picEl ? picEl.value || appSettings.picName : appSettings.picName;
   document.getElementById('prevSignPic').innerText = `(${pic})`;
 
   // Render Income Table
   let totInc = 0;
   const incTbody = document.getElementById('prevIncomeTbody');
-  incTbody.innerHTML = '';
-  incomeItems.forEach(item => {
-    totInc += Number(item.amount || 0);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="col-item">${item.desc || 'Pendapatan'}</td>
-      <td class="col-val">${formatRupiah(item.amount)}</td>
-    `;
-    incTbody.appendChild(tr);
-  });
+  if (incTbody) {
+    incTbody.innerHTML = '';
+    incomeItems.forEach(item => {
+      totInc += Number(item.amount || 0);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="col-item">${item.desc || 'Pendapatan'}</td>
+        <td class="col-val">${formatRupiah(item.amount)}</td>
+      `;
+      incTbody.appendChild(tr);
+    });
+  }
 
   // Render Deduction Table
   let totDed = 0;
   const dedBox = document.getElementById('prevDeductionBox');
   const dedTbody = document.getElementById('prevDeductionTbody');
-  dedTbody.innerHTML = '';
 
   const activeDed = deductionItems.filter(i => Number(i.amount) > 0);
-  if (activeDed.length > 0) {
-    dedBox.style.display = 'block';
-    activeDed.forEach(item => {
-      totDed += Number(item.amount || 0);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="col-item">${item.desc || 'Potongan'}</td>
-        <td class="col-val">-${formatRupiah(item.amount)}</td>
-      `;
-      dedTbody.appendChild(tr);
-    });
-  } else {
-    dedBox.style.display = 'none';
+  if (dedBox && dedTbody) {
+    dedTbody.innerHTML = '';
+    if (activeDed.length > 0) {
+      dedBox.style.display = 'block';
+      activeDed.forEach(item => {
+        totDed += Number(item.amount || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="col-item">${item.desc || 'Potongan'}</td>
+          <td class="col-val">-${formatRupiah(item.amount)}</td>
+        `;
+        dedTbody.appendChild(tr);
+      });
+    } else {
+      dedBox.style.display = 'none';
+    }
   }
 
   const netTotal = totInc - totDed;
-  document.getElementById('prevTotal').innerText = formatRupiah(netTotal);
-  document.getElementById('prevMethod').innerText = document.getElementById('paymentMethod').value;
-  document.getElementById('prevFooterNote').innerText = document.getElementById('noteText').value || appSettings.footerNote;
+  const prevTot = document.getElementById('prevTotal');
+  const prevMeth = document.getElementById('paymentMethod');
+  const prevNote = document.getElementById('noteText');
+  if (prevTot) prevTot.innerText = formatRupiah(netTotal);
+  if (prevMeth) document.getElementById('prevMethod').innerText = prevMeth.value;
+  if (prevNote) document.getElementById('prevFooterNote').innerText = prevNote.value || appSettings.footerNote;
 }
 
 function resetSlipForm(ask = true) {
@@ -555,17 +601,22 @@ function renderDashboard() {
   let totalPaid = slipHistory.reduce((acc, s) => acc + s.netAmount, 0);
   let totalKasbon = slipHistory.reduce((acc, s) => acc + s.kasbonAmount, 0);
 
-  document.getElementById('kpiTotalPaid').innerText = formatRupiah(totalPaid);
-  document.getElementById('kpiSlipCount').innerText = `${slipHistory.length} slip dicetak`;
-  document.getElementById('kpiTotalKasbon').innerText = formatRupiah(totalKasbon);
-  document.getElementById('kpiActiveWorkers').innerText = workersDb.filter(w => w.status === 'Aktif').length;
+  const kpiPaid = document.getElementById('kpiTotalPaid');
+  const kpiSlip = document.getElementById('kpiSlipCount');
+  const kpiKasbon = document.getElementById('kpiTotalKasbon');
+  const kpiWorkers = document.getElementById('kpiActiveWorkers');
+
+  if (kpiPaid) kpiPaid.innerText = formatRupiah(totalPaid);
+  if (kpiSlip) kpiSlip.innerText = `${slipHistory.length} slip dicetak`;
+  if (kpiKasbon) kpiKasbon.innerText = formatRupiah(totalKasbon);
+  if (kpiWorkers) kpiWorkers.innerText = workersDb.filter(w => w.status === 'Aktif').length;
 
   // Realization vs COA Budget Table
   const tbody = document.getElementById('coaRealizationTbody');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   COA_ACCOUNTS.forEach(coa => {
-    // Total from history for this COA
     let currentHistoryPaid = slipHistory
       .filter(s => s.coaCode === coa.code)
       .reduce((acc, s) => acc + s.grossAmount, 0);
@@ -596,18 +647,23 @@ function renderDashboard() {
 
 // ================= WORKERS TABLE =================
 function renderWorkersTable() {
-  const search = document.getElementById('searchWorker').value.toLowerCase();
-  const regu = document.getElementById('filterWorkerRegu').value;
-  const status = document.getElementById('filterWorkerStatus').value;
+  const searchEl = document.getElementById('searchWorkerInput');
+  const reguEl = document.getElementById('filterWorkerRegu');
+  const roleEl = document.getElementById('filterWorkerRole');
 
-  const tbody = document.getElementById('workersTbody');
+  const search = searchEl ? searchEl.value.toLowerCase() : '';
+  const regu = reguEl ? reguEl.value.toLowerCase() : '';
+  const role = roleEl ? roleEl.value.toLowerCase() : '';
+
+  const tbody = document.getElementById('workersTableBody');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   const filtered = workersDb.filter(w => {
-    const matchSearch = w.name.toLowerCase().includes(search) || w.role.toLowerCase().includes(search) || w.id.toLowerCase().includes(search);
-    const matchRegu = !regu || w.regu.toLowerCase().includes(regu.toLowerCase());
-    const matchStatus = !status || w.status === status;
-    return matchSearch && matchRegu && matchStatus;
+    const matchSearch = (w.name || '').toLowerCase().includes(search) || (w.role || '').toLowerCase().includes(search) || (w.id || '').toLowerCase().includes(search);
+    const matchRegu = !regu || (w.regu || '').toLowerCase().includes(regu);
+    const matchRole = !role || (w.role || '').toLowerCase().includes(role);
+    return matchSearch && matchRegu && matchRole;
   });
 
   filtered.forEach(w => {
@@ -616,10 +672,10 @@ function renderWorkersTable() {
       <td><strong>${w.id}</strong></td>
       <td style="font-weight: 700; color: var(--text-main);">${w.name}</td>
       <td><span class="badge badge-blue">${w.role}</span></td>
-      <td>${w.regu}</td>
-      <td>${w.scheme}</td>
+      <td>${w.regu || '-'}</td>
+      <td>${w.scheme || 'Borongan'}</td>
       <td>${w.rate > 0 ? formatRupiah(w.rate) : '-'}</td>
-      <td><span class="badge ${w.status === 'Aktif' ? 'badge-green' : 'badge-gray'}">${w.status}</span></td>
+      <td><span class="badge ${w.status === 'Aktif' ? 'badge-green' : 'badge-gray'}">${w.status || 'Aktif'}</span></td>
       <td>
         <button class="btn btn-secondary btn-sm" onclick="quickCreateSlipForWorker('${w.id}')">Buat Slip</button>
       </td>
@@ -630,41 +686,53 @@ function renderWorkersTable() {
 
 function quickCreateSlipForWorker(id) {
   switchView('slip');
-  document.getElementById('filterSlipRegu').value = '';
+  const reguEl = document.getElementById('filterSlipRegu');
+  if (reguEl) reguEl.value = '';
   populateWorkerSelect();
-  document.getElementById('selectWorkerDb').value = id;
-  onSelectWorkerFromDb();
+  const select = document.getElementById('selectWorkerDb');
+  if (select) {
+    select.value = id;
+    onSelectWorkerFromDb();
+  }
 }
 
-function openAddWorkerModal() {
-  document.getElementById('addWorkerModal').classList.add('open');
+function openWorkerModal() {
+  const modal = document.getElementById('workerModal');
+  if (modal) modal.classList.add('open');
 }
 
-function closeAddWorkerModal() {
-  document.getElementById('addWorkerModal').classList.remove('open');
+function closeWorkerModal() {
+  const modal = document.getElementById('workerModal');
+  if (modal) modal.classList.remove('open');
 }
 
 function saveNewWorker() {
-  const name = document.getElementById('newWorkerName').value.trim();
+  const nameEl = document.getElementById('newWorkerName');
+  const name = nameEl ? nameEl.value.trim() : '';
   if (!name) {
     showToast("⚠️ Nama Pekerja Wajib Diisi!");
     return;
   }
 
+  const roleEl = document.getElementById('newWorkerRole');
+  const reguEl = document.getElementById('newWorkerRegu');
+  const schemeEl = document.getElementById('newWorkerScheme');
+  const rateEl = document.getElementById('newWorkerRate');
+
   const newW = {
     id: 'W' + String(workersDb.length + 1).padStart(3, '0'),
     name: name,
-    role: document.getElementById('newWorkerRole').value,
-    regu: document.getElementById('newWorkerRegu').value || '-',
-    scheme: document.getElementById('newWorkerScheme').value,
-    rate: parseFloat(document.getElementById('newWorkerRate').value) || 0,
+    role: roleEl ? roleEl.value : 'Borongan Pemetik',
+    regu: reguEl ? (reguEl.value || '-') : '-',
+    scheme: schemeEl ? schemeEl.value : 'Borongan',
+    rate: rateEl ? (parseFloat(rateEl.value) || 0) : 0,
     status: 'Aktif'
   };
 
   workersDb.unshift(newW);
   localStorage.setItem('koperasi_workers', JSON.stringify(workersDb));
 
-  closeAddWorkerModal();
+  closeWorkerModal();
   initDropdowns();
   renderWorkersTable();
   renderDashboard();
@@ -673,14 +741,18 @@ function saveNewWorker() {
 
 // ================= HISTORY TABLE =================
 function renderHistoryTable() {
-  const search = document.getElementById('searchHistory').value.toLowerCase();
-  const coa = document.getElementById('filterHistoryCoa').value;
+  const searchEl = document.getElementById('searchHistoryInput');
+  const coaEl = document.getElementById('filterHistoryCoa');
 
-  const tbody = document.getElementById('historyTbody');
+  const search = searchEl ? searchEl.value.toLowerCase() : '';
+  const coa = coaEl ? coaEl.value : '';
+
+  const tbody = document.getElementById('historyTableBody');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   const filtered = slipHistory.filter(s => {
-    const matchSearch = s.workerName.toLowerCase().includes(search) || s.refNo.toLowerCase().includes(search);
+    const matchSearch = (s.workerName || '').toLowerCase().includes(search) || (s.refNo || '').toLowerCase().includes(search);
     const matchCoa = !coa || s.coaCode === coa;
     return matchSearch && matchCoa;
   });
@@ -714,9 +786,128 @@ function deleteHistoryRecord(idx) {
   }
 }
 
+function clearHistory() {
+  if (confirm("⚠️ Apakah Anda yakin ingin menghapus SELURUH riwayat slip?")) {
+    slipHistory = [];
+    localStorage.setItem('koperasi_history', JSON.stringify(slipHistory));
+    renderHistoryTable();
+    renderDashboard();
+    showToast("Riwayat slip telah dikosongkan.");
+  }
+}
+
+function exportHistoryCSV() {
+  if (slipHistory.length === 0) {
+    showToast("⚠️ Belum ada riwayat slip untuk diexport!");
+    return;
+  }
+
+  let csv = "No Bukti,Tanggal,Nama Pekerja,Jabatan,Regu,Kode COA,Periode,Gaji Kotor,Kasbon,Gaji Bersih,Metode\n";
+  slipHistory.forEach(s => {
+    csv += `"${s.refNo}","${s.date}","${s.workerName}","${s.role}","${s.regu}","${s.coaCode}","${s.period}","${s.grossAmount}","${s.kasbonAmount}","${s.netAmount}","${s.paymentMethod}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Rekap_Slip_Koperasi_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  showToast("📥 File CSV berhasil didownload!");
+}
+
+// ================= SETTINGS & BACKUP =================
+function loadSettingsToUI() {
+  const setBizName = document.getElementById('setBusinessName');
+  const setBizUnit = document.getElementById('setBusinessUnit');
+  const setBizAddr = document.getElementById('setBusinessAddress');
+  const setPicName = document.getElementById('setPicName');
+  const setPaperWidth = document.getElementById('setPaperWidth');
+  const setRatePemetik = document.getElementById('setRatePemetik');
+  const setRatePengawas = document.getElementById('setRatePengawas');
+  const setFooterNote = document.getElementById('setFooterNote');
+
+  if (setBizName) setBizName.value = appSettings.businessName;
+  if (setBizUnit) setBizUnit.value = appSettings.businessUnit;
+  if (setBizAddr) setBizAddr.value = appSettings.businessAddress;
+  if (setPicName) setPicName.value = appSettings.picName;
+  if (setPaperWidth) setPaperWidth.value = appSettings.paperWidth || '58mm';
+  if (setRatePemetik) setRatePemetik.value = appSettings.defaultRatePemetik;
+  if (setRatePengawas) setRatePengawas.value = appSettings.defaultRatePengawas;
+  if (setFooterNote) setFooterNote.value = appSettings.footerNote;
+}
+
+function saveSettings() {
+  appSettings.businessName = document.getElementById('setBusinessName').value || DEFAULT_SETTINGS.businessName;
+  appSettings.businessUnit = document.getElementById('setBusinessUnit').value;
+  appSettings.businessAddress = document.getElementById('setBusinessAddress').value;
+  appSettings.picName = document.getElementById('setPicName').value;
+  appSettings.paperWidth = document.getElementById('setPaperWidth').value;
+  appSettings.defaultRatePemetik = parseFloat(document.getElementById('setRatePemetik').value) || 7000;
+  appSettings.defaultRatePengawas = parseFloat(document.getElementById('setRatePengawas').value) || 150000;
+  appSettings.footerNote = document.getElementById('setFooterNote').value;
+
+  localStorage.setItem('koperasi_settings', JSON.stringify(appSettings));
+  applyPaperWidth();
+  updateReceipt();
+  showToast("💾 Pengaturan berhasil disimpan!");
+}
+
+function applyPaperWidth() {
+  const w = appSettings.paperWidth || '58mm';
+  const printArea = document.getElementById('receiptPrintArea');
+  const widthLabel = document.getElementById('previewWidthLabel');
+  if (printArea) printArea.style.width = w;
+  if (widthLabel) widthLabel.innerText = w;
+}
+
+function backupDataJSON() {
+  const payload = { settings: appSettings, workers: workersDb, history: slipHistory };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Backup_Koperasi_ERP_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  showToast("📤 Backup JSON berhasil didownload.");
+}
+
+function restoreDataJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.settings) {
+        appSettings = data.settings;
+        localStorage.setItem('koperasi_settings', JSON.stringify(appSettings));
+      }
+      if (data.workers && Array.isArray(data.workers) && data.workers.length > 0) {
+        workersDb = data.workers;
+        localStorage.setItem('koperasi_workers', JSON.stringify(workersDb));
+      }
+      if (data.history) {
+        slipHistory = data.history;
+        localStorage.setItem('koperasi_history', JSON.stringify(slipHistory));
+      }
+      loadSettingsToUI();
+      initDropdowns();
+      renderDashboard();
+      renderWorkersTable();
+      renderHistoryTable();
+      updateReceipt();
+      showToast("✅ Data berhasil direstore!");
+    } catch {
+      showToast("❌ File JSON tidak valid!");
+    }
+  };
+  reader.readAsText(file);
+}
+
 // ================= SYNC WITH GOOGLE SHEETS =================
 function syncWithGoogleSheets() {
-  showToast("Memulai sinkronisasi data dari Google Sheets...");
+  alert('Memulai sinkronisasi data dari Google Sheets...');
 
   const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
   const t = new Date().getTime();
@@ -757,16 +948,17 @@ function syncWithGoogleSheets() {
     let newWorkers = [];
 
     linesP.forEach(line => {
+      // Split robustly by comma / quotes
       const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
-      if (fields.length >= 8) {
+      if (fields.length >= 3) {
         const no = fields[1];
         const name = fields[2];
-        const category = fields[3];
-        const regu = fields[4];
-        const schema = fields[5];
-        const status = fields[7];
+        const category = fields.length >= 4 ? fields[3] : "Borongan Pemetik";
+        const regu = fields.length >= 5 ? fields[4] : "-";
+        const schema = fields.length >= 6 ? fields[5] : "Borongan";
+        const status = fields.length >= 7 ? fields[6] : "Aktif";
 
-        if (/^\d+$/.test(no) && name && isNaN(name)) {
+        if (name && name !== "Nama Pekerja" && name !== "Nama Pemetik" && name.trim().length > 1) {
           let defaultRate = 7000;
           if (category.includes('Pengawas Lapangan') || category.includes('Koperasi')) defaultRate = 150000;
           else if (category.includes('Penjemur')) defaultRate = 125000;
@@ -774,7 +966,7 @@ function syncWithGoogleSheets() {
           else if (category.includes('Borongan Cudai')) defaultRate = 1500;
 
           newWorkers.push({
-            id: "W" + String(no).padStart(3, '0'),
+            id: "W" + String(newWorkers.length + 1).padStart(3, '0'),
             name: name,
             role: category || "Borongan Pemetik",
             regu: regu || "-",
@@ -790,15 +982,15 @@ function syncWithGoogleSheets() {
       let linesM = csvPemetik.split('\n');
       linesM.forEach(line => {
         const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
-        if (fields.length >= 8) {
+        if (fields.length >= 3) {
           const no = fields[1];
           const name = fields[2];
 
           let p2Kg = fields.length >= 9 ? (parseFloat(fields[8]) || 0) : 0;
-          let p1Kg = parseFloat(fields[4]) || 0;
+          let p1Kg = fields.length >= 5 ? (parseFloat(fields[4]) || 0) : 0;
           let activeKg = p2Kg > 0 ? p2Kg : p1Kg;
 
-          if (/^\d+$/.test(no) && name && activeKg > 0) {
+          if (name && activeKg > 0) {
             let matchWorker = newWorkers.find(w => w.name.toLowerCase() === name.toLowerCase());
             if (matchWorker) {
               matchWorker.lastKg = activeKg;
@@ -827,48 +1019,57 @@ function syncWithGoogleSheets() {
 
 // Bluetooth Printer Modal Functions
 function openBluetoothModal() {
-  document.getElementById('btModal').style.display = 'flex';
+  const modal = document.getElementById('btModal');
+  if (modal) modal.style.display = 'flex';
   loadBtDevices();
 }
 
 function closeBluetoothModal() {
-  document.getElementById('btModal').style.display = 'none';
+  const modal = document.getElementById('btModal');
+  if (modal) modal.style.display = 'none';
 }
 
 function loadBtDevices() {
   const select = document.getElementById('btDeviceSelect');
   const status = document.getElementById('btStatus');
+  if (!select) return;
   select.innerHTML = '<option value="">-- Pilih Perangkat Bluetooth --</option>';
 
   if (typeof AndroidPrint !== 'undefined' && AndroidPrint.getPairedBluetoothDevices) {
     try {
       const devices = JSON.parse(AndroidPrint.getPairedBluetoothDevices());
       if (devices.length === 0) {
-        status.innerText = 'Belum ada printer Bluetooth terpasang. Pair terlebih dahulu di HP.';
-        status.style.color = 'var(--danger)';
+        if (status) {
+          status.innerText = 'Belum ada printer Bluetooth terpasang. Pair terlebih dahulu di HP.';
+          status.style.color = 'var(--danger)';
+        }
       } else {
         devices.forEach(d => {
           select.add(new Option(`${d.name} (${d.address})`, d.address));
         });
-        status.innerText = `Ditemukan ${devices.length} printer terpasang.`;
-        status.style.color = 'var(--primary)';
+        if (status) {
+          status.innerText = `Ditemukan ${devices.length} printer terpasang.`;
+          status.style.color = 'var(--primary)';
+        }
       }
     } catch (e) {
-      status.innerText = 'Gagal memuat list Bluetooth: ' + e.message;
+      if (status) status.innerText = 'Gagal memuat list Bluetooth: ' + e.message;
     }
   } else {
-    status.innerText = 'Fitur Bluetooth aktif di aplikasi HP Android.';
+    if (status) status.innerText = 'Fitur Bluetooth aktif di aplikasi HP Android.';
   }
 }
 
 function connectBtDevice() {
-  const addr = document.getElementById('btDeviceSelect').value;
+  const addrEl = document.getElementById('btDeviceSelect');
+  const addr = addrEl ? addrEl.value : '';
   if (!addr) {
     showToast("⚠️ Pilih perangkat printer!");
     return;
   }
   if (typeof AndroidPrint !== 'undefined' && AndroidPrint.connectBluetoothDevice) {
-    document.getElementById('btStatus').innerText = "Menghubungkan ke printer...";
+    const status = document.getElementById('btStatus');
+    if (status) status.innerText = "Menghubungkan ke printer...";
     AndroidPrint.connectBluetoothDevice(addr);
   }
 }
@@ -881,13 +1082,21 @@ function disconnectBtDevice() {
 }
 
 function onBtConnected(devName) {
-  document.getElementById('btStatus').innerText = 'Terhubung ke ' + (devName || 'Printer');
-  document.getElementById('btStatus').style.color = 'var(--primary)';
-  document.getElementById('directBtBtnBox').style.display = 'block';
+  const status = document.getElementById('btStatus');
+  const box = document.getElementById('directBtBtnBox');
+  if (status) {
+    status.innerText = 'Terhubung ke ' + (devName || 'Printer');
+    status.style.color = 'var(--primary)';
+  }
+  if (box) box.style.display = 'block';
 }
 
 function onBtDisconnected(msg) {
-  document.getElementById('btStatus').innerText = 'Terputus: ' + (msg || '');
-  document.getElementById('btStatus').style.color = 'var(--danger)';
-  document.getElementById('directBtBtnBox').style.display = 'none';
+  const status = document.getElementById('btStatus');
+  const box = document.getElementById('directBtBtnBox');
+  if (status) {
+    status.innerText = 'Terputus: ' + (msg || '');
+    status.style.color = 'var(--danger)';
+  }
+  if (box) box.style.display = 'none';
 }
