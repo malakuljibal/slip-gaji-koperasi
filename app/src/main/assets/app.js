@@ -18,6 +18,12 @@ let deductionItems = [
   { desc: "Kasbon / Pinjaman", amount: 0 }
 ];
 
+// Helper safe DOM getter
+function getVal(id, fallback = "") {
+  const el = document.getElementById(id);
+  return el ? (el.value || fallback) : fallback;
+}
+
 // Initialization
 window.addEventListener('DOMContentLoaded', () => {
   // Ensure workersDb is never empty
@@ -144,14 +150,18 @@ function populateWorkerSelect() {
 }
 
 function onSelectWorkerFromDb() {
-  const id = document.getElementById('selectWorkerDb').value;
+  const id = getVal('selectWorkerDb');
   if (!id) return;
   const w = workersDb.find(item => item.id === id);
   if (!w) return;
 
-  document.getElementById('workerName').value = w.name;
-  document.getElementById('workerRole').value = w.role;
-  document.getElementById('workerRegu').value = w.regu || '-';
+  const wNameEl = document.getElementById('workerName');
+  const wRoleEl = document.getElementById('workerRole');
+  const wReguEl = document.getElementById('workerRegu');
+
+  if (wNameEl) wNameEl.value = w.name;
+  if (wRoleEl) wRoleEl.value = w.role;
+  if (wReguEl) wReguEl.value = w.regu || '-';
 
   // Set Kasbon if available from Google Sheets sync
   if (w.lastKasbon && w.lastKasbon > 0) {
@@ -161,31 +171,33 @@ function onSelectWorkerFromDb() {
   }
 
   // Auto-select COA & calculator mode based on role
+  const coaEl = document.getElementById('coaSelect');
+  const modeEl = document.getElementById('calcMode');
+  const rateKgEl = document.getElementById('calcRateKg');
+  const qtyKgEl = document.getElementById('calcQtyKg');
+  const rateHokEl = document.getElementById('calcRateHok');
+
   if (w.role.includes('Pemetik')) {
-    document.getElementById('coaSelect').value = '402';
-    document.getElementById('calcMode').value = 'borongan_kg';
-    document.getElementById('calcRateKg').value = w.rate || appSettings.defaultRatePemetik;
-    if (w.lastKg && w.lastKg > 0) {
-      document.getElementById('calcQtyKg').value = w.lastKg;
-    }
+    if (coaEl) coaEl.value = '402';
+    if (modeEl) modeEl.value = 'borongan_kg';
+    if (rateKgEl) rateKgEl.value = w.rate || appSettings.defaultRatePemetik;
+    if (qtyKgEl && w.lastKg && w.lastKg > 0) qtyKgEl.value = w.lastKg;
   } else if (w.role.includes('Pencudai') || w.role.includes('Cudai')) {
-    document.getElementById('coaSelect').value = '403';
-    document.getElementById('calcMode').value = 'borongan_kg';
-    document.getElementById('calcRateKg').value = w.rate || appSettings.defaultRateCudai;
-    if (w.lastKg && w.lastKg > 0) {
-      document.getElementById('calcQtyKg').value = w.lastKg;
-    }
+    if (coaEl) coaEl.value = '403';
+    if (modeEl) modeEl.value = 'borongan_kg';
+    if (rateKgEl) rateKgEl.value = w.rate || appSettings.defaultRateCudai;
+    if (qtyKgEl && w.lastKg && w.lastKg > 0) qtyKgEl.value = w.lastKg;
   } else if (w.role.includes('Pengawas')) {
-    document.getElementById('coaSelect').value = '404';
-    document.getElementById('calcMode').value = 'harian_hok';
-    document.getElementById('calcRateHok').value = w.rate || appSettings.defaultRatePengawas;
+    if (coaEl) coaEl.value = '404';
+    if (modeEl) modeEl.value = 'harian_hok';
+    if (rateHokEl) rateHokEl.value = w.rate || appSettings.defaultRatePengawas;
   } else if (w.role.includes('Penjemur')) {
-    document.getElementById('coaSelect').value = '405';
-    document.getElementById('calcMode').value = 'harian_hok';
-    document.getElementById('calcRateHok').value = w.rate || 125000;
+    if (coaEl) coaEl.value = '405';
+    if (modeEl) modeEl.value = 'harian_hok';
+    if (rateHokEl) rateHokEl.value = w.rate || 125000;
   } else if (w.role.includes('Pemarasan')) {
-    document.getElementById('coaSelect').value = '407';
-    document.getElementById('calcMode').value = 'borongan_lahan';
+    if (coaEl) coaEl.value = '407';
+    if (modeEl) modeEl.value = 'borongan_lahan';
   }
 
   toggleCalcMode();
@@ -194,14 +206,18 @@ function onSelectWorkerFromDb() {
 }
 
 function onCoaChange() {
-  const code = document.getElementById('coaSelect').value;
+  const code = getVal('coaSelect');
   const coa = COA_ACCOUNTS.find(c => c.code === code);
+  const modeEl = document.getElementById('calcMode');
+  const rateKgEl = document.getElementById('calcRateKg');
+  const rateHokEl = document.getElementById('calcRateHok');
+
   if (coa && coa.mode !== 'custom') {
-    document.getElementById('calcMode').value = coa.mode;
-    if (coa.mode === 'borongan_kg' && coa.defaultRate) {
-      document.getElementById('calcRateKg').value = coa.defaultRate;
-    } else if (coa.mode === 'harian_hok' && coa.defaultRate) {
-      document.getElementById('calcRateHok').value = coa.defaultRate;
+    if (modeEl) modeEl.value = coa.mode;
+    if (coa.mode === 'borongan_kg' && coa.defaultRate && rateKgEl) {
+      rateKgEl.value = coa.defaultRate;
+    } else if (coa.mode === 'harian_hok' && coa.defaultRate && rateHokEl) {
+      rateHokEl.value = coa.defaultRate;
     }
     toggleCalcMode();
   }
@@ -210,7 +226,7 @@ function onCoaChange() {
 
 // ================= SMART CALCULATOR =================
 function toggleCalcMode() {
-  const mode = document.getElementById('calcMode').value;
+  const mode = getVal('calcMode');
   const kgBox = document.getElementById('calcInputsKg');
   const hokBox = document.getElementById('calcInputsHok');
   const lahanBox = document.getElementById('calcInputsLahan');
@@ -223,29 +239,22 @@ function toggleCalcMode() {
 }
 
 function applyCalculatedIncome() {
-  const mode = document.getElementById('calcMode').value;
-  const roleEl = document.getElementById('workerRole');
-  const role = roleEl ? (roleEl.value || 'Pekerja') : 'Pekerja';
+  const mode = getVal('calcMode');
+  const role = getVal('workerRole', 'Pekerja');
 
   if (mode === 'borongan_kg') {
-    const qtyKgEl = document.getElementById('calcQtyKg');
-    const rateKgEl = document.getElementById('calcRateKg');
-    const kg = qtyKgEl ? (parseFloat(qtyKgEl.value) || 0) : 0;
-    const rate = rateKgEl ? (parseFloat(rateKgEl.value) || 7000) : 7000;
+    const kg = parseFloat(getVal('calcQtyKg', '0')) || 0;
+    const rate = parseFloat(getVal('calcRateKg', '7000')) || 7000;
     const total = kg * rate;
     incomeItems[0] = { desc: `Hasil ${role} (${kg} kg x ${formatRupiah(rate)})`, amount: total };
   } else if (mode === 'harian_hok') {
-    const qtyHokEl = document.getElementById('calcQtyHok') || document.getElementById('calcDaysHok');
-    const rateHokEl = document.getElementById('calcRateHok');
-    const days = qtyHokEl ? (parseFloat(qtyHokEl.value) || 0) : 0;
-    const rate = rateHokEl ? (parseFloat(rateHokEl.value) || 150000) : 150000;
+    const days = parseFloat(getVal('calcQtyHok', getVal('calcDaysHok', '0'))) || 0;
+    const rate = parseFloat(getVal('calcRateHok', '150000')) || 150000;
     const total = days * rate;
     incomeItems[0] = { desc: `Gaji ${role} (${days} hari x ${formatRupiah(rate)})`, amount: total };
   } else if (mode === 'borongan_lahan') {
-    const lahanInfoEl = document.getElementById('calcLahanInfo') || document.getElementById('calcLuasLahan');
-    const rateLahanEl = document.getElementById('calcRateLahan');
-    const luas = lahanInfoEl ? (lahanInfoEl.value || '') : '';
-    const rate = rateLahanEl ? (parseFloat(rateLahanEl.value) || 0) : 0;
+    const luas = getVal('calcLahanInfo', getVal('calcLuasLahan', ''));
+    const rate = parseFloat(getVal('calcRateLahan', '0')) || 0;
     incomeItems[0] = { desc: `Upah Pemarasan (${luas || 'Borongan Lahan'})`, amount: rate };
   }
 
@@ -253,7 +262,6 @@ function applyCalculatedIncome() {
   updateReceipt();
 }
 
-// Alias function for html oninput="applySmartCalc()"
 const applySmartCalc = applyCalculatedIncome;
 
 // ================= DYNAMIC ITEMS EDITOR =================
@@ -321,43 +329,40 @@ function removeDeductionItem(idx) {
 
 // ================= LIVE RECEIPT UPDATE =================
 function updateReceipt() {
-  const bizName = document.getElementById('businessName');
-  const bizUnit = document.getElementById('businessUnit');
-  const bizAddr = document.getElementById('businessAddress');
-  if (bizName && document.getElementById('prevBizName')) document.getElementById('prevBizName').innerText = bizName.value || appSettings.businessName;
-  if (bizUnit && document.getElementById('prevBizUnit')) document.getElementById('prevBizUnit').innerText = bizUnit.value || appSettings.businessUnit;
-  if (bizAddr && document.getElementById('prevBizAddr')) document.getElementById('prevBizAddr').innerText = bizAddr.value || appSettings.businessAddress;
+  const bizName = getVal('setBusinessName', appSettings.businessName);
+  const bizUnit = getVal('setBusinessUnit', appSettings.businessUnit);
+  const bizAddr = getVal('setBusinessAddress', appSettings.businessAddress);
 
-  const refNoEl = document.getElementById('refNo');
-  if (refNoEl && document.getElementById('prevRefNo')) document.getElementById('prevRefNo').innerText = refNoEl.value;
+  if (document.getElementById('prevBusinessName')) document.getElementById('prevBusinessName').innerText = bizName;
+  if (document.getElementById('prevBusinessUnit')) document.getElementById('prevBusinessUnit').innerText = bizUnit;
+  if (document.getElementById('prevBusinessAddress')) document.getElementById('prevBusinessAddress').innerText = bizAddr;
 
-  const payDateEl = document.getElementById('payDate');
-  if (payDateEl && payDateEl.value && document.getElementById('prevDate')) {
-    const p = payDateEl.value.split('-');
-    document.getElementById('prevDate').innerText = `${p[2]}/${p[1]}/${p[0]}`;
+  const refNo = getVal('refNo');
+  if (document.getElementById('prevRefNo')) document.getElementById('prevRefNo').innerText = refNo;
+
+  const payDate = getVal('payDate');
+  if (payDate && document.getElementById('prevDate')) {
+    const p = payDate.split('-');
+    if (p.length === 3) document.getElementById('prevDate').innerText = `${p[2]}/${p[1]}/${p[0]}`;
   }
 
-  const workerEl = document.getElementById('workerName');
-  const worker = workerEl ? workerEl.value || 'Nama Pekerja' : 'Nama Pekerja';
+  const worker = getVal('workerName', 'Nama Pekerja');
   if (document.getElementById('prevWorker')) document.getElementById('prevWorker').innerText = worker;
   if (document.getElementById('prevSignWorker')) document.getElementById('prevSignWorker').innerText = `(${worker.length > 14 ? worker.substring(0, 14) + '.' : worker})`;
 
-  const roleEl = document.getElementById('workerRole');
-  const reguEl = document.getElementById('workerRegu');
-  const periodEl = document.getElementById('periodText');
-  const coaEl = document.getElementById('coaSelect');
+  const role = getVal('workerRole', '-');
+  const regu = getVal('workerRegu', '-');
+  const period = getVal('periodText', '-');
+  const coa = getVal('coaSelect', '-');
 
-  if (roleEl && reguEl && document.getElementById('prevRoleRegu')) {
-    document.getElementById('prevRoleRegu').innerText = `${reguEl.value || '-'} / ${roleEl.value || '-'}`;
-  }
-  if (periodEl && document.getElementById('prevPeriod')) document.getElementById('prevPeriod').innerText = periodEl.value || '-';
-  if (coaEl && document.getElementById('prevCoa')) document.getElementById('prevCoa').innerText = coaEl.value || '-';
+  if (document.getElementById('prevRoleRegu')) document.getElementById('prevRoleRegu').innerText = `${regu} / ${role}`;
+  if (document.getElementById('prevPeriod')) document.getElementById('prevPeriod').innerText = period;
+  if (document.getElementById('prevCoa')) document.getElementById('prevCoa').innerText = coa;
 
-  const picEl = document.getElementById('picName');
-  const pic = picEl ? picEl.value || appSettings.picName : appSettings.picName;
+  const pic = getVal('picName', appSettings.picName);
   if (document.getElementById('prevSignPic')) document.getElementById('prevSignPic').innerText = `(${pic})`;
 
-  // Render Income Table in Receipt Preview
+  // Render Income Table
   let totInc = 0;
   const incTbody = document.getElementById('prevIncomeTbody') || document.getElementById('prevIncomeTable');
   if (incTbody) {
@@ -373,7 +378,7 @@ function updateReceipt() {
     });
   }
 
-  // Render Deduction Table in Receipt Preview
+  // Render Deduction Table
   let totDed = 0;
   const dedBox = document.getElementById('prevDeductionBox') || document.getElementById('prevDeductionSection');
   const dedTbody = document.getElementById('prevDeductionTbody') || document.getElementById('prevDeductionTable');
@@ -398,12 +403,9 @@ function updateReceipt() {
   }
 
   const netTotal = totInc - totDed;
-  const prevTot = document.getElementById('prevTotal');
-  const prevMeth = document.getElementById('paymentMethod');
-  const prevNote = document.getElementById('noteText');
-  if (prevTot) prevTot.innerText = formatRupiah(netTotal);
-  if (prevMeth && document.getElementById('prevMethod')) document.getElementById('prevMethod').innerText = prevMeth.value;
-  if (prevNote && document.getElementById('prevFooterNote')) document.getElementById('prevFooterNote').innerText = prevNote.value || appSettings.footerNote;
+  if (document.getElementById('prevTotal')) document.getElementById('prevTotal').innerText = formatRupiah(netTotal);
+  if (document.getElementById('prevPaymentMethod')) document.getElementById('prevPaymentMethod').innerText = getVal('paymentMethod', 'Tunai / Cash');
+  if (document.getElementById('prevFooterNote')) document.getElementById('prevFooterNote').innerText = getVal('noteText', appSettings.footerNote);
 }
 
 function resetSlipForm(ask = true) {
@@ -451,7 +453,7 @@ function resetSlipForm(ask = true) {
 
 // ================= SAVE & PRINT SLIP =================
 function saveAndPrintSlip() {
-  const workerName = document.getElementById('workerName').value.trim();
+  const workerName = getVal('workerName').trim();
   if (!workerName) {
     showToast("⚠️ Tuliskan Nama Pekerja terlebih dahulu!");
     return;
@@ -463,29 +465,28 @@ function saveAndPrintSlip() {
 
   const record = {
     id: 'SLIP-' + Date.now(),
-    refNo: document.getElementById('refNo').value,
-    date: document.getElementById('payDate').value,
+    refNo: getVal('refNo'),
+    date: getVal('payDate'),
     workerName: workerName,
-    role: document.getElementById('workerRole').value,
-    regu: document.getElementById('workerRegu').value,
-    coaCode: document.getElementById('coaSelect').value,
-    period: document.getElementById('periodText').value,
+    role: getVal('workerRole'),
+    regu: getVal('workerRegu'),
+    coaCode: getVal('coaSelect'),
+    period: getVal('periodText'),
     grossAmount: totInc,
     kasbonAmount: totDed,
     netAmount: netTotal,
-    paymentMethod: document.getElementById('paymentMethod').value,
+    paymentMethod: getVal('paymentMethod'),
     incomeDetails: JSON.parse(JSON.stringify(incomeItems)),
     deductionDetails: JSON.parse(JSON.stringify(deductionItems))
   };
 
-  // Add to history
-  slipHistory.unshift(record);
-  localStorage.setItem('koperasi_history', JSON.stringify(slipHistory));
+  if (!slipHistory.some(s => s.refNo === record.refNo && s.workerName === record.workerName)) {
+    slipHistory.unshift(record);
+    localStorage.setItem('koperasi_history', JSON.stringify(slipHistory));
+    renderDashboard();
+    renderHistoryTable();
+  }
 
-  renderDashboard();
-  renderHistoryTable();
-
-  // Print execution
   if (typeof AndroidPrint !== 'undefined' && AndroidPrint.isBluetoothConnected && AndroidPrint.isBluetoothConnected()) {
     printDirectBluetooth();
   } else {
@@ -507,10 +508,10 @@ function prepareAndPrintSystem() {
 }
 
 function shareSlipWhatsApp() {
-  const worker = document.getElementById('workerName').value || 'Pekerja';
-  const total = document.getElementById('prevTotal').innerText || '0';
-  const ref = document.getElementById('refNo').value || '';
-  const period = document.getElementById('periodText').value || '';
+  const worker = getVal('workerName', 'Pekerja');
+  const total = document.getElementById('prevTotal') ? document.getElementById('prevTotal').innerText : '0';
+  const ref = getVal('refNo');
+  const period = getVal('periodText');
 
   let text = `*SLIP GAJI KOPERASI ILANTAT JAYA*\n`;
   text += `No. Bukti: ${ref}\n`;
@@ -558,11 +559,11 @@ function generateEscPosBytes() {
   bytes.push(0x1B, 0x61, 0x01); // Center Align
 
   bytes.push(0x1B, 0x45, 0x01); // Bold
-  pushString((document.getElementById('businessName').value || appSettings.businessName) + "\n");
+  pushString((getVal('setBusinessName') || appSettings.businessName) + "\n");
   bytes.push(0x1B, 0x45, 0x00);
 
-  pushString((document.getElementById('businessUnit').value || appSettings.businessUnit) + "\n");
-  pushString((document.getElementById('businessAddress').value || appSettings.businessAddress) + "\n");
+  pushString((getVal('setBusinessUnit') || appSettings.businessUnit) + "\n");
+  pushString((getVal('setBusinessAddress') || appSettings.businessAddress) + "\n");
   pushString("------------------------------\n");
 
   bytes.push(0x1B, 0x61, 0x00); // Left Align
@@ -580,11 +581,11 @@ function generateEscPosBytes() {
     }
   }
 
-  addKeyValue("No.Bukti", document.getElementById('refNo').value);
-  addKeyValue("Tanggal", document.getElementById('payDate').value);
-  addKeyValue("Pekerja", document.getElementById('workerName').value);
-  addKeyValue("Jabatan", document.getElementById('workerRole').value);
-  addKeyValue("Periode", document.getElementById('periodText').value);
+  addKeyValue("No.Bukti", getVal('refNo'));
+  addKeyValue("Tanggal", getVal('payDate'));
+  addKeyValue("Pekerja", getVal('workerName'));
+  addKeyValue("Jabatan", getVal('workerRole'));
+  addKeyValue("Periode", getVal('periodText'));
   pushString("------------------------------\n");
 
   bytes.push(0x1B, 0x45, 0x01);
@@ -627,12 +628,12 @@ function generateEscPosBytes() {
   pushString(totStr + " ".repeat(totSp) + totAmt + "\n");
   bytes.push(0x1B, 0x45, 0x00);
 
-  addKeyValue("Metode", document.getElementById('paymentMethod').value);
+  addKeyValue("Metode", getVal('paymentMethod', 'Tunai / Cash'));
   pushString("------------------------------\n");
 
   pushString("Penerima,            Pengesah,\n\n\n");
-  const worker = document.getElementById('workerName').value;
-  const pic = document.getElementById('picName').value || appSettings.picName;
+  const worker = getVal('workerName', 'Pekerja');
+  const pic = getVal('picName', appSettings.picName);
   let wSign = "(" + (worker.length > 11 ? worker.substring(0, 11) : worker) + ")";
   let pSign = "(" + (pic.length > 11 ? pic.substring(0, 11) : pic) + ")";
   let signSp = Math.max(1, 30 - (wSign.length + pSign.length));
@@ -640,7 +641,7 @@ function generateEscPosBytes() {
   pushString("------------------------------\n");
 
   bytes.push(0x1B, 0x61, 0x01);
-  pushString((document.getElementById('noteText').value || appSettings.footerNote) + "\n");
+  pushString((getVal('noteText') || appSettings.footerNote) + "\n");
   pushString("--- Simpan bukti ini ---\n\n\n\n\n\n");
   bytes.push(0x1D, 0x56, 0x42, 0x00);
 
@@ -648,6 +649,41 @@ function generateEscPosBytes() {
 }
 
 function printDirectBluetooth() {
+  const workerName = getVal('workerName').trim();
+  if (!workerName) {
+    showToast("⚠️ Tuliskan Nama Pekerja terlebih dahulu!");
+    return;
+  }
+
+  // Save record to history
+  let totInc = incomeItems.reduce((acc, i) => acc + Number(i.amount || 0), 0);
+  let totDed = deductionItems.reduce((acc, i) => acc + Number(i.amount || 0), 0);
+  let netTotal = totInc - totDed;
+
+  const record = {
+    id: 'SLIP-' + Date.now(),
+    refNo: getVal('refNo'),
+    date: getVal('payDate'),
+    workerName: workerName,
+    role: getVal('workerRole'),
+    regu: getVal('workerRegu'),
+    coaCode: getVal('coaSelect'),
+    period: getVal('periodText'),
+    grossAmount: totInc,
+    kasbonAmount: totDed,
+    netAmount: netTotal,
+    paymentMethod: getVal('paymentMethod'),
+    incomeDetails: JSON.parse(JSON.stringify(incomeItems)),
+    deductionDetails: JSON.parse(JSON.stringify(deductionItems))
+  };
+
+  if (!slipHistory.some(s => s.refNo === record.refNo && s.workerName === record.workerName)) {
+    slipHistory.unshift(record);
+    localStorage.setItem('koperasi_history', JSON.stringify(slipHistory));
+    renderDashboard();
+    renderHistoryTable();
+  }
+
   if (typeof AndroidPrint === 'undefined' || !AndroidPrint.isBluetoothConnected || !AndroidPrint.isBluetoothConnected()) {
     openBluetoothModal();
     showToast("⚠️ Hubungkan Printer Bluetooth terlebih dahulu!");
@@ -662,7 +698,12 @@ function printDirectBluetooth() {
     }
     const base64Str = btoa(binaryStr);
     const ok = AndroidPrint.sendRawBytes(base64Str);
-    if (!ok) showToast("❌ Gagal mengirim data ke printer Bluetooth.");
+    if (ok) {
+      showToast("✅ Berhasil mencetak ke Printer Bluetooth!");
+      closeBluetoothModal();
+    } else {
+      showToast("❌ Gagal mengirim data ke printer Bluetooth.");
+    }
   } catch (e) {
     showToast("❌ Error cetak: " + e.message);
   }
@@ -770,34 +811,34 @@ function quickCreateSlipForWorker(id) {
 
 function openWorkerModal() {
   const modal = document.getElementById('workerModal');
-  if (modal) modal.classList.add('open');
+  if (modal) {
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  }
 }
 
 function closeWorkerModal() {
   const modal = document.getElementById('workerModal');
-  if (modal) modal.classList.remove('open');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
 }
 
 function saveNewWorker() {
-  const nameEl = document.getElementById('newWorkerName');
-  const name = nameEl ? nameEl.value.trim() : '';
+  const name = getVal('modalWorkerName').trim();
   if (!name) {
     showToast("⚠️ Nama Pekerja Wajib Diisi!");
     return;
   }
 
-  const roleEl = document.getElementById('newWorkerRole');
-  const reguEl = document.getElementById('newWorkerRegu');
-  const schemeEl = document.getElementById('newWorkerScheme');
-  const rateEl = document.getElementById('newWorkerRate');
-
   const newW = {
     id: 'W' + String(workersDb.length + 1).padStart(3, '0'),
     name: name,
-    role: roleEl ? roleEl.value : 'Borongan Pemetik',
-    regu: reguEl ? (reguEl.value || '-') : '-',
-    scheme: schemeEl ? schemeEl.value : 'Borongan',
-    rate: rateEl ? (parseFloat(rateEl.value) || 0) : 0,
+    role: getVal('modalWorkerRole', 'Borongan Pemetik'),
+    regu: getVal('modalWorkerRegu', '-'),
+    scheme: getVal('modalWorkerScheme', 'Borongan'),
+    rate: parseFloat(getVal('modalWorkerRate', '0')) || 0,
     status: 'Aktif'
   };
 
@@ -813,11 +854,8 @@ function saveNewWorker() {
 
 // ================= HISTORY TABLE =================
 function renderHistoryTable() {
-  const searchEl = document.getElementById('searchHistoryInput');
-  const coaEl = document.getElementById('filterHistoryCoa');
-
-  const search = searchEl ? searchEl.value.toLowerCase() : '';
-  const coa = coaEl ? coaEl.value : '';
+  const search = getVal('searchHistoryInput').toLowerCase();
+  const coa = getVal('filterHistoryCoa');
 
   const tbody = document.getElementById('historyTableBody');
   if (!tbody) return;
@@ -910,14 +948,14 @@ function loadSettingsToUI() {
 }
 
 function saveSettings() {
-  appSettings.businessName = document.getElementById('setBusinessName').value || DEFAULT_SETTINGS.businessName;
-  appSettings.businessUnit = document.getElementById('setBusinessUnit').value;
-  appSettings.businessAddress = document.getElementById('setBusinessAddress').value;
-  appSettings.picName = document.getElementById('setPicName').value;
-  appSettings.paperWidth = document.getElementById('setPaperWidth').value;
-  appSettings.defaultRatePemetik = parseFloat(document.getElementById('setRatePemetik').value) || 7000;
-  appSettings.defaultRatePengawas = parseFloat(document.getElementById('setRatePengawas').value) || 150000;
-  appSettings.footerNote = document.getElementById('setFooterNote').value;
+  appSettings.businessName = getVal('setBusinessName', DEFAULT_SETTINGS.businessName);
+  appSettings.businessUnit = getVal('setBusinessUnit');
+  appSettings.businessAddress = getVal('setBusinessAddress');
+  appSettings.picName = getVal('setPicName');
+  appSettings.paperWidth = getVal('setPaperWidth', '58mm');
+  appSettings.defaultRatePemetik = parseFloat(getVal('setRatePemetik', '7000')) || 7000;
+  appSettings.defaultRatePengawas = parseFloat(getVal('setRatePengawas', '150000')) || 150000;
+  appSettings.footerNote = getVal('setFooterNote');
 
   localStorage.setItem('koperasi_settings', JSON.stringify(appSettings));
   applyPaperWidth();
@@ -1147,8 +1185,7 @@ function loadBtDevices() {
 }
 
 function connectBtDevice() {
-  const addrEl = document.getElementById('btDeviceSelect');
-  const addr = addrEl ? addrEl.value : '';
+  const addr = getVal('btDeviceSelect');
   if (!addr) {
     showToast("⚠️ Pilih perangkat printer!");
     return;
