@@ -59,8 +59,9 @@
         </div>
       </div>
       <div class="topbar-actions">
-        <span class="pill-badge hide-mobile">🖨️ Thermal 57x30 Ready</span>
-        <button class="btn btn-primary btn-sm" onclick="switchView('slip')">+ Buat Slip Baru</button>
+        <span class="pill-badge hide-mobile">🖨️ Thermal 58mm Ready</span>
+        <button class="btn btn-primary btn-sm" onclick="syncWithGoogleSheets()" style="background: #059669; color: white;">⚡ Sync GSheets</button>
+        <button class="btn btn-accent btn-sm" onclick="switchView('slip')">+ Buat Slip Baru</button>
       </div>
     </header>
 
@@ -399,7 +400,10 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">👥 Database Pekerja &amp; Ketua Regu Koperasi</div>
-            <button class="btn btn-primary btn-sm" onclick="openWorkerModal()">+ Tambah Pekerja</button>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary btn-sm" onclick="syncWithGoogleSheets()" style="background: #059669; color: white;">⚡ Sync GSheets</button>
+              <button class="btn btn-accent btn-sm" onclick="openWorkerModal()">+ Tambah Pekerja</button>
+            </div>
           </div>
 
           <div class="filter-bar">
@@ -525,6 +529,7 @@
 
           <div class="action-bar">
             <button class="btn btn-primary" onclick="saveSettings()">💾 Simpan Pengaturan</button>
+            <button class="btn btn-primary" onclick="syncWithGoogleSheets()" style="background: #059669; color: white;">⚡ Sync Data dari Google Sheets</button>
             <button class="btn btn-secondary" onclick="backupDataJSON()">📤 Backup Data (JSON)</button>
             <button class="btn btn-secondary" onclick="document.getElementById('restoreFile').click()">📥 Restore Data (JSON)</button>
             <input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreDataJSON(event)">
