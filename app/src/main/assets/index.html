@@ -293,13 +293,21 @@
                 </div>
               </div>
 
-              <div class="action-bar">
-                <button class="btn btn-primary btn-lg" style="flex: 2;" onclick="saveAndPrintSlip()">
-                  🖨️ Simpan &amp; Cetak Thermal (57x30)
+              <div class="action-bar" style="flex-direction: column; gap: 0.6rem; margin-top: 1rem;">
+                <button class="btn btn-primary btn-lg" style="width: 100%; background: #10b981; color: white; font-size: 1.05rem; padding: 0.85rem; font-weight: 700; box-shadow: 0 4px 12px rgba(16,185,129,0.3);" onclick="printDirectBluetooth()">
+                  🖨️ CETAK BLUETOOTH LANGSUNG (58mm)
                 </button>
-                <button class="btn btn-accent btn-lg" style="flex: 1;" onclick="shareSlipWhatsApp()">
-                  💬 Kirim WA / Copy
-                </button>
+                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                  <button class="btn btn-secondary" style="flex: 1;" onclick="openBluetoothModal()">
+                    📶 Pilih Printer
+                  </button>
+                  <button class="btn btn-secondary" style="flex: 1;" onclick="prepareAndPrintSystem()">
+                    📄 Simpan PDF
+                  </button>
+                  <button class="btn btn-accent" style="flex: 1;" onclick="shareSlipWhatsApp()">
+                    💬 Kirim WA
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -308,7 +316,7 @@
           <div class="preview-sticky">
             <div class="preview-toolbar">
               <span>📄 Live Preview Thermal (<span id="previewWidthLabel">58mm</span>)</span>
-              <button class="btn btn-secondary btn-sm" onclick="window.print()">Cetak Langsung</button>
+              <button class="btn btn-primary btn-sm" onclick="printDirectBluetooth()" style="background: #10b981; color: white; font-weight: 700;">🖨️ Cetak Bluetooth</button>
             </div>
 
             <div class="receipt-paper-wrapper">
@@ -607,6 +615,43 @@
       <div class="action-bar" style="justify-content: flex-end;">
         <button class="btn btn-secondary" onclick="closeWorkerModal()">Batal</button>
         <button class="btn btn-primary" onclick="saveNewWorker()">Simpan Pekerja</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BLUETOOTH PRINTER -->
+  <div class="modal-backdrop" id="btModal">
+    <div class="modal-box" style="max-width: 450px;">
+      <div class="card-header">
+        <div class="card-title">📶 Koneksi Printer Thermal Bluetooth</div>
+        <button class="btn btn-secondary btn-sm" onclick="closeBluetoothModal()">✕</button>
+      </div>
+      <div style="padding: 0.5rem 0;">
+        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.85rem;">
+          Pilih printer thermal Bluetooth yang sudah terpasang (paired) di HP Anda:
+        </p>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <select id="btDeviceSelect" style="flex: 1;">
+            <option value="">-- Cari / Pilih Perangkat Printer --</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="loadBtDevices()">Cari</button>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+          <button class="btn btn-primary" onclick="connectBtDevice()" style="flex: 1; justify-content: center;">
+            Hubungkan
+          </button>
+          <button class="btn btn-danger" onclick="disconnectBtDevice()" style="flex: 1; justify-content: center;">
+            Putus
+          </button>
+        </div>
+
+        <div id="directBtBtnBox" style="display: none; margin-top: 0.75rem;">
+          <button class="btn btn-primary" onclick="printDirectBluetooth()" style="width: 100%; justify-content: center; background: #10b981; font-size: 1rem; padding: 0.75rem; font-weight: 700;">
+            🖨️ CETAK LANGSUNG VIA BLUETOOTH
+          </button>
+        </div>
+
+        <div id="btStatus" style="margin-top: 0.85rem; font-size: 0.85rem; font-weight: 600; text-align: center; min-height: 1.5rem;"></div>
       </div>
     </div>
   </div>

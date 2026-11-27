@@ -1100,13 +1100,19 @@ function syncWithGoogleSheets() {
 // Bluetooth Printer Modal Functions
 function openBluetoothModal() {
   const modal = document.getElementById('btModal');
-  if (modal) modal.style.display = 'flex';
+  if (modal) {
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  }
   loadBtDevices();
 }
 
 function closeBluetoothModal() {
   const modal = document.getElementById('btModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
 }
 
 function loadBtDevices() {
