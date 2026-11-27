@@ -1,3942 +1,615 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1e293b">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <title>Finance Ilantat Jaya - Database Pekerja & Slip Gaji Koperasi</title>
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f1f5f9;
-      --card-bg: #ffffff;
-      --border: #cbd5e1;
-      --text: #0f172a;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    header {
-      background: #1e293b;
-      color: white;
-      padding: 0.85rem 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    header h1 {
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
-
-    .badge {
-      background: #3b82f6;
-      color: white;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 9999px;
-      margin-left: 0.5rem;
-    }
-
-    /* Main Navigation Bar */
-    .top-nav {
-      background: #0f172a;
-      display: flex;
-      gap: 0.5rem;
-      padding: 0.5rem 1.25rem;
-      overflow-x: auto;
-      border-bottom: 1px solid #334155;
-    }
-
-    .nav-btn {
-      background: transparent;
-      color: #94a3b8;
-      border: none;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-
-    .nav-btn:hover {
-      color: #ffffff;
-      background: rgba(255,255,255,0.05);
-    }
-
-    .nav-btn.active {
-      background: #2563eb;
-      color: #ffffff;
-    }
-
-    .container {
-      display: flex;
-      flex: 1;
-      gap: 1.5rem;
-      padding: 1.25rem;
-      max-width: 1350px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* Main View Sections */
-    .view-section {
-      width: 100%;
-      display: none;
-    }
-
-    #secSlip {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      width: 100%;
-    }
-
-    /* Form Editor - Full Width */
-    .editor-section {
-      width: 100%;
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      padding: 1.25rem;
-      transition: all 0.2s ease;
-    }
-
-    .section-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      color: #334155;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 0.35rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .form-group {
-      margin-bottom: 0.85rem;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .form-row > * {
-      flex: 1;
-    }
-
-    label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      color: #475569;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 0.45rem 0.65rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
-    }
-
-    .btn {
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 600;
-      padding: 0.45rem 0.85rem;
-      border-radius: 6px;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: all 0.15s ease;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-secondary {
-      background: #e2e8f0;
-      color: #334155;
-    }
-    .btn-secondary:hover {
-      background: #cbd5e1;
-    }
-
-    .btn-danger {
-      background: #fee2e2;
-      color: #ef4444;
-      padding: 0.35rem 0.6rem;
-    }
-    .btn-danger:hover {
-      background: #fecaca;
-    }
-
-    .btn-print {
-      background: #10b981;
-      color: white;
-      font-size: 1.05rem;
-      padding: 0.85rem 1.5rem;
-      width: 100%;
-      justify-content: center;
-      margin-top: 1rem;
-      font-weight: 700;
-    }
-    .btn-print:hover {
-      background: #059669;
-    }
-
-    /* Bottom Preview Section - Stacked Below Form */
-    .preview-section {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: all 0.2s ease;
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      padding: 1.25rem;
-    }
-
-    .preview-section.hidden {
-      display: none !important;
-    }
-
-    .preview-header {
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #334155;
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 320px;
-    }
-
-    /* Thermal Receipt Simulation (58mm continuous roll) */
-    .receipt-container {
-      width: 58mm;
-      max-width: 100%;
-      height: auto;
-      background: #ffffff;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-      padding: 4mm 3mm;
-      color: #000000;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 11px;
-      line-height: 1.3;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      margin: 0 auto;
-    }
-
-    .receipt-center {
-      text-align: center;
-    }
-
-    .receipt-title {
-      font-size: 13.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 2px;
-      color: #0f172a;
-    }
-
-    .receipt-sub {
-      font-size: 10px;
-      margin-bottom: 2px;
-      color: #334155;
-    }
-
-    .divider {
-      border-top: 1px dashed #000000;
-      margin: 6px 0;
-    }
-
-    .receipt-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 3px;
-      gap: 4px;
-      font-size: 10.5px;
-    }
-
-    .receipt-row.bold {
-      font-weight: 800;
-    }
-
-    .receipt-row .label {
-      text-align: left;
-      flex: 1;
-      word-break: break-word;
-      color: #1e293b;
-    }
-
-    .receipt-row .val {
-      text-align: right;
-      white-space: nowrap;
-      color: #0f172a;
-    }
-
-    .receipt-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 4px 0;
-    }
-
-    .receipt-table td {
-      padding: 2px 0;
-      vertical-align: top;
-    }
-
-    .receipt-table td.col-item {
-      text-align: left;
-      font-size: 10.5px;
-      color: #0f172a;
-    }
-
-    .receipt-table td.col-val {
-      text-align: right;
-      white-space: nowrap;
-      font-size: 10.5px;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .signatures {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 16px;
-      text-align: center;
-      font-size: 10px;
-    }
-
-    .sign-box {
-      width: 48%;
-    }
-
-    .sign-space {
-      height: 32px;
-    }
-
-    /* Database Pekerja Styles */
-    .db-container {
-      width: 100%;
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      padding: 1.25rem;
-    }
-
-    .filter-bar {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
-    }
-
-    .worker-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
-    }
-
-    .worker-card {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1rem;
-      background: #f8fafc;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .worker-card:hover {
-      border-color: #2563eb;
-      box-shadow: 0 4px 12px rgba(37,99,235,0.08);
-      transform: translateY(-2px);
-    }
-
-    .worker-header {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #2563eb;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
-
-    .worker-info {
-      flex: 1;
-    }
-
-    .worker-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #0f172a;
-    }
-
-    .worker-regu {
-      font-size: 0.75rem;
-      color: #64748b;
-    }
-
-    .tag {
-      font-size: 0.72rem;
-      padding: 0.15rem 0.45rem;
-      border-radius: 4px;
-      font-weight: 600;
-      display: inline-block;
-    }
-
-    .tag-category {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-
-    .tag-schema {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .tag-unpaid {
-      background: #fef3c7;
-      color: #d97706;
-      border: 1px solid #fcd34d;
-    }
-
-    .tag-paid {
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #86efac;
-    }
-
-    /* Rekap Table Styles */
-    .rekap-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-      margin-top: 1rem;
-    }
-
-    .rekap-table th {
-      background: #1e293b;
-      color: white;
-      padding: 0.65rem;
-      text-align: left;
-    }
-
-    .rekap-table td {
-      padding: 0.6rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .rekap-table tr:hover {
-      background: #f1f5f9;
-    }
-
-    /* Modal & Calculator Styles */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      padding: 1rem;
-    }
-
-    .modal-content {
-      background: #ffffff;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 450px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      overflow: hidden;
-    }
-
-    .modal-header {
-      background: #1e293b;
-      color: #ffffff;
-      padding: 0.85rem 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h3 {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .close-btn {
-      font-size: 1.25rem;
-      cursor: pointer;
-      color: #cbd5e1;
-    }
-
-    .modal-body {
-      padding: 1.25rem;
-    }
-
-    .calc-summary-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-    }
-
-    .calc-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .calc-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 8px;
-      padding: 0.85rem;
-      margin-top: 1.25rem;
-    }
-
-    .calc-box-title {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #1e40af;
-      margin-bottom: 0.6rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .calc-item {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      margin-bottom: 0.35rem;
-      color: #334155;
-    }
-
-    .calc-item.bold {
-      font-weight: 700;
-    }
-
-    .calc-divider {
-      border-top: 1px dashed #93c5fd;
-      margin: 0.5rem 0;
-    }
-
-    .calc-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.5rem;
-    }
-
-    .calc-btn {
-      padding: 0.75rem;
-      font-size: 1.1rem;
-      font-weight: bold;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      cursor: pointer;
-    }
-
-    .calc-btn:active {
-      background: #e2e8f0;
-    }
-
-    .mode-toggle-bar {
-      display: none;
-      background: #cbd5e1;
-      padding: 0.3rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      gap: 0.4rem;
-    }
-
-    .mode-tab {
-      flex: 1;
-      text-align: center;
-      padding: 0.55rem 0.5rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      color: #334155;
-      background: transparent;
-      border: none;
-      transition: all 0.2s ease;
-    }
-
-    .mode-tab.active {
-      background: #2563eb;
-      color: #ffffff;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-
-    @media (max-width: 900px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        padding: 0.85rem 1rem;
-      }
-
-      .container {
-        flex-direction: column;
-        padding: 0.75rem;
-        gap: 1rem;
-      }
-
-      .form-row {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-    }
-
-    /* Print Stylesheet for System Print & PDF (Continuous 54mm inside 58mm) */
-    @media print {
-      @page {
-        size: 58mm auto;
-        margin: 0mm;
-      }
-      html, body {
-        width: 58mm !important;
-        height: auto !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-        overflow: visible !important;
-      }
-      body > *:not(#printableReceiptContainer) {
-        display: none !important;
-      }
-      #printableReceiptContainer {
-        display: block !important;
-        visibility: visible !important;
-        width: 54mm !important;
-        max-width: 54mm !important;
-        height: auto !important;
-        margin: 0 auto !important;
-        padding: 2mm 1mm !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-        font-family: 'Courier New', Courier, monospace !important;
-        font-size: 10.5px !important;
-        line-height: 1.25 !important;
-        overflow: visible !important;
-      }
-      #printableReceiptContainer * {
-        visibility: visible !important;
-      }
-    }
-  </style>
+  <title>Koperasi ERP — Payroll &amp; Slip Thermal 57x30</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Hidden Container for System PDF Printing -->
-  <div id="printableReceiptContainer" style="display: none;"></div>
-
-  <header>
-    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <h1>Finance Ilantat Jaya</h1>
-        <span class="badge">Thermal 58mm (Roll / Auto Height)</span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="btn btn-secondary" onclick="openRatesModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem; background: #3b82f6; color: white;">
-          ⚙️ Kelola Tarif
-        </button>
-        <button class="btn btn-secondary" onclick="openBluetoothModal()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
-          Printer Bluetooth
-        </button>
-        <button class="btn btn-secondary" id="togglePreviewBtn" onclick="togglePreview()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem;">
-          <span id="toggleText">Sembunyikan Preview</span>
-        </button>
-        <button class="btn btn-primary" onclick="syncWithGoogleSheets()" style="font-size: 0.82rem; padding: 0.4rem 0.8rem; background: #059669;">
-          Sync Google Sheets
-        </button>
+  <!-- SIDEBAR DESKTOP -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">K</div>
+      <div class="brand-text">
+        <h2>Koperasi ERP</h2>
+        <span>Payroll &amp; Thermal POS</span>
       </div>
     </div>
-  </header>
 
-  <!-- Top Main Navigation Bar -->
-  <div class="top-nav">
-    <button class="nav-btn active" id="tabNavSlip" onclick="switchMainTab('slip')">Cetak Slip Gaji</button>
-    <button class="nav-btn" id="tabNavDb" onclick="switchMainTab('db')">Database Pekerja (<span id="totalWorkerBadge">86</span>)</button>
-    <button class="nav-btn" id="tabNavRekap" onclick="switchMainTab('rekap')">Rekapitulasi Gaji &amp; Pemetik</button>
-  </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu Utama</div>
+      <button class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')">
+        <span>📊</span> Dashboard &amp; Anggaran
+      </button>
+      <button class="nav-item" data-view="slip" onclick="switchView('slip')">
+        <span>🧾</span> Buat &amp; Cetak Slip
+      </button>
+      <button class="nav-item" data-view="workers" onclick="switchView('workers')">
+        <span>👥</span> Database Pekerja
+      </button>
+      <button class="nav-item" data-view="history" onclick="switchView('history')">
+        <span>📋</span> Riwayat &amp; Rekap
+      </button>
 
-  <div class="container">
+      <div class="nav-label">Sistem</div>
+      <button class="nav-item" data-view="settings" onclick="switchView('settings')">
+        <span>⚙️</span> Pengaturan &amp; Printer
+      </button>
+    </nav>
 
-    <!-- SECTION 1: Slip Gaji Generator (Editor di Atas, Preview di Bawah) -->
-    <div class="view-section" id="secSlip" style="display: flex;">
+    <div class="sidebar-footer">
+      <div><span class="status-dot"></span>Offline-Ready (PWA/APK)</div>
+      <div style="margin-top: 4px; font-size: 0.7rem; opacity: 0.8;">Kertas Thermal 57x30 / 58mm</div>
+    </div>
+  </aside>
 
-      <!-- Form Input / Editor (Full Width) -->
-      <div class="editor-section">
-
-        <!-- Master Data Template Pekerja -->
-        <div class="section-title">
-          <span>Pilih / Kelola Template Pekerja</span>
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title" id="topbarTitle">Dashboard Koperasi</div>
+          <div class="topbar-subtitle" id="topbarSubtitle">Ringkasan Anggaran, Realisasi Beban &amp; Operasional</div>
         </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
-          <label>Daftar Nama Pekerja (Hanya yang Belum Dibayarkan):</label>
-          <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem; flex-wrap: wrap;">
-            <select id="workerTemplateSelect" onchange="loadWorkerTemplate(this.value)" style="flex: 2; min-width: 180px;">
-              <option value="">-- Pilih / Cari Nama Pekerja --</option>
-            </select>
-            <button class="btn btn-primary" onclick="saveWorkerTemplate()" style="font-size: 0.8rem;">
-              Simpan
-            </button>
-            <button class="btn btn-danger" onclick="deleteWorkerTemplate()" style="font-size: 0.8rem;">
-              Hapus
-            </button>
-          </div>
-        </div>
-
-        <div class="section-title">
-          <span>Informasi Usaha / Tempat Kerja</span>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nama Usaha / Toko / Perusahaan</label>
-            <input type="text" id="businessName" value="KOPERASI ILANTAT JAYA" oninput="updateReceipt()">
-          </div>
-          <div class="form-group">
-            <label>Sub-judul / Unit Kerja</label>
-            <input type="text" id="businessUnit" value="Slip Gaji &amp; Upah Kerja" oninput="updateReceipt()">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Alamat / Kontak Singkat</label>
-          <input type="text" id="businessAddress" value="Desa Lungkap, Bolaang Mongondow Selatan" oninput="updateReceipt()">
-        </div>
-
-        <div class="section-title" style="margin-top: 1.25rem;">
-          <span>Detail Pekerja &amp; Kategori</span>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nama Pekerja</label>
-            <input type="text" id="workerName" value="Ahmad Maulana" oninput="updateReceipt()">
-          </div>
-          <div class="form-group">
-            <label>Kategori Pekerja</label>
-            <select id="workerCategorySelect" onchange="handleCategoryChange(this.value)">
-              <option value="Pengawas">Pengawas / Harian</option>
-              <option value="Borongan">Borongan</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Sub-Kategori Pengawas / Harian -->
-        <div class="form-group" id="pengawasSubGroup" style="display: block;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-            <label style="margin-bottom: 0;">Jabatan / Peran Pengawas</label>
-            <span id="roleRateDisplayBadge" style="font-size: 0.72rem; color: #1e40af; font-weight: 700; background: #dbeafe; padding: 0.15rem 0.45rem; border-radius: 4px;">Tarif: Rp 150.000/hari</span>
-          </div>
-          <select id="pengawasRoleSelect" onchange="handlePengawasRoleChange(this.value)">
-            <option value="Pengawas Lapangan">Pengawas Lapangan</option>
-            <option value="Pengawas Cudai">Pengawas Cudai</option>
-            <option value="Penjemur">Penjemur</option>
-            <option value="Pengawas Malam">Pengawas Malam</option>
-            <option value="Pengawas Koperasi">Pengawas Koperasi</option>
-          </select>
-        </div>
-
-        <!-- Sub-Kategori Borongan -->
-        <div class="form-group" id="boronganSubGroup" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-            <label style="margin-bottom: 0;">Jenis Borongan</label>
-            <span id="boronganRateDisplayBadge" style="font-size: 0.72rem; color: #92400e; font-weight: 700; background: #fef3c7; padding: 0.15rem 0.45rem; border-radius: 4px;">Tarif: Rp 7.000/kg</span>
-          </div>
-          <select id="boronganTypeSelect" onchange="handleBoronganTypeChange(this.value)">
-            <option value="Borongan Petik">Borongan Petik</option>
-            <option value="Borongan Cudai">Borongan Cudai</option>
-          </select>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>No. Bukti / Referensi</label>
-            <input type="text" id="refNo" value="PAY-202611-01" oninput="updateReceipt()">
-          </div>
-          <div class="form-group">
-            <label>Tanggal Pembayaran</label>
-            <input type="date" id="payDate" oninput="updateReceipt()">
-          </div>
-        </div>
-
-        <!-- Kalender Periode Kerja -->
-        <div class="form-row">
-          <div class="form-group">
-            <label>Periode Kerja (Mulai)</label>
-            <input type="date" id="periodStart" oninput="updatePeriodFromDates()">
-          </div>
-          <div class="form-group">
-            <label>Periode Kerja (Sampai)</label>
-            <input type="date" id="periodEnd" oninput="updatePeriodFromDates()">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Format Teks Periode (Otomatis / Custom)</label>
-          <input type="text" id="periodText" value="16 Nov 2026 - 22 Nov 2026 (Mingguan)" oninput="updateReceipt()">
-        </div>
-
-        <!-- Pendapatan / Komponen Gaji -->
-        <div class="section-title" style="margin-top: 1.25rem;">
-          <span>Komponen Pendapatan (+)</span>
-          <button class="btn btn-secondary" onclick="addIncomeItem()">+ Tambah Baris</button>
-        </div>
-        <div id="incomeItemsContainer"></div>
-        <div class="calc-summary-card">
-          <div class="calc-row">
-            <span>Subtotal Pendapatan (+):</span>
-            <strong id="editorTotalIncome" style="color: #16a34a;">Rp 0</strong>
-          </div>
-        </div>
-
-        <!-- Potongan / Kasbon -->
-        <div class="section-title" style="margin-top: 1.25rem;">
-          <span>Komponen Potongan / Kasbon (-)</span>
-          <button class="btn btn-secondary" onclick="addDeductionItem()">+ Tambah Baris</button>
-        </div>
-        <div id="deductionItemsContainer"></div>
-        <div class="calc-summary-card">
-          <div class="calc-row">
-            <span>Subtotal Potongan / Kasbon (-):</span>
-            <strong id="editorTotalDeduction" style="color: #ef4444;">-Rp 0</strong>
-          </div>
-        </div>
-
-        <!-- Ringkasan Kalkulator Otomatis Gaji -->
-        <div class="calc-box">
-          <div class="calc-box-title">
-            <span>Kalkulator Ringkasan Gaji</span>
-            <button class="btn btn-secondary" onclick="openCalcModal()" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-              Buka Kalkulator Hitung
-            </button>
-          </div>
-          <div class="calc-item">
-            <span>Total Pendapatan (+)</span>
-            <span id="sumIncome" style="color: #16a34a; font-weight: 600;">Rp 0</span>
-          </div>
-          <div class="calc-item">
-            <span>Total Potongan / Kasbon (-)</span>
-            <span id="sumDeduction" style="color: #dc2626; font-weight: 600;">-Rp 0</span>
-          </div>
-          <div class="calc-divider"></div>
-          <div class="calc-item bold">
-            <span>Gaji Bersih / Total Diterima (=)</span>
-            <span id="sumGrandTotal" style="color: #2563eb; font-size: 1.05rem;">Rp 0</span>
-          </div>
-        </div>
-
-        <!-- Pembayaran & Tanda Tangan -->
-        <div class="section-title" style="margin-top: 1.25rem;">
-          <span>Metode Pembayaran &amp; Tanda Tangan</span>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Metode Pembayaran</label>
-            <select id="paymentMethod" onchange="updateReceipt()">
-              <option value="Tunai / Cash">Tunai / Cash</option>
-              <option value="Transfer Bank BCA">Transfer Bank BCA</option>
-              <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
-              <option value="Transfer Bank BRI">Transfer Bank BRI</option>
-              <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Nama Penanggung Jawab</label>
-            <input type="text" id="picName" value="Koperasi" oninput="updateReceipt()">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Catatan Tambahan (Bawah Kertas)</label>
-          <textarea id="noteText" rows="2" oninput="updateReceipt()">Terima kasih atas kerja keras &amp; dedikasinya!</textarea>
-        </div>
-
-        <button class="btn btn-print" onclick="handleMainPrint()">
-          Cetak Slip Gaji (Thermal 58mm Roll)
-        </button>
-
-        <button class="btn btn-secondary" onclick="prepareAndPrintSystem()" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.85rem;">
-          Simpan PDF / Cetak Sistem
-        </button>
       </div>
+      <div class="topbar-actions">
+        <span class="pill-badge hide-mobile">🖨️ Thermal 57x30 Ready</span>
+        <button class="btn btn-primary btn-sm" onclick="switchView('slip')">+ Buat Slip Baru</button>
+      </div>
+    </header>
 
-      <!-- Preview Thermal Section (Di Bawah Form Editor) -->
-      <div class="preview-section" id="previewSectionBox">
-        <div class="preview-header">
-          <span>Live Preview Thermal (58mm Roll)</span>
-          <span style="color: #64748b; font-size: 0.8rem;">Auto-height</span>
+    <!-- CONTENT AREA -->
+    <main class="content-area">
+
+      <!-- ================= VIEW 1: DASHBOARD ================= -->
+      <section id="view-dashboard" class="view-section active">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Total Pengeluaran Slip (Sesi Ini)</span>
+              <div class="kpi-icon" style="background: #d1fae5; color: #059669;">💰</div>
+            </div>
+            <div class="kpi-value" id="kpiTotalPaid">Rp 0</div>
+            <div class="kpi-meta" id="kpiSlipCount">0 slip dicetak</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Total Potongan Kasbon</span>
+              <div class="kpi-icon" style="background: #fef3c7; color: #d97706;">✂️</div>
+            </div>
+            <div class="kpi-value" id="kpiTotalKasbon">Rp 0</div>
+            <div class="kpi-meta">Akumulasi potongan kasbon pekerja</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Total Hasil Petik / Kerja</span>
+              <div class="kpi-icon" style="background: #dbeafe; color: #2563eb;">🌿</div>
+            </div>
+            <div class="kpi-value" id="kpiTotalKg">0 kg</div>
+            <div class="kpi-meta">Tercatat dari slip borongan</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Database Pekerja Aktif</span>
+              <div class="kpi-icon" style="background: #f1f5f9; color: #334155;">👷</div>
+            </div>
+            <div class="kpi-value" id="kpiActiveWorkers">0</div>
+            <div class="kpi-meta" id="kpiTotalRegu">Terbagi dalam berbagai regu &amp; petak</div>
+          </div>
         </div>
 
-        <div class="receipt-container" id="receiptPrintArea">
-          <!-- Header Usaha -->
-          <div class="receipt-center">
-            <div class="receipt-title" id="prevBusinessName">KOPERASI ILANTAT JAYA</div>
-            <div class="receipt-sub" id="prevBusinessUnit">Slip Gaji &amp; Upah Kerja</div>
-            <div class="receipt-sub" id="prevBusinessAddress" style="font-size: 9px;">Desa Lungkap, Bolaang Mongondow Selatan</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📈 Realisasi vs Anggaran Kontrak (COA Beban Koperasi)</div>
+            <span class="badge badge-blue">Data Induk + Transaksi Aplikasi</span>
           </div>
-
-          <div class="divider"></div>
-
-          <!-- Info Bukti & Pekerja -->
-          <div class="receipt-row">
-            <span class="label">No.Bukti</span>
-            <span class="val" id="prevRefNo">PAY-202611-01</span>
-          </div>
-          <div class="receipt-row">
-            <span class="label">Tanggal</span>
-            <span class="val" id="prevDate">22/11/2026</span>
-          </div>
-          <div class="receipt-row">
-            <span class="label">Pekerja</span>
-            <span class="val bold" id="prevWorker">Ahmad Maulana</span>
-          </div>
-          <div class="receipt-row">
-            <span class="label">Jabatan</span>
-            <span class="val" id="prevRole">Pengawas Lapangan</span>
-          </div>
-          <div class="receipt-row">
-            <span class="label">Periode</span>
-            <span class="val" id="prevPeriod" style="font-size: 10px;">16-22 Nov 2026</span>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Rincian Pendapatan -->
-          <div style="font-weight: bold; margin-bottom: 2px;">RINCIAN PENDAPATAN:</div>
-          <table class="receipt-table" id="prevIncomeTable">
-            <!-- Rows injected via JS -->
-          </table>
-
-          <!-- Rincian Potongan -->
-          <div id="prevDeductionSection" style="display: none; margin-top: 4px;">
-            <div style="font-weight: bold; margin-bottom: 2px;">POTONGAN / KASBON:</div>
-            <table class="receipt-table" id="prevDeductionTable">
-              <!-- Rows injected via JS -->
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Akun Beban (COA)</th>
+                  <th>Anggaran Kontrak</th>
+                  <th>Total Realisasi</th>
+                  <th>Sisa Anggaran</th>
+                  <th style="min-width: 140px;">Serapan</th>
+                </tr>
+              </thead>
+              <tbody id="coaBudgetTableBody"></tbody>
             </table>
           </div>
+        </div>
 
-          <div class="divider"></div>
-
-          <!-- Total Bersih -->
-          <div class="receipt-row bold" style="font-size: 12px;">
-            <span class="label">TOTAL DITERIMA:</span>
-            <span class="val" id="prevTotal">Rp 0</span>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🕒 Transaksi Slip Terbaru</div>
+            <button class="btn btn-secondary btn-sm" onclick="switchView('history')">Lihat Semua →</button>
           </div>
-          <div class="receipt-row" style="font-size: 9.5px; margin-top: 2px;">
-            <span class="label">Metode:</span>
-            <span class="val" id="prevPaymentMethod">Tunai / Cash</span>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Tanda Tangan -->
-          <div class="signatures">
-            <div class="sign-box">
-              <div>Penerima,</div>
-              <div class="sign-space"></div>
-              <div id="prevSignWorker">( Ahmad M. )</div>
-            </div>
-            <div class="sign-box">
-              <div>Pengesah,</div>
-              <div class="sign-space"></div>
-              <div id="prevSignPic">( Koperasi )</div>
-            </div>
-          </div>
-
-          <div class="divider" style="margin-top: 10px;"></div>
-
-          <div class="receipt-center" style="font-size: 9px; margin-top: 4px;" id="prevNote">
-            Terima kasih atas kerja keras &amp; dedikasinya!
-          </div>
-          <div class="receipt-center" style="font-size: 8px; color: #555; margin-top: 2px;">
-            --- Simpan bukti ini dengan baik ---
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>No. Bukti</th>
+                  <th>Tanggal</th>
+                  <th>Pekerja / Regu</th>
+                  <th>Akun COA</th>
+                  <th>Total Bersih</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="recentTxTableBody"></tbody>
+            </table>
           </div>
         </div>
+      </section>
 
-        <div style="margin-top: 15px; font-size: 0.8rem; color: #64748b; max-width: 300px; text-align: center;">
-          <strong>Tips Setting Printer:</strong> Panjang kertas otomatis mengikuti isi rincian slip gaji ke bawah (Continuous Roll).
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2: Database Pekerja -->
-    <div class="view-section" id="secDb" style="display: none;">
-      <div class="db-container">
-        <div class="section-title">
-          <span>Database Pekerja Koperasi</span>
-          <span style="font-size: 0.8rem; color: #64748b;" id="dbStatsText">Total 86 Pekerja</span>
-        </div>
-
-        <div class="filter-bar">
-          <input type="text" id="searchWorkerInput" placeholder="Cari nama pekerja..." oninput="filterWorkers()" style="flex: 2; min-width: 180px;">
-          <select id="filterStatusSelect" onchange="filterWorkers()" style="flex: 1; min-width: 150px; background: #fffbebf7; font-weight: bold; color: #d97706;">
-            <option value="Belum Dibayarkan">🟡 Hanya Belum Dibayarkan</option>
-            <option value="Lunas">🟢 Sudah Lunas / Dibayarkan</option>
-            <option value="">⚪ Semua Status Pembayaran</option>
-          </select>
-          <select id="filterCategorySelect" onchange="filterWorkers()" style="flex: 1; min-width: 150px;">
-            <option value="">-- Semua Kategori --</option>
-            <option value="Borongan Pemetik">Borongan Pemetik</option>
-            <option value="Pengawas Lapangan">Pengawas Lapangan</option>
-            <option value="Pengawas Cudai">Pengawas Cudai</option>
-            <option value="Penjemur">Penjemur</option>
-            <option value="Pengawas Malam">Pengawas Malam</option>
-          </select>
-          <select id="filterReguSelect" onchange="filterWorkers()" style="flex: 1; min-width: 130px;">
-            <option value="">-- Semua Regu --</option>
-          </select>
-        </div>
-
-        <div class="worker-grid" id="workerGridContainer">
-          <!-- Worker cards injected via JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 3: Rekapitulasi Gaji -->
-    <div class="view-section" id="secRekap" style="display: none;">
-      <div class="db-container">
-        <div class="section-title">
-          <span>Rekapitulasi Pembayaran Gaji &amp; Pemetik</span>
-          <span style="font-size: 0.8rem; color: #059669;" id="rekapStatsText">Google Sheets Live Data</span>
-        </div>
-
-        <div class="filter-bar">
-          <input type="text" id="searchRekapInput" placeholder="Cari nama pemetik..." oninput="filterRekap()" style="flex: 2; min-width: 180px;">
-          <select id="filterRekapStatusSelect" onchange="filterRekap()" style="flex: 1; min-width: 150px; background: #fffbebf7; font-weight: bold; color: #d97706;">
-            <option value="Belum Dibayarkan">🟡 Hanya Belum Dibayarkan</option>
-            <option value="Lunas">🟢 Sudah Lunas / Dibayarkan</option>
-            <option value="">⚪ Semua Status Pembayaran</option>
-          </select>
-        </div>
-
-        <div style="overflow-x: auto;">
-          <table class="rekap-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Nama Pemetik</th>
-                <th>Kode Regu</th>
-                <th>Hasil Petik (kg)</th>
-                <th>Sub Total Gaji</th>
-                <th>Kasbon</th>
-                <th>Total Gaji Netto</th>
-                <th>Status Pembayaran</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="rekapTableBody">
-              <!-- Rekap rows injected via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Modal Settings Tarif Pokok / Gaji Bawaan -->
-  <div id="ratesModal" class="modal" style="display: none;">
-    <div class="modal-content" style="max-width: 480px;">
-      <div class="modal-header">
-        <h3>⚙️ Pengaturan Tarif Pokok / Gaji Per Hari</h3>
-        <span class="close-btn" onclick="closeRatesModal()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.85rem;">
-          Atur default tarif/hari dan tarif/kg untuk setiap jabatan/peran:
-        </p>
-        <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+      <!-- ================= VIEW 2: BUAT & CETAK SLIP ================= -->
+      <section id="view-slip" class="view-section">
+        <div class="slip-workspace">
+          <!-- LEFT: EDITOR -->
           <div>
-            <label style="font-size: 0.78rem;">Pengawas Lapangan (Rp/hari)</label>
-            <input type="number" id="input_rate_pengawas_lapangan" value="150000">
-          </div>
-          <div>
-            <label style="font-size: 0.78rem;">Pengawas Cudai (Rp/hari)</label>
-            <input type="number" id="input_rate_pengawas_cudai" value="75000">
-          </div>
-          <div>
-            <label style="font-size: 0.78rem;">Penjemur (Rp/hari)</label>
-            <input type="number" id="input_rate_penjemur" value="125000">
-          </div>
-          <div>
-            <label style="font-size: 0.78rem;">Pengawas Malam (Rp/hari)</label>
-            <input type="number" id="input_rate_pengawas_malam" value="75000">
-          </div>
-          <div>
-            <label style="font-size: 0.78rem;">Pengawas Koperasi (Rp/hari)</label>
-            <input type="number" id="input_rate_pengawas_koperasi" value="150000">
-          </div>
-          <div>
-            <label style="font-size: 0.78rem;">Borongan Petik (Rp/kg)</label>
-            <input type="number" id="input_rate_borongan_petik" value="7000">
-          </div>
-          <div>
-            <label style="font-size: 0.78rem;">Borongan Cudai (Rp/kg)</label>
-            <input type="number" id="input_rate_borongan_cudai" value="1500">
-          </div>
-        </div>
-        <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem;">
-          <button class="btn btn-primary" onclick="saveCustomRates()" style="flex: 1; justify-content: center;">
-            Simpan Tarif Pokok
-          </button>
-          <button class="btn btn-secondary" onclick="resetDefaultRates()" style="flex: 1; justify-content: center;">
-            Reset Bawaan
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Bluetooth Settings -->
-  <div id="btModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>📶 Koneksi Printer Bluetooth</h3>
-        <span class="close-btn" onclick="closeBluetoothModal()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 0.75rem;">
-          Pilih printer thermal Bluetooth yang sudah terpasang (paired) di HP Anda:
-        </p>
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-          <select id="btDeviceSelect" style="flex: 1;">
-            <option value="">-- Cari / Pilih Perangkat --</option>
-          </select>
-          <button class="btn btn-secondary" onclick="loadBtDevices()">Cari</button>
-        </div>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="btn btn-primary" onclick="connectBtDevice()" style="flex: 1; justify-content: center;">
-            Hubungkan
-          </button>
-          <button class="btn btn-danger" onclick="disconnectBtDevice()" style="flex: 1; justify-content: center;">
-            Putus
-          </button>
-        </div>
-
-        <div id="directBtBtnBox" style="margin-top: 1rem; display: none;">
-          <button class="btn btn-primary" onclick="printDirectBluetooth()" style="width: 100%; justify-content: center; background: #10b981; font-size: 1rem; padding: 0.75rem; font-weight: 700;">
-            CETAK LANGSUNG VIA BLUETOOTH
-          </button>
-        </div>
-
-        <div id="btStatus" style="margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; text-align: center; min-height: 1.5rem;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Kalkulator -->
-  <div id="calcModal" class="modal" style="display: none;">
-    <div class="modal-content" style="max-width: 320px;">
-      <div class="modal-header">
-        <h3>Kalkulator Hitung Gaji</h3>
-        <span class="close-btn" onclick="closeCalcModal()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <input type="text" id="calcDisplay" value="0" readonly style="font-size: 1.35rem; text-align: right; margin-bottom: 0.75rem; font-weight: bold; background: #f8fafc;">
-        <div class="calc-grid">
-          <button class="calc-btn btn-danger" onclick="calcClear()">C</button>
-          <button class="calc-btn" onclick="calcOp('/')">÷</button>
-          <button class="calc-btn" onclick="calcOp('*')">×</button>
-          <button class="calc-btn" onclick="calcOp('-')">-</button>
-
-          <button class="calc-btn" onclick="calcNum('7')">7</button>
-          <button class="calc-btn" onclick="calcNum('8')">8</button>
-          <button class="calc-btn" onclick="calcNum('9')">9</button>
-          <button class="calc-btn" onclick="calcOp('+')">+</button>
-
-          <button class="calc-btn" onclick="calcNum('4')">4</button>
-          <button class="calc-btn" onclick="calcNum('5')">5</button>
-          <button class="calc-btn" onclick="calcNum('6')">6</button>
-          <button class="calc-btn btn-primary" onclick="calcEqual()" style="grid-row: span 2; display: flex; align-items: center; justify-content: center;">=</button>
-
-          <button class="calc-btn" onclick="calcNum('1')">1</button>
-          <button class="calc-btn" onclick="calcNum('2')">2</button>
-          <button class="calc-btn" onclick="calcNum('3')">3</button>
-
-          <button class="calc-btn" onclick="calcNum('0')" style="grid-column: span 2;">0</button>
-          <button class="calc-btn" onclick="calcNum('000')">000</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Embedded Database Datasets from Google Sheets
-    let defaultWorkersData = [
-    {
-        "name":  "Alfiki Paputungan",
-        "no":  1,
-        "regu":  "PGWS",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Akmaludin Tombo",
-        "no":  2,
-        "regu":  "PGWS",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Wahyudin Paputungan",
-        "no":  3,
-        "regu":  "PGWS",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Malik Paputungan",
-        "no":  4,
-        "regu":  "PGWS",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Alvin Paputungan",
-        "no":  5,
-        "regu":  "PGWS",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Fajrin Paputungan",
-        "no":  6,
-        "regu":  "PGWS",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Iki",
-        "no":  7,
-        "regu":  "Sabua Miring",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Yaya",
-        "no":  8,
-        "regu":  "Sabua Miring",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Yudi",
-        "no":  9,
-        "regu":  "Sabua Miring",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Darman",
-        "no":  10,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Amran",
-        "no":  11,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Heru",
-        "no":  12,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Sastra",
-        "no":  13,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Gusti",
-        "no":  14,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Nugi",
-        "no":  15,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Adil",
-        "no":  16,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Tian",
-        "no":  17,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Daffa",
-        "no":  18,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Agung",
-        "no":  19,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Rehan",
-        "no":  20,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Begi",
-        "no":  21,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Mama Acin",
-        "no":  22,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Mama Tar",
-        "no":  23,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Mama Tina",
-        "no":  24,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Fandi",
-        "no":  25,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Papa Dian",
-        "no":  26,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Deni",
-        "no":  27,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Acin",
-        "no":  28,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Adnan",
-        "no":  29,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Dalin",
-        "no":  30,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Yudi",
-        "no":  31,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Dandi",
-        "no":  32,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Salman",
-        "no":  33,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Asis",
-        "no":  34,
-        "regu":  "LGKP",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Rako",
-        "no":  35,
-        "regu":  "Due 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Om Deni",
-        "no":  36,
-        "regu":  "Due 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Aldo",
-        "no":  37,
-        "regu":  "Due 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Alfred",
-        "no":  38,
-        "regu":  "Due 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Boy",
-        "no":  39,
-        "regu":  "Due 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Jems",
-        "no":  40,
-        "regu":  "Due 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Alan",
-        "no":  41,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Opal",
-        "no":  42,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Amin",
-        "no":  43,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Gilang",
-        "no":  44,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Ka Undu",
-        "no":  45,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Lendy",
-        "no":  46,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Ako",
-        "no":  47,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Alis",
-        "no":  48,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "NENEK",
-        "no":  49,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Omin",
-        "no":  50,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Tutun",
-        "no":  51,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Dandi",
-        "no":  52,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Yapin",
-        "no":  53,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Gina",
-        "no":  54,
-        "regu":  "Sabua Miring 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Iyal",
-        "no":  55,
-        "regu":  "Sabua Miring 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Non-Aktif"
-    },
-    {
-        "name":  "Riyan",
-        "no":  56,
-        "regu":  "Sabua Miring 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Non-Aktif"
-    },
-    {
-        "name":  "Saprian",
-        "no":  57,
-        "regu":  "Sabua Miring 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Non-Aktif"
-    },
-    {
-        "name":  "Dolpi",
-        "no":  58,
-        "regu":  "Sabua Miring 3",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Alex",
-        "no":  59,
-        "regu":  "Sabua Miring 3",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Male",
-        "no":  60,
-        "regu":  "Sabua Miring 3",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Maikel",
-        "no":  61,
-        "regu":  "Sabua Miring 3",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Bojes",
-        "no":  62,
-        "regu":  "Kaki Seribu 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Jun",
-        "no":  63,
-        "regu":  "Kaki Seribu 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Handi",
-        "no":  64,
-        "regu":  "Kaki Seribu 1",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Bobon",
-        "no":  65,
-        "regu":  "Kaki Seribu 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Ray",
-        "no":  66,
-        "regu":  "Kaki Seribu 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Oni",
-        "no":  67,
-        "regu":  "Kaki Seribu 2",
-        "schema":  "Borongan",
-        "category":  "Borongan Pemetik",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Alfiki Paputungan",
-        "no":  68,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Lapangan",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Akmaludin Tombo",
-        "no":  69,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Lapangan",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Wahyudin Paputungan",
-        "no":  70,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Lapangan",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Malik Paputungan",
-        "no":  71,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Lapangan",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Alvin Paputungan",
-        "no":  72,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Lapangan",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Fajrin Paputungan",
-        "no":  73,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Lapangan",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Musripan Paputungan",
-        "no":  74,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Lapangan",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Anis Bapuli",
-        "no":  75,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Cudai",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Moh Yakob Botutihe",
-        "no":  76,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Cudai",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Acong Paputungan",
-        "no":  77,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Cudai",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Papa Agil",
-        "no":  78,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Cudai",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Etin Paputungan",
-        "no":  79,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Cudai",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Papa Wira",
-        "no":  80,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Cudai",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Ridho Paputungan",
-        "no":  81,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Penjemur",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Dandi Huntua",
-        "no":  82,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Penjemur",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Iki Paputungan",
-        "no":  83,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Penjemur",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Sariin",
-        "no":  84,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Malam",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Rahman Sinalaan",
-        "no":  85,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Malam",
-        "status":  "Aktif"
-    },
-    {
-        "name":  "Edu",
-        "no":  86,
-        "regu":  "-",
-        "schema":  "Harian",
-        "category":  "Pengawas Malam",
-        "status":  "Aktif"
-    }
-]
-;
-    let defaultRekapData = [
-    {
-        "subTotal":  "124,600.00",
-        "name":  "Alfiki Paputungan",
-        "no":  1,
-        "regu":  "PGWS",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 124,600",
-        "hasilKg":  17.8
-    },
-    {
-        "subTotal":  "196,000.00",
-        "name":  "Akmaludin Tombo",
-        "no":  2,
-        "regu":  "PGWS",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 196,000",
-        "hasilKg":  28
-    },
-    {
-        "subTotal":  "92,400.00",
-        "name":  "Wahyudin Paputungan",
-        "no":  3,
-        "regu":  "PGWS",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 92,400",
-        "hasilKg":  13.2
-    },
-    {
-        "subTotal":  "448,000.00",
-        "name":  "Malik Paputungan",
-        "no":  4,
-        "regu":  "PGWS",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 448,000",
-        "hasilKg":  64
-    },
-    {
-        "subTotal":  "60,900.00",
-        "name":  "Alvin Paputungan",
-        "no":  5,
-        "regu":  "PGWS",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 60,900",
-        "hasilKg":  8.7
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Fajrin Paputungan",
-        "no":  6,
-        "regu":  "PGWS",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Iki",
-        "no":  7,
-        "regu":  "Sabua Miring",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "1,135,400.00",
-        "name":  "Yaya",
-        "no":  8,
-        "regu":  "Sabua Miring",
-        "kasbon":  "Rp 50,000",
-        "totalGaji":  "Rp 1,085,400",
-        "hasilKg":  162.2
-    },
-    {
-        "subTotal":  "251,300.00",
-        "name":  "Yudi",
-        "no":  9,
-        "regu":  "Sabua Miring",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 251,300",
-        "hasilKg":  35.9
-    },
-    {
-        "subTotal":  "686,700.00",
-        "name":  "Darman",
-        "no":  1,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 50,000",
-        "totalGaji":  "Rp 636,700",
-        "hasilKg":  98.1
-    },
-    {
-        "subTotal":  "646,100.00",
-        "name":  "Amran",
-        "no":  2,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 100,000",
-        "totalGaji":  "Rp 546,100",
-        "hasilKg":  92.3
-    },
-    {
-        "subTotal":  "300,300.00",
-        "name":  "Heru",
-        "no":  3,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 150,000",
-        "totalGaji":  "Rp 150,300",
-        "hasilKg":  42.9
-    },
-    {
-        "subTotal":  "736,400.00",
-        "name":  "Sastra",
-        "no":  4,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 150,000",
-        "totalGaji":  "Rp 586,400",
-        "hasilKg":  105.2
-    },
-    {
-        "subTotal":  "483,700.00",
-        "name":  "Gusti",
-        "no":  5,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 70,000",
-        "totalGaji":  "Rp 413,700",
-        "hasilKg":  69.1
-    },
-    {
-        "subTotal":  "211,400.00",
-        "name":  "Nugi",
-        "no":  6,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 100,000",
-        "totalGaji":  "Rp 111,400",
-        "hasilKg":  30.2
-    },
-    {
-        "subTotal":  "308,700.00",
-        "name":  "Adil",
-        "no":  7,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 308,700",
-        "hasilKg":  44.1
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Tian",
-        "no":  8,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "262,500.00",
-        "name":  "Daffa",
-        "no":  9,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 50,000",
-        "totalGaji":  "Rp 212,500",
-        "hasilKg":  37.5
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Agung",
-        "no":  10,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Rehan",
-        "no":  11,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "274,400.00",
-        "name":  "Begi",
-        "no":  12,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 274,400",
-        "hasilKg":  39.2
-    },
-    {
-        "subTotal":  "50,400.00",
-        "name":  "Mama Acin",
-        "no":  13,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 50,400",
-        "hasilKg":  7.2
-    },
-    {
-        "subTotal":  "784,000.00",
-        "name":  "Mama Tar",
-        "no":  14,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 100,000",
-        "totalGaji":  "Rp 684,000",
-        "hasilKg":  112
-    },
-    {
-        "subTotal":  "920,500.00",
-        "name":  "Mama Tina",
-        "no":  15,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 920,500",
-        "hasilKg":  131.5
-    },
-    {
-        "subTotal":  "1,231,300.00",
-        "name":  "Fandi",
-        "no":  16,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 1,231,300",
-        "hasilKg":  175.9
-    },
-    {
-        "subTotal":  "947,800.00",
-        "name":  "Papa Dian",
-        "no":  17,
-        "regu":  "LGKP",
-        "kasbon":  "Rp 100,000",
-        "totalGaji":  "Rp 847,800",
-        "hasilKg":  135.4
-    },
-    {
-        "subTotal":  "595,000.00",
-        "name":  "Deni",
-        "no":  18,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 595,000",
-        "hasilKg":  85
-    },
-    {
-        "subTotal":  "459,200.00",
-        "name":  "Acin",
-        "no":  19,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 459,200",
-        "hasilKg":  65.6
-    },
-    {
-        "subTotal":  "95,900.00",
-        "name":  "Adnan",
-        "no":  20,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 95,900",
-        "hasilKg":  13.7
-    },
-    {
-        "subTotal":  "84,700.00",
-        "name":  "Dalin",
-        "no":  21,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 84,700",
-        "hasilKg":  12.1
-    },
-    {
-        "subTotal":  "324,100.00",
-        "name":  "Yudi",
-        "no":  22,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 324,100",
-        "hasilKg":  46.3
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Dandi",
-        "no":  23,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Salman",
-        "no":  24,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Asis",
-        "no":  25,
-        "regu":  "LGKP",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Rako",
-        "no":  1,
-        "regu":  "Due 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Om Deni",
-        "no":  2,
-        "regu":  "Due 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Aldo",
-        "no":  3,
-        "regu":  "Due 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Alfred",
-        "no":  2,
-        "regu":  "Due 2",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Boy",
-        "no":  1,
-        "regu":  "Due 2",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Jems",
-        "no":  3,
-        "regu":  "Due 2",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "1,814,400.00",
-        "name":  "Alan",
-        "no":  1,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "Rp 1,000,000",
-        "totalGaji":  "Rp 814,400",
-        "hasilKg":  259.2
-    },
-    {
-        "subTotal":  "2,129,750.00",
-        "name":  "Opal",
-        "no":  2,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "Rp 1,600,000",
-        "totalGaji":  "Rp 529,750",
-        "hasilKg":  304.25
-    },
-    {
-        "subTotal":  "2,230,900.00",
-        "name":  "Amin",
-        "no":  3,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "Rp 750,000",
-        "totalGaji":  "Rp 1,480,900",
-        "hasilKg":  318.7
-    },
-    {
-        "subTotal":  "936,600.00",
-        "name":  "Gilang",
-        "no":  4,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "Rp 70,000",
-        "totalGaji":  "Rp 866,600",
-        "hasilKg":  133.8
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Ka Undu",
-        "no":  5,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Lendy",
-        "no":  6,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Ako",
-        "no":  7,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "1,043,000.00",
-        "name":  "Alis",
-        "no":  8,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 1,043,000",
-        "hasilKg":  149
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "NENEK",
-        "no":  9,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Omin",
-        "no":  10,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Tutun",
-        "no":  11,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Dandi",
-        "no":  12,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Yapin",
-        "no":  13,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Gina",
-        "no":  14,
-        "regu":  "Sabua Miring 1",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "515,900.00",
-        "name":  "Iyal",
-        "no":  1,
-        "regu":  "Sabua Miring 2",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 515,900",
-        "hasilKg":  73.7
-    },
-    {
-        "subTotal":  "1,051,400.00",
-        "name":  "Riyan",
-        "no":  2,
-        "regu":  "Sabua Miring 2",
-        "kasbon":  "Rp 400,000",
-        "totalGaji":  "Rp 651,400",
-        "hasilKg":  150.2
-    },
-    {
-        "subTotal":  "436,100.00",
-        "name":  "Saprian",
-        "no":  3,
-        "regu":  "Sabua Miring 2",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 436,100",
-        "hasilKg":  62.3
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Dolpi",
-        "no":  1,
-        "regu":  "Sabua Miring 3",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Alex",
-        "no":  2,
-        "regu":  "Sabua Miring 3",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Male",
-        "no":  3,
-        "regu":  "Sabua Miring 3",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Maikel",
-        "no":  4,
-        "regu":  "Sabua Miring 3",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "1,191,400.00",
-        "name":  "Bojes",
-        "no":  1,
-        "regu":  "Kaki Seribu 1",
-        "kasbon":  "Rp 800,000",
-        "totalGaji":  "Rp 391,400",
-        "hasilKg":  170.2
-    },
-    {
-        "subTotal":  "1,307,600.00",
-        "name":  "Jun",
-        "no":  2,
-        "regu":  "Kaki Seribu 1",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 1,307,600",
-        "hasilKg":  186.8
-    },
-    {
-        "subTotal":  "735,000.00",
-        "name":  "Handi",
-        "no":  3,
-        "regu":  "Kaki Seribu 1",
-        "kasbon":  "-",
-        "totalGaji":  "Rp 735,000",
-        "hasilKg":  105
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Bobon",
-        "no":  1,
-        "regu":  "Kaki Seribu 2",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Ray",
-        "no":  2,
-        "regu":  "Kaki Seribu 2",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    },
-    {
-        "subTotal":  "0.00",
-        "name":  "Oni",
-        "no":  3,
-        "regu":  "Kaki Seribu 2",
-        "kasbon":  "-",
-        "totalGaji":  "-",
-        "hasilKg":  0
-    }
-]
-;
-
-    // Exact user specified rates
-    let defaultRoleRates = {
-      "Pengawas Lapangan": 150000,
-      "Pengawas Cudai": 75000,
-      "Penjemur": 125000,
-      "Pengawas Malam": 75000,
-      "Pengawas Koperasi": 150000,
-      "Borongan Petik": 7000,
-      "Borongan Cudai": 1500
-    };
-
-    // Force update roleRates in localStorage to match exact user specifications
-    let roleRates = defaultRoleRates;
-    localStorage.setItem('roleRates', JSON.stringify(roleRates));
-
-    let workersData = JSON.parse(localStorage.getItem('workersData') || 'null') || defaultWorkersData;
-    let rekapData = JSON.parse(localStorage.getItem('rekapData') || 'null') || defaultRekapData;
-
-    let savedTarif = roleRates["Borongan Petik"] || 7000;
-    let savedPeriode = localStorage.getItem('periodeSync') || "";
-
-    // Category & Worker State
-    let workerCategory = "Pengawas";
-    let boronganType = "Borongan Petik";
-    let pengawasRole = "Pengawas Lapangan";
-
-    let incomeItems = [
-      { type: "harian", desc: "Gaji Pengawas Lapangan", workDays: 7, dailyRate: getRoleRate("Pengawas Lapangan"), amount: 7 * getRoleRate("Pengawas Lapangan") }
-    ];
-
-    let deductionItems = [
-      { desc: "Kasbon / Pinjaman", amount: 0 }
-    ];
-
-    let workerTemplates = JSON.parse(localStorage.getItem('workerTemplates') || '{}');
-
-    window.onload = function() {
-      const todayDate = new Date();
-      const today = todayDate.toISOString().split('T')[0];
-      document.getElementById('payDate').value = today;
-
-      const startDate = new Date();
-      startDate.setDate(todayDate.getDate() - 6);
-      document.getElementById('periodStart').value = startDate.toISOString().split('T')[0];
-      document.getElementById('periodEnd').value = today;
-      updatePeriodFromDates();
-
-      renderWorkerTemplateDropdown();
-      populateReguDropdown();
-      renderItemsInput();
-      updateReceipt();
-
-      renderWorkerGrid();
-      renderRekapTable();
-
-      checkBtStatusOnLoad();
-    };
-
-    function populateReguDropdown() {
-      const reguSelect = document.getElementById('filterReguSelect');
-      if (!reguSelect) return;
-
-      const currentVal = reguSelect.value;
-      const reguSet = new Set();
-
-      workersData.forEach(w => {
-        if (w.regu && w.regu !== '-' && w.regu.trim() !== '') {
-          reguSet.add(w.regu.trim());
-        }
-      });
-      rekapData.forEach(r => {
-        if (r.regu && r.regu !== '-' && r.regu.trim() !== '') {
-          reguSet.add(r.regu.trim());
-        }
-      });
-
-      const sortedRegu = Array.from(reguSet).sort();
-
-      reguSelect.innerHTML = '<option value="">-- Semua Regu --</option>';
-      sortedRegu.forEach(reguName => {
-        const opt = document.createElement('option');
-        opt.value = reguName;
-        opt.innerText = reguName;
-        if (reguName === currentVal) opt.selected = true;
-        reguSelect.appendChild(opt);
-      });
-    }
-
-    function sanitizeAscii(str) {
-      return (str || "")
-        .replace(/[–—]/g, '-')
-        .replace(/…/g, '...')
-        .replace(/‘|’/g, "'")
-        .replace(/“|”/g, '"')
-        .replace(/[^\x20-\x7E\n\r]/g, '');
-    }
-
-    function getRoleRate(roleName) {
-      if (roleRates && roleRates[roleName] && roleRates[roleName] > 0) {
-        return roleRates[roleName];
-      }
-      return defaultRoleRates[roleName] || 100000;
-    }
-
-    function openRatesModal() {
-      document.getElementById('input_rate_pengawas_lapangan').value = getRoleRate("Pengawas Lapangan");
-      document.getElementById('input_rate_pengawas_cudai').value = getRoleRate("Pengawas Cudai");
-      document.getElementById('input_rate_penjemur').value = getRoleRate("Penjemur");
-      document.getElementById('input_rate_pengawas_malam').value = getRoleRate("Pengawas Malam");
-      document.getElementById('input_rate_pengawas_koperasi').value = getRoleRate("Pengawas Koperasi");
-      document.getElementById('input_rate_borongan_petik').value = getRoleRate("Borongan Petik");
-      document.getElementById('input_rate_borongan_cudai').value = getRoleRate("Borongan Cudai");
-      document.getElementById('ratesModal').style.display = 'flex';
-    }
-
-    function closeRatesModal() {
-      document.getElementById('ratesModal').style.display = 'none';
-    }
-
-    function saveCustomRates() {
-      roleRates["Pengawas Lapangan"] = parseInt(document.getElementById('input_rate_pengawas_lapangan').value) || 150000;
-      roleRates["Pengawas Cudai"] = parseInt(document.getElementById('input_rate_pengawas_cudai').value) || 75000;
-      roleRates["Penjemur"] = parseInt(document.getElementById('input_rate_penjemur').value) || 125000;
-      roleRates["Pengawas Malam"] = parseInt(document.getElementById('input_rate_pengawas_malam').value) || 75000;
-      roleRates["Pengawas Koperasi"] = parseInt(document.getElementById('input_rate_pengawas_koperasi').value) || 150000;
-
-      let pRate = parseInt(document.getElementById('input_rate_borongan_petik').value) || 7000;
-      let cRate = parseInt(document.getElementById('input_rate_borongan_cudai').value) || 1500;
-      roleRates["Borongan Petik"] = pRate;
-      roleRates["Borongan Cudai"] = cRate;
-      savedTarif = pRate;
-
-      localStorage.setItem('roleRates', JSON.stringify(roleRates));
-      localStorage.setItem('tarifBorongan', savedTarif);
-
-      closeRatesModal();
-
-      if (workerCategory === "Pengawas") {
-        handlePengawasRoleChange(pengawasRole);
-      } else {
-        handleBoronganTypeChange(boronganType);
-      }
-      alert('✅ Tarif pokok berhasil disimpan dan diperbarui!');
-    }
-
-    function resetDefaultRates() {
-      roleRates = JSON.parse(JSON.stringify(defaultRoleRates));
-      localStorage.setItem('roleRates', JSON.stringify(roleRates));
-      savedTarif = 7000;
-      localStorage.setItem('tarifBorongan', 7000);
-      closeRatesModal();
-      handleCategoryChange(workerCategory);
-      alert('Tarif dikembalikan ke standar bawaan.');
-    }
-
-    function prepareAndPrintSystem() {
-      const source = document.getElementById('receiptPrintArea');
-      const container = document.getElementById('printableReceiptContainer');
-      if (source && container) {
-        container.innerHTML = source.innerHTML;
-      }
-      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.printPage) {
-        AndroidPrint.printPage();
-      } else {
-        window.print();
-      }
-    }
-
-    function switchMainTab(tab) {
-      const secSlip = document.getElementById('secSlip');
-      const secDb = document.getElementById('secDb');
-      const secRekap = document.getElementById('secRekap');
-
-      secSlip.style.display = 'none';
-      secDb.style.display = 'none';
-      secRekap.style.display = 'none';
-
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-
-      if (tab === 'slip') {
-        secSlip.style.display = 'flex';
-        document.getElementById('tabNavSlip').classList.add('active');
-      } else if (tab === 'db') {
-        secDb.style.display = 'block';
-        document.getElementById('tabNavDb').classList.add('active');
-        populateReguDropdown();
-        renderWorkerGrid();
-      } else if (tab === 'rekap') {
-        secRekap.style.display = 'block';
-        document.getElementById('tabNavRekap').classList.add('active');
-        renderRekapTable();
-      }
-    }
-
-    function getDaysFromPeriod() {
-      const startVal = document.getElementById('periodStart').value;
-      const endVal = document.getElementById('periodEnd').value;
-      if (startVal && endVal) {
-        const start = new Date(startVal);
-        const end = new Date(endVal);
-        const diffTime = end.getTime() - start.getTime();
-        const diffDays = Math.round(diffTime / (1000 * 3600 * 24)) + 1;
-        if (diffDays > 0) return diffDays;
-      }
-      return 7;
-    }
-
-    function handleCategoryChange(cat) {
-      workerCategory = cat;
-      const pGroup = document.getElementById('pengawasSubGroup');
-      const bGroup = document.getElementById('boronganSubGroup');
-
-      if (cat === "Borongan") {
-        pGroup.style.display = "none";
-        bGroup.style.display = "block";
-        boronganType = document.getElementById('boronganTypeSelect').value || "Borongan Petik";
-        let price = getRoleRate(boronganType);
-        document.getElementById('boronganRateDisplayBadge').innerText = "Tarif: " + formatRupiah(price) + "/kg";
-        incomeItems = [{ type: "borongan", desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 }];
-      } else {
-        pGroup.style.display = "block";
-        bGroup.style.display = "none";
-        pengawasRole = document.getElementById('pengawasRoleSelect').value || "Pengawas Lapangan";
-
-        let defaultRate = getRoleRate(pengawasRole);
-        document.getElementById('roleRateDisplayBadge').innerText = "Tarif: " + formatRupiah(defaultRate) + "/hari";
-
-        let days = getDaysFromPeriod();
-        incomeItems = [{ type: "harian", desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate }];
-      }
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function handlePengawasRoleChange(role) {
-      pengawasRole = role;
-      let defaultRate = getRoleRate(role);
-      document.getElementById('roleRateDisplayBadge').innerText = "Tarif: " + formatRupiah(defaultRate) + "/hari";
-
-      let currentDays = getDaysFromPeriod();
-
-      if (incomeItems.length > 0) {
-        incomeItems[0].type = "harian";
-        incomeItems[0].desc = "Gaji " + role;
-        incomeItems[0].dailyRate = defaultRate;
-        incomeItems[0].workDays = currentDays;
-        incomeItems[0].amount = currentDays * defaultRate;
-      }
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function handleBoronganTypeChange(type) {
-      boronganType = type;
-      let price = getRoleRate(type);
-      document.getElementById('boronganRateDisplayBadge').innerText = "Tarif: " + formatRupiah(price) + "/kg";
-      if (incomeItems.length > 0 && incomeItems[0].desc.startsWith("Hasil ")) {
-        incomeItems[0].type = "borongan";
-        incomeItems[0].desc = "Hasil " + type;
-        incomeItems[0].pricePerKg = price;
-        incomeItems[0].amount = (incomeItems[0].weightKg || 0) * price;
-      }
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function getSelectedRole() {
-      if (workerCategory === "Borongan") {
-        return document.getElementById('boronganTypeSelect').value || "Borongan";
-      }
-      return document.getElementById('pengawasRoleSelect').value || "Pengawas Lapangan";
-    }
-
-    function applyWorkerData(workerName) {
-      if (!workerName) return;
-
-      const worker = workersData.find(w => w.name.toLowerCase() === workerName.toLowerCase());
-      const rekap = rekapData.find(r => r.name.toLowerCase() === workerName.toLowerCase());
-
-      document.getElementById('workerName').value = workerName;
-
-      let category = worker ? worker.category : "Pengawas Lapangan";
-      let catLower = category.toLowerCase();
-
-      if (catLower.includes('borongan') || catLower.includes('pemetik') || catLower.includes('pencudai')) {
-        document.getElementById('workerCategorySelect').value = 'Borongan';
-        handleCategoryChange('Borongan');
-
-        let type = 'Borongan Petik';
-        if (catLower.includes('cudai')) {
-          type = 'Borongan Cudai';
-        }
-        document.getElementById('boronganTypeSelect').value = type;
-        handleBoronganTypeChange(type);
-
-        let kg = rekap ? parseFloat(rekap.hasilKg) || 0 : 0;
-        let price = getRoleRate(type);
-        let total = kg * price;
-
-        incomeItems = [{
-          type: "borongan",
-          desc: "Hasil " + type,
-          weightKg: kg,
-          pricePerKg: price,
-          amount: total
-        }];
-      } else {
-        // Pengawas / Penjemur / Harian
-        document.getElementById('workerCategorySelect').value = 'Pengawas';
-
-        let exactRole = "Pengawas Lapangan";
-        if (catLower.includes('malam')) {
-          exactRole = "Pengawas Malam";
-        } else if (catLower.includes('cudai')) {
-          exactRole = "Pengawas Cudai";
-        } else if (catLower.includes('jemur')) {
-          exactRole = "Penjemur";
-        } else if (catLower.includes('koperasi')) {
-          exactRole = "Pengawas Koperasi";
-        }
-
-        document.getElementById('pengawasSubGroup').style.display = 'block';
-        document.getElementById('boronganSubGroup').style.display = 'none';
-        document.getElementById('pengawasRoleSelect').value = exactRole;
-        pengawasRole = exactRole;
-
-        let defaultRate = getRoleRate(exactRole);
-        document.getElementById('roleRateDisplayBadge').innerText = "Tarif: " + formatRupiah(defaultRate) + "/hari";
-
-        let days = getDaysFromPeriod();
-
-        incomeItems = [{
-          type: "harian",
-          desc: "Gaji " + exactRole,
-          workDays: days,
-          dailyRate: defaultRate,
-          amount: days * defaultRate
-        }];
-      }
-
-      // Kasbon
-      let kasbonAmt = 0;
-      if (rekap && rekap.kasbon && rekap.kasbon !== "-") {
-        let cleaned = rekap.kasbon.replace(/[^0-9]/g, '');
-        kasbonAmt = parseFloat(cleaned) || 0;
-      }
-
-      deductionItems = [{
-        desc: "Kasbon / Pinjaman",
-        amount: kasbonAmt
-      }];
-
-      if (savedPeriode && savedPeriode.trim() !== "") {
-        document.getElementById('periodText').value = savedPeriode;
-      }
-
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function renderWorkerGrid() {
-      const container = document.getElementById('workerGridContainer');
-      const search = (document.getElementById('searchWorkerInput').value || '').toLowerCase();
-      const statusFilter = document.getElementById('filterStatusSelect').value;
-      const categoryFilter = document.getElementById('filterCategorySelect').value;
-      const reguFilter = document.getElementById('filterReguSelect').value;
-
-      container.innerHTML = '';
-      let count = 0;
-
-      workersData.forEach(w => {
-        const matchesSearch = !search || w.name.toLowerCase().includes(search) || (w.regu || '').toLowerCase().includes(search);
-        const wStatus = w.paymentStatus || 'Belum Dibayarkan';
-        const matchesStatus = !statusFilter || (wStatus === statusFilter);
-        const matchesCategory = !categoryFilter || w.category === categoryFilter;
-
-        let matchesRegu = true;
-        if (reguFilter) {
-          matchesRegu = (w.regu || '').toLowerCase().includes(reguFilter.toLowerCase());
-        }
-
-        if (matchesSearch && matchesStatus && matchesCategory && matchesRegu) {
-          count++;
-          const card = document.createElement('div');
-          card.className = 'worker-card';
-
-          const initial = w.name.charAt(0).toUpperCase();
-          const statusClass = (wStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
-
-          card.innerHTML = `
-            <div>
-              <div class="worker-header">
-                <div class="avatar">${initial}</div>
-                <div class="worker-info">
-                  <div class="worker-name">${w.name}</div>
-                  <div class="worker-regu">Regu: ${w.regu || '-'} (#${w.no})</div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">1️⃣ Pilih Pekerja &amp; Akun Beban (COA)</div>
+                <button class="btn btn-secondary btn-sm" onclick="resetSlipForm()">🔄 Reset Form</button>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Filter Regu / Petak</label>
+                  <select id="filterSlipRegu" onchange="populateWorkerSelect()">
+                    <option value="">-- Semua Regu / Petak --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Pilih Pekerja (Database)</label>
+                  <select id="selectWorkerDb" onchange="onSelectWorkerFromDb()">
+                    <option value="">-- Ketik Manual / Pilih Pekerja --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Nama Pekerja / Ketua Regu</label>
+                  <input type="text" id="workerName" value="Alfiki Paputungan" oninput="updateReceipt()">
+                </div>
+                <div class="form-group">
+                  <label>Jabatan / Kategori</label>
+                  <input type="text" id="workerRole" value="Borongan Pemetik" oninput="updateReceipt()">
+                </div>
+                <div class="form-group">
+                  <label>Regu / Petak Lahan</label>
+                  <input type="text" id="workerRegu" value="PGWS" oninput="updateReceipt()">
+                </div>
+                <div class="form-group">
+                  <label>Akun Beban (COA)</label>
+                  <select id="coaSelect" onchange="onCoaChange()"></select>
+                </div>
+                <div class="form-group">
+                  <label>No. Bukti / Referensi</label>
+                  <input type="text" id="refNo" oninput="updateReceipt()">
+                </div>
+                <div class="form-group">
+                  <label>Tanggal Pembayaran</label>
+                  <input type="date" id="payDate" oninput="updateReceipt()">
+                </div>
+                <div class="form-group full">
+                  <label>Periode / Keterangan Kerja</label>
+                  <input type="text" id="periodText" value="Periode November 2026" oninput="updateReceipt()">
                 </div>
               </div>
-              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-                <span class="tag tag-category">${w.category}</span>
-                <span class="tag ${statusClass}">🟡 ${wStatus}</span>
+            </div>
+
+            <!-- KALKULATOR PINTAR -->
+            <div class="smart-calc-box">
+              <div class="smart-calc-header">
+                <span>⚡ Kalkulator Cepat (Otomatis ke Komponen Pendapatan)</span>
+                <select id="calcMode" onchange="toggleCalcMode()" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                  <option value="borongan_kg">Borongan Petik / Cudai (Kg)</option>
+                  <option value="harian_hok">Harian Pengawas / Penjemur (HOK)</option>
+                  <option value="borongan_lahan">Borongan Pemarasan (Ha / Pohon)</option>
+                </select>
+              </div>
+
+              <div id="calcInputsKg" class="form-grid" style="margin-bottom: 0.5rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Berat Hasil (kg)</label>
+                  <input type="number" id="calcQtyKg" step="0.1" placeholder="Contoh: 133.5" oninput="applySmartCalc()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Tarif per kg (Rp)</label>
+                  <input type="number" id="calcRateKg" value="7000" oninput="applySmartCalc()">
+                </div>
+              </div>
+
+              <div id="calcInputsHok" class="form-grid" style="display: none; margin-bottom: 0.5rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Jumlah Hari (HOK)</label>
+                  <input type="number" id="calcQtyHok" step="0.5" placeholder="Contoh: 10" oninput="applySmartCalc()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Tarif per HOK (Rp)</label>
+                  <input type="number" id="calcRateHok" value="150000" oninput="applySmartCalc()">
+                </div>
+              </div>
+
+              <div id="calcInputsLahan" class="form-grid" style="display: none; margin-bottom: 0.5rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Luas (Ha) / Jumlah Pohon</label>
+                  <input type="text" id="calcLahanInfo" placeholder="Contoh: 2.5 Ha / 180 Pohon" oninput="applySmartCalc()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Nilai Borongan (Rp)</label>
+                  <input type="number" id="calcRateLahan" placeholder="Contoh: 2500000" oninput="applySmartCalc()">
+                </div>
               </div>
             </div>
-            <button class="btn btn-primary" onclick="createSlipForWorker('${w.name}', '${w.category}', '${w.regu}')" style="width: 100%; justify-content: center; font-size: 0.8rem;">
-              Buat Slip Gaji
-            </button>
-          `;
-          container.appendChild(card);
-        }
-      });
 
-      document.getElementById('dbStatsText').innerText = `Menampilkan ${count} dari ${workersData.length} Pekerja (${statusFilter || 'Semua Status'})`;
-      document.getElementById('totalWorkerBadge').innerText = workersData.length;
-    }
-
-    function filterWorkers() {
-      renderWorkerGrid();
-    }
-
-    function createSlipForWorker(name, category, regu) {
-      applyWorkerData(name);
-      switchMainTab('slip');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function renderRekapTable() {
-      const tbody = document.getElementById('rekapTableBody');
-      const search = (document.getElementById('searchRekapInput').value || '').toLowerCase();
-      const statusFilter = document.getElementById('filterRekapStatusSelect').value;
-      tbody.innerHTML = '';
-
-      rekapData.forEach(r => {
-        const matchesSearch = !search || r.name.toLowerCase().includes(search) || (r.regu || '').toLowerCase().includes(search);
-        const rStatus = r.paymentStatus || 'Belum Dibayarkan';
-        const matchesStatus = !statusFilter || (rStatus === statusFilter);
-
-        if (matchesSearch && matchesStatus) {
-          const tr = document.createElement('tr');
-          const statusClass = (rStatus === 'Belum Dibayarkan') ? 'tag-unpaid' : 'tag-paid';
-
-          tr.innerHTML = `
-            <td>#${r.no}</td>
-            <td style="font-weight: 700; color: #0f172a;">${r.name}</td>
-            <td><span class="tag tag-category">${r.regu || '-'}</span></td>
-            <td style="font-weight: 600;">${r.hasilKg || 0} kg</td>
-            <td>Rp ${r.subTotal || '0'}</td>
-            <td><span style="color: #dc2626;">${r.kasbon || '-'}</span></td>
-            <td style="font-weight: 700; color: #16a34a;">${r.totalGaji || 'Rp 0'}</td>
-            <td><span class="tag ${statusClass}">🟡 ${rStatus}</span></td>
-            <td>
-              <button class="btn btn-secondary" onclick="createSlipForWorker('${r.name}', 'Borongan Pemetik', '${r.regu}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                Buat Slip
-              </button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        }
-      });
-    }
-
-    function filterRekap() {
-      renderRekapTable();
-    }
-
-    function syncWithGoogleSheets() {
-      alert('Memulai sinkronisasi data dari Google Sheets...');
-
-      const docId = "1rgSWAGeef9o2D-Eru6v2dzuTm_W8MMeb86Bt_Quo6Rk";
-      const t = new Date().getTime();
-      const urlPekerja = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Database%20Pekerja&_t=${t}`;
-      const urlPemetik = `https://docs.google.com/spreadsheets/d/${docId}/gviz/tq?tqx=out:csv&sheet=Pembayaran%20Pemetik&_t=${t}`;
-
-      function performSync() {
-        let csvPekerja = "";
-        let csvPemetik = "";
-
-        if (typeof AndroidPrint !== 'undefined' && AndroidPrint.fetchUrlText) {
-          csvPekerja = AndroidPrint.fetchUrlText(urlPekerja);
-          csvPemetik = AndroidPrint.fetchUrlText(urlPemetik);
-        }
-
-        if (!csvPekerja || csvPekerja.trim().length === 0) {
-          alert('❌ Gagal sinkronisasi: Tidak dapat mengakses data Google Sheets. Cek koneksi internet.');
-          return;
-        }
-
-        let linesP = csvPekerja.split('\n');
-        let newWorkers = [];
-        linesP.forEach(line => {
-          const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
-          if (fields.length >= 8) {
-            const no = fields[1];
-            const name = fields[2];
-            const category = fields[3];
-            const regu = fields[4];
-            const schema = fields[5];
-            const status = fields[7];
-
-            if (/^\d+$/.test(no) && name && isNaN(name)) {
-              newWorkers.push({
-                no: parseInt(no),
-                name: name,
-                category: category,
-                regu: regu || "-",
-                schema: schema || "-",
-                status: status || "Aktif",
-                paymentStatus: "Belum Dibayarkan"
-              });
-            }
-          }
-        });
-
-        let newRekap = [];
-        if (csvPemetik && csvPemetik.trim().length > 0) {
-          let linesM = csvPemetik.split('\n');
-
-          if (linesM.length > 2) {
-            const h1 = linesM[0];
-            const tMatch = h1.match(/Tarif Borongan:\s*Rp\s*([0-9.,]+)/i);
-            if (tMatch && tMatch[1]) {
-               let parsedTarif = parseInt(tMatch[1].replace(/\./g, ''));
-               if (parsedTarif > 0) {
-                 roleRates["Borongan Petik"] = parsedTarif;
-                 savedTarif = parsedTarif;
-                 localStorage.setItem('tarifBorongan', savedTarif);
-                 localStorage.setItem('roleRates', JSON.stringify(roleRates));
-               }
-            }
-
-            const h2 = linesM[1];
-            const pMatch = h2.match(/Periode Gaji\s*\(([^)]+)\)/i);
-            if (pMatch && pMatch[1]) {
-               savedPeriode = pMatch[1];
-               localStorage.setItem('periodeSync', savedPeriode);
-               document.getElementById('periodText').value = savedPeriode;
-            }
-          }
-
-          linesM.forEach(line => {
-            const fields = line.split('","').map(f => f.replace(/^"|"$/g, '').trim());
-            if (fields.length >= 8) {
-              const no = fields[1];
-              const name = fields[2];
-              const regu = fields[3];
-
-              let p2Kg = fields.length >= 9 ? (parseFloat(fields[8]) || 0) : 0;
-              let p1Kg = parseFloat(fields[4]) || 0;
-
-              let hasilKg = 0;
-              let subTotal = "0";
-              let kasbon = "-";
-              let totalGaji = "Rp 0";
-
-              if (p2Kg > 0 || (fields.length >= 12 && fields[11] && fields[11] !== "-")) {
-                hasilKg = p2Kg;
-                subTotal = fields[9] || "0";
-                kasbon = fields[10] || "-";
-                totalGaji = fields[11] || "Rp 0";
-              } else {
-                hasilKg = p1Kg;
-                subTotal = fields[5] || "0";
-                kasbon = fields[6] || "-";
-                totalGaji = fields[7] || "Rp 0";
-              }
-
-              if (/^\d+$/.test(no) && name) {
-                const statusVal = (hasilKg > 0 || (totalGaji && totalGaji !== "-")) ? "Belum Dibayarkan" : "Lunas";
-                newRekap.push({
-                  no: parseInt(no),
-                  name: name,
-                  regu: regu,
-                  hasilKg: hasilKg,
-                  subTotal: subTotal,
-                  kasbon: kasbon,
-                  totalGaji: totalGaji,
-                  paymentStatus: statusVal
-                });
-              }
-            }
-          });
-        }
-
-        if (newWorkers.length > 0) {
-          workersData = newWorkers;
-          localStorage.setItem('workersData', JSON.stringify(workersData));
-        }
-        if (newRekap.length > 0) {
-          rekapData = newRekap;
-          localStorage.setItem('rekapData', JSON.stringify(rekapData));
-        }
-
-        populateReguDropdown();
-        renderWorkerGrid();
-        renderRekapTable();
-        renderWorkerTemplateDropdown();
-
-        if (workerCategory === "Pengawas") {
-          handlePengawasRoleChange(pengawasRole);
-        } else {
-          handleBoronganTypeChange(boronganType);
-        }
-
-        let unpaidCount = workersData.filter(w => (w.paymentStatus || 'Belum Dibayarkan') === 'Belum Dibayarkan').length;
-        alert("✅ Sinkronisasi Berhasil!\n\n• Total Pekerja: " + workersData.length + " orang\n• Pengawas Lapangan: " + formatRupiah(getRoleRate("Pengawas Lapangan")) + "\n• Penjemur: " + formatRupiah(getRoleRate("Penjemur")) + "\n• Pengawas Malam/Cudai: " + formatRupiah(getRoleRate("Pengawas Malam")) + "\n• Borongan Cudai: " + formatRupiah(getRoleRate("Borongan Cudai")) + "/kg\n• Borongan Petik: " + formatRupiah(getRoleRate("Borongan Petik")) + "/kg\n\nData ter-update langsung dari Google Sheets!");
-      }
-
-      setTimeout(performSync, 100);
-    }
-
-    function checkBtStatusOnLoad() {
-      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.isBluetoothConnected && AndroidPrint.isBluetoothConnected()) {
-        onBtConnected('Printer Bluetooth');
-      }
-    }
-
-    function onBtConnected(devName) {
-      const status = document.getElementById('btStatus');
-      const directBox = document.getElementById('directBtBtnBox');
-      if (status) {
-        status.innerText = 'Terhubung ke ' + (devName || 'Printer Bluetooth');
-        status.style.color = '#10b981';
-      }
-      if (directBox) {
-        directBox.style.display = 'block';
-      }
-    }
-
-    function onBtDisconnected(msg) {
-      const status = document.getElementById('btStatus');
-      const directBox = document.getElementById('directBtBtnBox');
-      if (status) {
-        status.innerText = 'Terputus: ' + (msg || '');
-        status.style.color = '#ef4444';
-      }
-      if (directBox) {
-        directBox.style.display = 'none';
-      }
-    }
-
-    function updatePeriodFromDates() {
-      const startVal = document.getElementById('periodStart').value;
-      const endVal = document.getElementById('periodEnd').value;
-
-      if (startVal && endVal) {
-        const startDate = new Date(startVal);
-        const endDate = new Date(endVal);
-
-        const formatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-        const startFormatted = startDate.toLocaleDateString('id-ID', formatOptions);
-        const endFormatted = endDate.toLocaleDateString('id-ID', formatOptions);
-
-        document.getElementById('periodText').value = `${startFormatted} - ${endFormatted}`;
-
-        // Auto update workDays for Pengawas / Harian items
-        const newDays = getDaysFromPeriod();
-        if (workerCategory === "Pengawas") {
-          incomeItems.forEach((item) => {
-            if (item.workDays !== undefined && item.dailyRate !== undefined) {
-              item.workDays = newDays;
-              item.amount = newDays * item.dailyRate;
-            }
-          });
-          renderItemsInput();
-        }
-      } else if (startVal) {
-        const startDate = new Date(startVal);
-        const formatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-        document.getElementById('periodText').value = startDate.toLocaleDateString('id-ID', formatOptions);
-      }
-      updateReceipt();
-    }
-
-    function renderWorkerTemplateDropdown() {
-      const select = document.getElementById('workerTemplateSelect');
-      select.innerHTML = '<option value="">-- Pilih / Cari Nama Pekerja (Belum Dibayarkan) --</option>';
-
-      let templateGroup = document.createElement('optgroup');
-      templateGroup.label = "💾 Template Tersimpan";
-      let hasTemplates = false;
-      for (const name in workerTemplates) {
-        hasTemplates = true;
-        const opt = document.createElement('option');
-        opt.value = "TEMPLATE:" + name;
-        opt.innerText = name;
-        templateGroup.appendChild(opt);
-      }
-      if (hasTemplates) select.appendChild(templateGroup);
-
-      let dbGroup = document.createElement('optgroup');
-      dbGroup.label = "🟡 Belum Dibayarkan (" + workersData.length + " Orang)";
-
-      const sortedWorkers = [...workersData].sort((a,b) => a.name.localeCompare(b.name));
-      sortedWorkers.forEach(w => {
-        const opt = document.createElement('option');
-        opt.value = "WORKER:" + w.name;
-        opt.innerText = `🟡 ${w.name} (${w.category}${w.regu && w.regu !== '-' ? ' - Regu ' + w.regu : ''})`;
-        dbGroup.appendChild(opt);
-      });
-      select.appendChild(dbGroup);
-    }
-
-    function saveWorkerTemplate() {
-      const name = document.getElementById('workerName').value.trim();
-      if (!name) {
-        alert('Tuliskan Nama Pekerja terlebih dahulu!');
-        return;
-      }
-      const role = getSelectedRole();
-
-      workerTemplates[name] = {
-        name: name,
-        category: workerCategory,
-        boronganType: boronganType,
-        pengawasRole: pengawasRole,
-        role: role,
-        incomeItems: JSON.parse(JSON.stringify(incomeItems)),
-        deductionItems: JSON.parse(JSON.stringify(deductionItems))
-      };
-
-      localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
-      renderWorkerTemplateDropdown();
-      document.getElementById('workerTemplateSelect').value = "TEMPLATE:" + name;
-      alert(`Data pekerja "${name}" berhasil disimpan ke daftar template!`);
-    }
-
-    function loadWorkerTemplate(val) {
-      if (!val) return;
-      if (val.startsWith("WORKER:")) {
-        const name = val.replace("WORKER:", "");
-        applyWorkerData(name);
-      } else if (val.startsWith("TEMPLATE:")) {
-        const name = val.replace("TEMPLATE:", "");
-        const data = workerTemplates[name];
-        if (!data) return;
-        document.getElementById('workerName').value = data.name;
-
-        if (data.category) {
-          document.getElementById('workerCategorySelect').value = data.category;
-          handleCategoryChange(data.category);
-        }
-        if (data.boronganType && data.category === "Borongan") {
-          document.getElementById('boronganTypeSelect').value = data.boronganType;
-          handleBoronganTypeChange(data.boronganType);
-        }
-        if (data.pengawasRole && data.category === "Pengawas") {
-          document.getElementById('pengawasRoleSelect').value = data.pengawasRole;
-          handlePengawasRoleChange(data.pengawasRole);
-        }
-
-        if (data.incomeItems) {
-          incomeItems = JSON.parse(JSON.stringify(data.incomeItems));
-        }
-        if (data.deductionItems) {
-          deductionItems = JSON.parse(JSON.stringify(data.deductionItems));
-        }
-
-        renderItemsInput();
-        updateReceipt();
-      }
-    }
-
-    function deleteWorkerTemplate() {
-      const select = document.getElementById('workerTemplateSelect');
-      const val = select.value;
-      if (!val || !val.startsWith("TEMPLATE:")) {
-        alert('Pilih template tersimpan dari daftar yang ingin dihapus!');
-        return;
-      }
-      const name = val.replace("TEMPLATE:", "");
-      if (confirm(`Apakah Anda yakin ingin menghapus template pekerja "${name}"?`)) {
-        delete workerTemplates[name];
-        localStorage.setItem('workerTemplates', JSON.stringify(workerTemplates));
-        renderWorkerTemplateDropdown();
-        alert(`Template "${name}" telah dihapus.`);
-      }
-    }
-
-    function togglePreview() {
-      const previewSec = document.getElementById('previewSectionBox');
-      const toggleText = document.getElementById('toggleText');
-
-      if (previewSec.classList.contains('hidden')) {
-        previewSec.classList.remove('hidden');
-        if (toggleText) toggleText.innerText = 'Sembunyikan Preview';
-      } else {
-        previewSec.classList.add('hidden');
-        if (toggleText) toggleText.innerText = 'Tampilkan Preview';
-      }
-    }
-
-    function switchMobileTab(mode) {
-      const editorSec = document.querySelector('.editor-section');
-      const previewSec = document.querySelector('.preview-section');
-      const tabEdit = document.getElementById('tabEdit');
-      const tabPreview = document.getElementById('tabPreview');
-
-      if (mode === 'edit') {
-        editorSec.style.display = 'block';
-        previewSec.style.display = 'none';
-        previewSec.classList.add('hidden');
-        tabEdit.classList.add('active');
-        tabPreview.classList.remove('active');
-      } else if (mode === 'preview') {
-        editorSec.style.display = 'none';
-        previewSec.style.display = 'flex';
-        previewSec.classList.remove('hidden');
-        tabEdit.classList.remove('active');
-        tabPreview.classList.add('active');
-      }
-    }
-
-    // Bluetooth Printer Functions
-    function openBluetoothModal() {
-      document.getElementById('btModal').style.display = 'flex';
-      loadBtDevices();
-    }
-
-    function closeBluetoothModal() {
-      document.getElementById('btModal').style.display = 'none';
-    }
-
-    function loadBtDevices() {
-      const select = document.getElementById('btDeviceSelect');
-      const status = document.getElementById('btStatus');
-      select.innerHTML = '<option value="">-- Pilih Perangkat Bluetooth --</option>';
-
-      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.getPairedBluetoothDevices) {
-        try {
-          const jsonStr = AndroidPrint.getPairedBluetoothDevices();
-          const devices = JSON.parse(jsonStr);
-          if (devices.length === 0) {
-            status.innerText = 'Belum ada printer Bluetooth terpasang. Pastikan sudah di-pair di Pengaturan HP.';
-            status.style.color = '#ef4444';
-          } else {
-            devices.forEach(d => {
-              const opt = document.createElement('option');
-              opt.value = d.address;
-              opt.innerText = `${d.name} (${d.address})`;
-              select.appendChild(opt);
-            });
-            status.innerText = `Ditemukan ${devices.length} perangkat Bluetooth terpasang.`;
-            status.style.color = '#10b981';
-          }
-        } catch (e) {
-          status.innerText = 'Gagal memuat list Bluetooth: ' + e.message;
-          status.style.color = '#ef4444';
-        }
-      } else {
-        status.innerText = 'Pencarian Bluetooth siap digunakan pada aplikasi Android.';
-        status.style.color = '#64748b';
-      }
-    }
-
-    function connectBtDevice() {
-      const address = document.getElementById('btDeviceSelect').value;
-      const status = document.getElementById('btStatus');
-      if (!address) {
-        alert('Silakan pilih perangkat Bluetooth terlebih dahulu!');
-        return;
-      }
-      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.connectBluetoothDevice) {
-        status.innerText = 'Menghubungkan ke printer... Mohon tunggu.';
-        status.style.color = '#f59e0b';
-        AndroidPrint.connectBluetoothDevice(address);
-      }
-    }
-
-    function disconnectBtDevice() {
-      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.disconnectBluetooth) {
-        AndroidPrint.disconnectBluetooth();
-        onBtDisconnected('Terputus');
-      }
-    }
-
-    // Direct ESC/POS Thermal Printing (30-column ultra-safe alignment)
-    function generateEscPosBytes() {
-      let bytes = [];
-
-      function pushString(str) {
-        let clean = sanitizeAscii(str);
-        for (let i = 0; i < clean.length; i++) {
-          bytes.push(clean.charCodeAt(i));
-        }
-      }
-
-      // Initialize
-      bytes.push(0x1B, 0x40);
-
-      // Center Align Header
-      bytes.push(0x1B, 0x61, 0x01);
-
-      // Bold Business Title
-      bytes.push(0x1B, 0x45, 0x01);
-      pushString((document.getElementById('businessName').value || 'KOPERASI ILANTAT JAYA') + "\n");
-      bytes.push(0x1B, 0x45, 0x00);
-
-      pushString((document.getElementById('businessUnit').value || 'Slip Gaji & Upah Kerja') + "\n");
-      pushString((document.getElementById('businessAddress').value || 'Desa Lungkap') + "\n");
-      pushString("------------------------------\n");
-
-      // Left Align for Details
-      bytes.push(0x1B, 0x61, 0x00);
-
-      function addKeyValue(key, val) {
-        let k = (key || "").trim();
-        let v = (val || "").trim();
-        if (k.length + v.length + 1 <= 30) {
-          let spaces = Math.max(1, 30 - (k.length + v.length));
-          pushString(k + " ".repeat(spaces) + v + "\n");
-        } else {
-          pushString(k + ":\n");
-          let vSub = v.length > 28 ? v.substring(0, 28) : v;
-          pushString("  " + vSub + "\n");
-        }
-      }
-
-      addKeyValue("No.Bukti", document.getElementById('refNo').value || '-');
-
-      const dateVal = document.getElementById('payDate').value;
-      let dateStr = '-';
-      if (dateVal) {
-        const parts = dateVal.split('-');
-        dateStr = `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
-      addKeyValue("Tanggal", dateStr);
-
-      const worker = document.getElementById('workerName').value || 'Nama Pekerja';
-      addKeyValue("Pekerja", worker);
-
-      const role = getSelectedRole();
-      addKeyValue("Jabatan", role);
-
-      const period = document.getElementById('periodText').value || '-';
-      addKeyValue("Periode", period);
-
-      pushString("------------------------------\n");
-
-      // Income Items
-      bytes.push(0x1B, 0x45, 0x01);
-      pushString("RINCIAN PENDAPATAN:\n");
-      bytes.push(0x1B, 0x45, 0x00);
-
-      let totalIncome = 0;
-      incomeItems.forEach(item => {
-        totalIncome += (item.amount || 0);
-        let name = item.desc || 'Pendapatan';
-        let amtStr = formatRupiah(item.amount);
-
-        pushString(name + "\n");
-
-        let subDetail = "";
-        if (item.type === 'borongan' || (item.weightKg !== undefined && item.pricePerKg !== undefined)) {
-          subDetail = `  ${item.weightKg || 0} kg x @${formatRupiah(item.pricePerKg || 0)}`;
-        } else if (item.type === 'harian' || (item.workDays !== undefined && item.dailyRate !== undefined)) {
-          subDetail = `  ${item.workDays || 0} hari x @${formatRupiah(item.dailyRate || 0)}`;
-        } else {
-          subDetail = `  Nominal Tetap`;
-        }
-
-        if (subDetail.length + amtStr.length + 1 <= 30) {
-          let sp = Math.max(1, 30 - (subDetail.length + amtStr.length));
-          pushString(subDetail + " ".repeat(sp) + amtStr + "\n");
-        } else {
-          pushString(subDetail + "\n");
-          let sp = Math.max(1, 30 - amtStr.length);
-          pushString(" ".repeat(sp) + amtStr + "\n");
-        }
-      });
-
-      // Deduction Items
-      let totalDeductions = 0;
-      if (deductionItems.length > 0) {
-        pushString("------------------------------\n");
-        bytes.push(0x1B, 0x45, 0x01);
-        pushString("POTONGAN / KASBON:\n");
-        bytes.push(0x1B, 0x45, 0x00);
-
-        deductionItems.forEach(item => {
-          totalDeductions += (item.amount || 0);
-          let dName = item.desc || 'Potongan';
-          let dAmtStr = "-" + formatRupiah(item.amount);
-
-          if (dName.length + dAmtStr.length + 1 <= 30) {
-            let sp = Math.max(1, 30 - (dName.length + dAmtStr.length));
-            pushString(dName + " ".repeat(sp) + dAmtStr + "\n");
-          } else {
-            pushString(dName + "\n");
-            let sp = Math.max(1, 30 - dAmtStr.length);
-            pushString(" ".repeat(sp) + dAmtStr + "\n");
-          }
-        });
-      }
-
-      pushString("------------------------------\n");
-
-      // Total Diterima
-      bytes.push(0x1B, 0x45, 0x01);
-      const grandTotal = totalIncome - totalDeductions;
-      let totStr = "TOTAL DITERIMA";
-      let totAmt = formatRupiah(grandTotal);
-      let totSp = Math.max(1, 30 - (totStr.length + totAmt.length));
-      pushString(totStr + " ".repeat(totSp) + totAmt + "\n");
-      bytes.push(0x1B, 0x45, 0x00);
-
-      addKeyValue("Metode", document.getElementById('paymentMethod').value);
-      pushString("------------------------------\n");
-
-      // Signatures
-      pushString("Penerima,            Pengesah,\n\n\n");
-      const pic = document.getElementById('picName').value || 'Koperasi';
-      let wSign = worker.length > 11 ? worker.substring(0, 11) : worker;
-      let pSign = pic.length > 11 ? pic.substring(0, 11) : pic;
-      let leftStr = "(" + wSign + ")";
-      let rightStr = "(" + pSign + ")";
-      let signSpaces = Math.max(1, 30 - (leftStr.length + rightStr.length));
-      pushString(leftStr + " ".repeat(signSpaces) + rightStr + "\n");
-
-      pushString("------------------------------\n");
-
-      // Footer
-      bytes.push(0x1B, 0x61, 0x01);
-      pushString((document.getElementById('noteText').value || 'Terima kasih!') + "\n");
-      pushString("--- Simpan bukti ini ---\n\n\n\n\n\n");
-
-      // Feed & Cut
-      bytes.push(0x1D, 0x56, 0x42, 0x00);
-
-      return new Uint8Array(bytes);
-    }
-
-    function printDirectBluetooth() {
-      if (typeof AndroidPrint === 'undefined' || !AndroidPrint.isBluetoothConnected || !AndroidPrint.isBluetoothConnected()) {
-        openBluetoothModal();
-        alert('Printer Bluetooth belum terhubung! Silakan hubungkan printer di modal terlebih dahulu.');
-        return;
-      }
-
-      try {
-        const rawBytes = generateEscPosBytes();
-        let binaryStr = "";
-        for (let i = 0; i < rawBytes.length; i++) {
-          binaryStr += String.fromCharCode(rawBytes[i]);
-        }
-        const base64Str = btoa(binaryStr);
-        const ok = AndroidPrint.sendRawBytes(base64Str);
-        if (!ok) {
-          alert('Gagal mengirim data ke printer Bluetooth.');
-        } else {
-          closeBluetoothModal();
-        }
-      } catch (e) {
-        alert('Error cetak Bluetooth: ' + e.message);
-      }
-    }
-
-    function handleMainPrint() {
-      if (typeof AndroidPrint !== 'undefined' && AndroidPrint.isBluetoothConnected && AndroidPrint.isBluetoothConnected()) {
-        printDirectBluetooth();
-      } else {
-        openBluetoothModal();
-      }
-    }
-
-    // Interactive Calculator
-    let calcExpr = "";
-    function openCalcModal() {
-      calcExpr = "0";
-      document.getElementById('calcDisplay').value = "0";
-      document.getElementById('calcModal').style.display = 'flex';
-    }
-
-    function closeCalcModal() {
-      document.getElementById('calcModal').style.display = 'none';
-    }
-
-    function calcNum(n) {
-      if (calcExpr === "0" || calcExpr === "Error") calcExpr = "";
-      calcExpr += n;
-      document.getElementById('calcDisplay').value = calcExpr;
-    }
-
-    function calcOp(op) {
-      if (calcExpr === "Error") calcExpr = "0";
-      calcExpr += " " + op + " ";
-      document.getElementById('calcDisplay').value = calcExpr;
-    }
-
-    function calcClear() {
-      calcExpr = "0";
-      document.getElementById('calcDisplay').value = "0";
-    }
-
-    function calcEqual() {
-      try {
-        const sanitized = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
-        const res = Function('"use strict";return (' + sanitized + ')')();
-        calcExpr = res.toString();
-        document.getElementById('calcDisplay').value = formatRupiah(res) + " (" + res + ")";
-      } catch (e) {
-        calcExpr = "Error";
-        document.getElementById('calcDisplay').value = "Error";
-      }
-    }
-
-    function formatRupiah(num) {
-      return "Rp " + Number(num || 0).toLocaleString("id-ID");
-    }
-
-    function updateIncomeType(index, newType) {
-      incomeItems[index].type = newType;
-      if (newType === "harian") {
-        incomeItems[index].workDays = incomeItems[index].workDays || getDaysFromPeriod();
-        incomeItems[index].dailyRate = incomeItems[index].dailyRate || getRoleRate(pengawasRole);
-        incomeItems[index].amount = (incomeItems[index].workDays || 0) * (incomeItems[index].dailyRate || 0);
-      } else if (newType === "borongan") {
-        incomeItems[index].weightKg = incomeItems[index].weightKg || 0;
-        incomeItems[index].pricePerKg = incomeItems[index].pricePerKg || getRoleRate(boronganType);
-        incomeItems[index].amount = (incomeItems[index].weightKg || 0) * (incomeItems[index].pricePerKg || 0);
-      } else {
-        incomeItems[index].amount = incomeItems[index].amount || 0;
-      }
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function renderItemsInput() {
-      // Income Inputs
-      const incomeContainer = document.getElementById('incomeItemsContainer');
-      incomeContainer.innerHTML = '';
-
-      incomeItems.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = 'form-row';
-        row.style.cssText = "flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; background: #f8fafc; padding: 0.65rem; border-radius: 6px; border: 1px solid #e2e8f0;";
-
-        const itemType = item.type || (workerCategory === "Borongan" ? "borongan" : "harian");
-
-        let typeSelectHtml = `
-          <div style="flex: 1.2; min-width: 140px;">
-            <label style="font-size: 0.75rem; color: #475569;">Jenis Hitungan</label>
-            <select onchange="updateIncomeType(${idx}, this.value)" style="font-size: 0.8rem; font-weight: bold;">
-              <option value="harian" ${itemType === 'harian' ? 'selected' : ''}>📅 Harian (Hari x Rp)</option>
-              <option value="borongan" ${itemType === 'borongan' ? 'selected' : ''}>⚖️ Borongan (Kg x Rp)</option>
-              <option value="flat" ${itemType === 'flat' ? 'selected' : ''}>💵 Nominal Tetap</option>
+            <!-- KOMPONEN PENDAPATAN & POTONGAN -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">2️⃣ Rincian Pendapatan &amp; Potongan</div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label style="margin: 0; color: #059669;">(+) Komponen Pendapatan</label>
+                <button class="btn btn-secondary btn-sm" onclick="addIncomeItem()">+ Tambah Baris</button>
+              </div>
+              <div id="incomeItemsContainer"></div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0 0.5rem;">
+                <label style="margin: 0; color: #dc2626;">(-) Potongan / Kasbon</label>
+                <button class="btn btn-secondary btn-sm" onclick="addDeductionItem()">+ Tambah Potongan</button>
+              </div>
+              <div id="deductionItemsContainer"></div>
+
+              <div class="form-grid" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                <div class="form-group">
+                  <label>Metode Pembayaran</label>
+                  <select id="paymentMethod" onchange="updateReceipt()">
+                    <option value="Tunai / Cash">Tunai / Cash</option>
+                    <option value="Transfer Bank Sulutgo">Transfer Bank Sulutgo</option>
+                    <option value="Transfer Bank BRI">Transfer Bank BRI</option>
+                    <option value="Transfer Bank BCA">Transfer Bank BCA</option>
+                    <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
+                    <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Nama Pengesah / Pengurus</label>
+                  <input type="text" id="picName" oninput="updateReceipt()">
+                </div>
+                <div class="form-group full">
+                  <label>Catatan Kaki (Bawah Struk)</label>
+                  <input type="text" id="noteText" oninput="updateReceipt()">
+                </div>
+              </div>
+
+              <div class="action-bar">
+                <button class="btn btn-primary btn-lg" style="flex: 2;" onclick="saveAndPrintSlip()">
+                  🖨️ Simpan &amp; Cetak Thermal (57x30)
+                </button>
+                <button class="btn btn-accent btn-lg" style="flex: 1;" onclick="shareSlipWhatsApp()">
+                  💬 Kirim WA / Copy
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: LIVE PREVIEW THERMAL -->
+          <div class="preview-sticky">
+            <div class="preview-toolbar">
+              <span>📄 Live Preview Thermal (<span id="previewWidthLabel">58mm</span>)</span>
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">Cetak Langsung</button>
+            </div>
+
+            <div class="receipt-paper-wrapper">
+              <div class="receipt-container" id="receiptPrintArea">
+                <div class="receipt-center">
+                  <div class="receipt-title" id="prevBusinessName">KOPERASI PERKEBUNAN</div>
+                  <div class="receipt-sub" id="prevBusinessUnit">Unit Produksi &amp; Pengolahan</div>
+                  <div class="receipt-sub" id="prevBusinessAddress" style="font-size: 8.5px;">Sulawesi Utara</div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="receipt-row">
+                  <span class="label">No.Bukti</span>
+                  <span class="val" id="prevRefNo">SLIP-001</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="label">Tanggal</span>
+                  <span class="val" id="prevDate">27/11/2026</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="label">Akun</span>
+                  <span class="val" id="prevCoa">402 - Upah Pemetik</span>
+                </div>
+                <div class="receipt-row bold">
+                  <span class="label">Pekerja</span>
+                  <span class="val" id="prevWorker">Alfiki Paputungan</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="label">Regu/Jab</span>
+                  <span class="val" id="prevRoleRegu">PGWS / Pemetik</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="label">Periode</span>
+                  <span class="val" id="prevPeriod">Nov 2026</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div style="font-weight: bold; margin-bottom: 2px;">PENDAPATAN:</div>
+                <table class="receipt-table" id="prevIncomeTable"></table>
+
+                <div id="prevDeductionSection" style="display: none; margin-top: 4px;">
+                  <div style="font-weight: bold; margin-bottom: 2px;">POTONGAN / KASBON:</div>
+                  <table class="receipt-table" id="prevDeductionTable"></table>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="receipt-row bold" style="font-size: 12px;">
+                  <span class="label">TOTAL DITERIMA:</span>
+                  <span class="val" id="prevTotal">Rp 0</span>
+                </div>
+                <div class="receipt-row" style="font-size: 9px; margin-top: 2px;">
+                  <span class="label">Metode:</span>
+                  <span class="val" id="prevPaymentMethod">Tunai / Cash</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="signatures">
+                  <div class="sign-box">
+                    <div>Penerima,</div>
+                    <div class="sign-space"></div>
+                    <div id="prevSignWorker">( Pekerja )</div>
+                  </div>
+                  <div class="sign-box">
+                    <div>Pengesah,</div>
+                    <div class="sign-space"></div>
+                    <div id="prevSignPic">( Pengurus )</div>
+                  </div>
+                </div>
+
+                <div class="divider" style="margin-top: 8px;"></div>
+                <div class="receipt-center" style="font-size: 8.5px; margin-top: 3px;" id="prevNote">
+                  Terima kasih atas kerja keras Anda.
+                </div>
+                <div class="receipt-center" style="font-size: 8px; opacity: 0.7; margin-top: 2px;">
+                  --- Dicetak via Koperasi ERP ---
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW 3: DATABASE PEKERJA ================= -->
+      <section id="view-workers" class="view-section">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">👥 Database Pekerja &amp; Ketua Regu Koperasi</div>
+            <button class="btn btn-primary btn-sm" onclick="openWorkerModal()">+ Tambah Pekerja</button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" id="searchWorkerInput" placeholder="Cari nama pekerja..." oninput="renderWorkersTable()">
+            <select id="filterWorkerRegu" onchange="renderWorkersTable()">
+              <option value="">Semua Regu / Petak</option>
+            </select>
+            <select id="filterWorkerRole" onchange="renderWorkersTable()">
+              <option value="">Semua Jabatan</option>
+              <option value="Borongan Pemetik">Borongan Pemetik</option>
+              <option value="Pengawas Lapangan">Pengawas Lapangan</option>
+              <option value="Pengawas Cudai">Pengawas Cudai</option>
+              <option value="Penjemur">Penjemur</option>
+              <option value="Pengawas Malam">Pengawas Malam</option>
+              <option value="Ketua Regu Pemarasan">Ketua Regu Pemarasan</option>
             </select>
           </div>
-        `;
 
-        let descHtml = `
-          <div style="flex: 2; min-width: 140px;">
-            <label style="font-size: 0.75rem; color: #475569;">Deskripsi Komponen</label>
-            <input type="text" placeholder="Deskripsi" value="${item.desc || ''}" oninput="updateIncomeDesc(${idx}, this.value)">
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nama Pekerja</th>
+                  <th>Jabatan / Kategori</th>
+                  <th>Regu / Petak</th>
+                  <th>Skema</th>
+                  <th>Tarif Default</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="workersTableBody"></tbody>
+            </table>
           </div>
-        `;
+        </div>
+      </section>
 
-        let fieldsHtml = '';
-
-        if (itemType === "borongan") {
-          fieldsHtml = `
-            <div style="flex: 1; min-width: 90px;">
-              <label style="font-size: 0.75rem; color: #475569;">Jumlah (kg)</label>
-              <input type="number" placeholder="0" value="${item.weightKg !== undefined ? item.weightKg : ''}" oninput="updateIncomeWeight(${idx}, this.value)">
+      <!-- ================= VIEW 4: RIWAYAT & REKAP ================= -->
+      <section id="view-history" class="view-section">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Riwayat Slip Pembayaran &amp; Export</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary btn-sm" onclick="exportHistoryCSV()">📥 Export CSV (Excel)</button>
+              <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑️ Hapus Semua</button>
             </div>
-            <div style="flex: 1; min-width: 100px;">
-              <label style="font-size: 0.75rem; color: #475569;">Harga/kg (Rp)</label>
-              <input type="number" placeholder="0" value="${item.pricePerKg !== undefined ? item.pricePerKg : ''}" oninput="updateIncomePrice(${idx}, this.value)">
-            </div>
-          `;
-        } else if (itemType === "harian") {
-          fieldsHtml = `
-            <div style="flex: 1; min-width: 90px;">
-              <label style="font-size: 0.75rem; color: #475569;">Jumlah Hari Kerja</label>
-              <input type="number" placeholder="0" value="${item.workDays !== undefined ? item.workDays : ''}" oninput="updateIncomeDays(${idx}, this.value)">
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-              <label style="font-size: 0.75rem; color: #475569;">Gaji/Tarif Harian (Rp)</label>
-              <input type="number" placeholder="0" value="${item.dailyRate !== undefined ? item.dailyRate : ''}" oninput="updateIncomeRate(${idx}, this.value)">
-            </div>
-          `;
-        } else {
-          // flat
-          fieldsHtml = `
-            <div style="flex: 1.5; min-width: 110px;">
-              <label style="font-size: 0.75rem; color: #475569;">Nominal (Rp)</label>
-              <input type="number" placeholder="0" value="${item.amount || ''}" oninput="updateIncomeAmount(${idx}, this.value)">
-            </div>
-          `;
-        }
-
-        let totalAndDeleteHtml = `
-          <div style="flex: 1.2; min-width: 110px;">
-            <label style="font-size: 0.75rem; color: #475569;">Total (Rp)</label>
-            <input type="text" placeholder="Rp 0" value="${formatRupiah(item.amount)}" readonly style="background: #e2e8f0; font-weight: bold; color: #16a34a;">
           </div>
-          <div style="display: flex; align-items: flex-end; padding-top: 1.25rem;">
-            <button class="btn btn-danger" onclick="removeIncomeItem(${idx})" title="Hapus">✕</button>
+
+          <div class="filter-bar">
+            <input type="text" id="searchHistoryInput" placeholder="Cari no. bukti atau nama pekerja..." oninput="renderHistoryTable()">
+            <select id="filterHistoryCoa" onchange="renderHistoryTable()">
+              <option value="">Semua Akun COA</option>
+            </select>
           </div>
-        `;
 
-        row.innerHTML = typeSelectHtml + descHtml + fieldsHtml + totalAndDeleteHtml;
-        incomeContainer.appendChild(row);
-      });
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>No. Bukti</th>
+                  <th>Tanggal</th>
+                  <th>Nama Pekerja</th>
+                  <th>Regu</th>
+                  <th>Akun COA</th>
+                  <th>Bruto</th>
+                  <th>Kasbon</th>
+                  <th>Total Bersih</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-      // Deduction Inputs
-      const deductionContainer = document.getElementById('deductionItemsContainer');
-      deductionContainer.innerHTML = '';
-      deductionItems.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = 'form-row';
-        row.innerHTML = `
-          <input type="text" placeholder="Deskripsi potongan" value="${item.desc}" oninput="updateDeductionDesc(${idx}, this.value)" style="flex: 2;">
-          <input type="number" placeholder="Nominal (Rp)" value="${item.amount}" oninput="updateDeductionAmount(${idx}, this.value)" style="flex: 1.2;">
-          <button class="btn btn-danger" onclick="removeDeductionItem(${idx})" title="Hapus">✕</button>
-        `;
-        deductionContainer.appendChild(row);
-      });
-    }
+      <!-- ================= VIEW 5: PENGATURAN ================= -->
+      <section id="view-settings" class="view-section">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚙️ Pengaturan Identitas Koperasi &amp; Printer Thermal</div>
+          </div>
 
-    function addIncomeItem() {
-      if (workerCategory === "Borongan") {
-        let price = getRoleRate(boronganType);
-        incomeItems.push({ type: "borongan", desc: "Hasil " + boronganType, weightKg: 0, pricePerKg: price, amount: 0 });
-      } else {
-        let defaultRate = getRoleRate(pengawasRole);
-        let days = getDaysFromPeriod();
-        incomeItems.push({ type: "harian", desc: "Gaji " + pengawasRole, workDays: days, dailyRate: defaultRate, amount: days * defaultRate });
-      }
-      renderItemsInput();
-      updateReceipt();
-    }
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nama Koperasi / Usaha</label>
+              <input type="text" id="setBusinessName">
+            </div>
+            <div class="form-group">
+              <label>Sub-Judul / Unit Kerja</label>
+              <input type="text" id="setBusinessUnit">
+            </div>
+            <div class="form-group full">
+              <label>Alamat &amp; Kontak</label>
+              <input type="text" id="setBusinessAddress">
+            </div>
+            <div class="form-group">
+              <label>Nama Pengesah / Admin Default</label>
+              <input type="text" id="setPicName">
+            </div>
+            <div class="form-group">
+              <label>Lebar Kertas Thermal</label>
+              <select id="setPaperWidth">
+                <option value="58mm">58mm (Roll 57x30 Standard)</option>
+                <option value="57mm">57mm (Compact)</option>
+                <option value="80mm">80mm (Lebar)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tarif Default Pemetik (Rp/kg)</label>
+              <input type="number" id="setRatePemetik">
+            </div>
+            <div class="form-group">
+              <label>Tarif Default Pengawas (Rp/HOK)</label>
+              <input type="number" id="setRatePengawas">
+            </div>
+            <div class="form-group full">
+              <label>Catatan Kaki Default Struk</label>
+              <input type="text" id="setFooterNote">
+            </div>
+          </div>
 
-    function removeIncomeItem(index) {
-      incomeItems.splice(index, 1);
-      renderItemsInput();
-      updateReceipt();
-    }
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings()">💾 Simpan Pengaturan</button>
+            <button class="btn btn-secondary" onclick="backupDataJSON()">📤 Backup Data (JSON)</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('restoreFile').click()">📥 Restore Data (JSON)</button>
+            <input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreDataJSON(event)">
+          </div>
+        </div>
+      </section>
 
-    function updateIncomeDesc(index, val) {
-      incomeItems[index].desc = val;
-      updateReceipt();
-    }
+    </main>
+  </div>
 
-    function updateIncomeAmount(index, val) {
-      incomeItems[index].amount = parseFloat(val) || 0;
-      updateReceipt();
-    }
+  <!-- MOBILE BOTTOM NAVIGATION (ANDROID APK) -->
+  <nav class="mobile-nav">
+    <button class="mobile-nav-btn active" data-view="dashboard" onclick="switchView('dashboard')">
+      <span class="ico">📊</span>
+      <span>Dashboard</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="slip" onclick="switchView('slip')">
+      <span class="ico">🧾</span>
+      <span>Cetak Slip</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="workers" onclick="switchView('workers')">
+      <span class="ico">👥</span>
+      <span>Pekerja</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="history" onclick="switchView('history')">
+      <span class="ico">📋</span>
+      <span>Riwayat</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="settings" onclick="switchView('settings')">
+      <span class="ico">⚙️</span>
+      <span>Setelan</span>
+    </button>
+  </nav>
 
-    function updateIncomeWeight(index, val) {
-      const weight = parseFloat(val) || 0;
-      incomeItems[index].weightKg = weight;
-      const price = incomeItems[index].pricePerKg || 0;
-      incomeItems[index].amount = weight * price;
-      renderItemsInput();
-      updateReceipt();
-    }
+  <!-- MODAL TAMBAH PEKERJA -->
+  <div class="modal-backdrop" id="workerModal">
+    <div class="modal-box">
+      <div class="card-header">
+        <div class="card-title">Tambah / Edit Pekerja</div>
+        <button class="btn btn-secondary btn-sm" onclick="closeWorkerModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Nama Pekerja</label>
+        <input type="text" id="modalWorkerName" placeholder="Nama lengkap pekerja">
+      </div>
+      <div class="form-group">
+        <label>Jabatan / Kategori</label>
+        <select id="modalWorkerRole">
+          <option value="Borongan Pemetik">Borongan Pemetik</option>
+          <option value="Pengawas Lapangan">Pengawas Lapangan</option>
+          <option value="Pengawas Cudai">Pengawas Cudai</option>
+          <option value="Penjemur">Penjemur</option>
+          <option value="Pengawas Malam">Pengawas Malam</option>
+          <option value="Ketua Regu Pemarasan">Ketua Regu Pemarasan</option>
+          <option value="Pencudai">Pencudai</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Regu / Petak</label>
+        <input type="text" id="modalWorkerRegu" placeholder="Contoh: LGKP, Sabua Miring 1, PGWS">
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Skema Gaji</label>
+          <select id="modalWorkerScheme">
+            <option value="Borongan">Borongan</option>
+            <option value="Harian">Harian (HOK)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tarif Default (Rp)</label>
+          <input type="number" id="modalWorkerRate" value="7000">
+        </div>
+      </div>
+      <div class="action-bar" style="justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="closeWorkerModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveNewWorker()">Simpan Pekerja</button>
+      </div>
+    </div>
+  </div>
 
-    function updateIncomePrice(index, val) {
-      const price = parseFloat(val) || 0;
-      incomeItems[index].pricePerKg = price;
-      const weight = incomeItems[index].weightKg || 0;
-      incomeItems[index].amount = weight * price;
-      renderItemsInput();
-      updateReceipt();
-    }
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast"></div>
 
-    function updateIncomeDays(index, val) {
-      const days = parseFloat(val) || 0;
-      incomeItems[index].workDays = days;
-      const rate = incomeItems[index].dailyRate || 0;
-      incomeItems[index].amount = days * rate;
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function updateIncomeRate(index, val) {
-      const rate = parseFloat(val) || 0;
-      incomeItems[index].dailyRate = rate;
-      const days = incomeItems[index].workDays || 0;
-      incomeItems[index].amount = days * rate;
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function addDeductionItem() {
-      deductionItems.push({ desc: "", amount: 0 });
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function removeDeductionItem(index) {
-      deductionItems.splice(index, 1);
-      renderItemsInput();
-      updateReceipt();
-    }
-
-    function updateDeductionDesc(index, val) {
-      deductionItems[index].desc = val;
-      updateReceipt();
-    }
-
-    function updateDeductionAmount(index, val) {
-      deductionItems[index].amount = parseFloat(val) || 0;
-      updateReceipt();
-    }
-
-    function updateReceipt() {
-      // Header & Worker info
-      document.getElementById('prevBusinessName').innerText = document.getElementById('businessName').value || 'USAHA ANDA';
-      document.getElementById('prevBusinessUnit').innerText = document.getElementById('businessUnit').value || '';
-      document.getElementById('prevBusinessAddress').innerText = document.getElementById('businessAddress').value || '';
-
-      document.getElementById('prevRefNo').innerText = document.getElementById('refNo').value || '-';
-
-      const dateVal = document.getElementById('payDate').value;
-      if (dateVal) {
-        const parts = dateVal.split('-');
-        document.getElementById('prevDate').innerText = `${parts[2]}/${parts[1]}/${parts[0]}`;
-      } else {
-        document.getElementById('prevDate').innerText = '-';
-      }
-
-      const worker = document.getElementById('workerName').value || 'Nama Pekerja';
-      document.getElementById('prevWorker').innerText = worker;
-      document.getElementById('prevSignWorker').innerText = `( ${worker} )`;
-
-      const role = getSelectedRole();
-      document.getElementById('prevRole').innerText = role;
-
-      document.getElementById('prevPeriod').innerText = document.getElementById('periodText').value || '-';
-
-      const pic = document.getElementById('picName').value || 'Koperasi';
-      document.getElementById('prevSignPic').innerText = `( ${pic} )`;
-
-      document.getElementById('prevPaymentMethod').innerText = document.getElementById('paymentMethod').value;
-      document.getElementById('prevNote').innerText = document.getElementById('noteText').value;
-
-      // Calculate totals
-      let totalIncome = 0;
-      const incomeTable = document.getElementById('prevIncomeTable');
-      incomeTable.innerHTML = '';
-      incomeItems.forEach(item => {
-        totalIncome += (item.amount || 0);
-        const tr = document.createElement('tr');
-
-        if (item.type === 'borongan' || (item.weightKg !== undefined && item.pricePerKg !== undefined)) {
-          tr.innerHTML = `
-            <td class="col-item">
-              <div>${item.desc || 'Item'}</div>
-              <div style="font-size: 9px; color: #555;">(${item.weightKg || 0} kg x @${formatRupiah(item.pricePerKg || 0)})</div>
-            </td>
-            <td class="col-val">${formatRupiah(item.amount)}</td>
-          `;
-        } else if (item.type === 'harian' || (item.workDays !== undefined && item.dailyRate !== undefined)) {
-          tr.innerHTML = `
-            <td class="col-item">
-              <div>${item.desc || 'Item'}</div>
-              <div style="font-size: 9px; color: #555;">(${item.workDays || 0} hari x @${formatRupiah(item.dailyRate || 0)})</div>
-            </td>
-            <td class="col-val">${formatRupiah(item.amount)}</td>
-          `;
-        } else {
-          tr.innerHTML = `
-            <td class="col-item">${item.desc || 'Item'}</td>
-            <td class="col-val">${formatRupiah(item.amount)}</td>
-          `;
-        }
-        incomeTable.appendChild(tr);
-      });
-
-      let totalDeduction = 0;
-      const deductionSec = document.getElementById('prevDeductionSection');
-      const deductionTable = document.getElementById('prevDeductionTable');
-      deductionTable.innerHTML = '';
-
-      if (deductionItems.length > 0) {
-        deductionSec.style.display = 'block';
-        deductionItems.forEach(item => {
-          totalDeduction += (item.amount || 0);
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="col-item">${item.desc || 'Potongan'}</td>
-            <td class="col-val">-${formatRupiah(item.amount)}</td>
-          `;
-          deductionTable.appendChild(tr);
-        });
-      } else {
-        deductionSec.style.display = 'none';
-      }
-
-      const grandTotal = totalIncome - totalDeduction;
-
-      // Update Form Editor Calculation Badges & Summary
-      document.getElementById('editorTotalIncome').innerText = formatRupiah(totalIncome);
-      document.getElementById('editorTotalDeduction').innerText = "-" + formatRupiah(totalDeduction);
-
-      document.getElementById('sumIncome').innerText = formatRupiah(totalIncome);
-      document.getElementById('sumDeduction').innerText = "-" + formatRupiah(totalDeduction);
-      document.getElementById('sumGrandTotal').innerText = formatRupiah(grandTotal);
-
-      // Update Receipt Preview Total
-      document.getElementById('prevTotal').innerText = formatRupiah(grandTotal);
-    }
-
-    // Register Service Worker for PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg error:', err));
-      });
-    }
-  </script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
-

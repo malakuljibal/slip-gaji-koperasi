@@ -1,7 +1,10 @@
-const CACHE_NAME = 'slip-gaji-v1';
+const CACHE_NAME = 'slip-gaji-erp-v2';
 const ASSETS = [
   './',
   './index.html',
+  './styles.css',
+  './data.js',
+  './app.js',
   './manifest.json'
 ];
 
