@@ -50,7 +50,14 @@ class MainActivity : AppCompatActivity() {
             loadWithOverviewMode = false
         }
 
-        webView.webChromeClient = WebChromeClient()
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
+                consoleMessage?.let {
+                    android.util.Log.e("WebConsole", "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
+                }
+                return true
+            }
+        }
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)

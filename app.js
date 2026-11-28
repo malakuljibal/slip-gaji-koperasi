@@ -1,93 +1,4 @@
-// State Management Fallbacks
-const FALLBACK_SETTINGS = {
-  businessName: "KOPERASI PERKEBUNAN CENGKEH",
-  businessUnit: "Unit Produksi & Pengolahan Hasil (Akad Salam)",
-  businessAddress: "Sulawesi Utara | Telp/WA: 0812-3456-7890",
-  picName: "Pengurus Koperasi",
-  defaultRatePemetik: 7000,
-  defaultRateCudai: 1500,
-  defaultRatePengawas: 150000,
-  defaultRatePengawas2: 125000,
-  paperWidth: "58mm",
-  fontSize: 11,
-  footerNote: "Terima kasih atas kerja keras Anda. Simpan slip ini sebagai bukti sah."
-};
-
-let savedSettings = null;
-try { savedSettings = JSON.parse(localStorage.getItem('koperasi_settings')); } catch(e){}
-let appSettings = savedSettings || (typeof DEFAULT_SETTINGS !== 'undefined' ? { ...DEFAULT_SETTINGS } : FALLBACK_SETTINGS);
-
-let savedWorkers = null;
-try { savedWorkers = JSON.parse(localStorage.getItem('koperasi_workers')); } catch(e){}
-let workersDb = (Array.isArray(savedWorkers) && savedWorkers.length > 0) ? savedWorkers : (typeof INITIAL_WORKERS !== 'undefined' ? [...INITIAL_WORKERS] : []);
-
-let savedHistory = null;
-try { savedHistory = JSON.parse(localStorage.getItem('koperasi_history')); } catch(e){}
-let slipHistory = Array.isArray(savedHistory) ? savedHistory : [];
-
-let incomeItems = [
-  { desc: "Upah Pemetik (0 kg x Rp 7.000)", amount: 0 }
-];
-let deductionItems = [
-  { desc: "Kasbon / Pinjaman", amount: 0 }
-];
-
-// Helper safe DOM getter
-function getVal(id, fallback = "") {
-  const el = document.getElementById(id);
-  return el ? (el.value || fallback) : fallback;
-}
-
-// Initialization
-function initApp() {
-  // Ensure workersDb is never empty
-  if (!Array.isArray(workersDb) || workersDb.length === 0) {
-    workersDb = [...INITIAL_WORKERS];
-    localStorage.setItem('koperasi_workers', JSON.stringify(workersDb));
-  }
-
-  initDropdowns();
-  loadSettingsToUI();
-  resetSlipForm(false);
-  renderDashboard();
-  renderWorkersTable();
-  renderHistoryTable();
-  applyPaperWidth();
-
-  // Explicit event listener binding for all navigation buttons
-  document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const view = btn.getAttribute('data-view') || btn.dataset.view;
-      if (view) {
-        switchView(view);
-      }
-    });
-  });
-
-  // Register Service Worker for PWA
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW:', err));
-  }
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
-
-// Document-level event delegation for navigation (catches all touch/clicks on mobile)
-document.addEventListener('click', (e) => {
-  const navBtn = e.target.closest('[data-view]');
-  if (navBtn) {
-    const view = navBtn.getAttribute('data-view');
-    if (view) {
-      switchView(view);
-    }
-  }
-});
-
-// ================= NAVIGATION =================
+// ================= NAVIGATION (MUST BE DEFINED FIRST) =================
 const VIEW_META = {
   dashboard: { title: "Dashboard Koperasi", sub: "Ringkasan Anggaran, Realisasi Beban & Operasional" },
   slip: { title: "Buat & Cetak Slip Thermal", sub: "Format Kertas Roll 57x30 / 58mm Fleksibel" },
@@ -137,7 +48,97 @@ function switchView(viewName) {
 }
 window.switchView = switchView;
 
-// ================= HELPERS =================
+// State Management Fallbacks
+const FALLBACK_SETTINGS = {
+  businessName: "KOPERASI PERKEBUNAN CENGKEH",
+  businessUnit: "Unit Produksi & Pengolahan Hasil (Akad Salam)",
+  businessAddress: "Sulawesi Utara | Telp/WA: 0812-3456-7890",
+  picName: "Pengurus Koperasi",
+  defaultRatePemetik: 7000,
+  defaultRateCudai: 1500,
+  defaultRatePengawas: 150000,
+  defaultRatePengawas2: 125000,
+  paperWidth: "58mm",
+  fontSize: 11,
+  footerNote: "Terima kasih atas kerja keras Anda. Simpan slip ini sebagai bukti sah."
+};
+
+let savedSettings = null;
+try { savedSettings = JSON.parse(localStorage.getItem('koperasi_settings')); } catch(e){}
+let appSettings = savedSettings || (typeof DEFAULT_SETTINGS !== 'undefined' ? { ...DEFAULT_SETTINGS } : FALLBACK_SETTINGS);
+
+let savedWorkers = null;
+try { savedWorkers = JSON.parse(localStorage.getItem('koperasi_workers')); } catch(e){}
+let workersDb = (Array.isArray(savedWorkers) && savedWorkers.length > 0) ? savedWorkers : (typeof INITIAL_WORKERS !== 'undefined' ? [...INITIAL_WORKERS] : []);
+
+let savedHistory = null;
+try { savedHistory = JSON.parse(localStorage.getItem('koperasi_history')); } catch(e){}
+let slipHistory = Array.isArray(savedHistory) ? savedHistory : [];
+
+let incomeItems = [
+  { desc: "Upah Pemetik (0 kg x Rp 7.000)", amount: 0 }
+];
+let deductionItems = [
+  { desc: "Kasbon / Pinjaman", amount: 0 }
+];
+
+// Helper safe DOM getter
+function getVal(id, fallback = "") {
+  const el = document.getElementById(id);
+  return el ? (el.value || fallback) : fallback;
+}
+
+// Initialization
+function initApp() {
+  // Ensure workersDb is never empty
+  if (!Array.isArray(workersDb) || workersDb.length === 0) {
+    if (typeof INITIAL_WORKERS !== 'undefined') {
+      workersDb = [...INITIAL_WORKERS];
+      localStorage.setItem('koperasi_workers', JSON.stringify(workersDb));
+    }
+  }
+
+  initDropdowns();
+  loadSettingsToUI();
+  resetSlipForm(false);
+  renderDashboard();
+  renderWorkersTable();
+  renderHistoryTable();
+  applyPaperWidth();
+
+  // Explicit event listener binding for all navigation buttons
+  document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const view = btn.getAttribute('data-view') || btn.dataset.view;
+      if (view) {
+        switchView(view);
+      }
+    });
+  });
+
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW:', err));
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+// Document-level event delegation for navigation (catches all touch/clicks on mobile)
+document.addEventListener('click', (e) => {
+  const navBtn = e.target.closest('[data-view]');
+  if (navBtn) {
+    const view = navBtn.getAttribute('data-view');
+    if (view) {
+      switchView(view);
+    }
+  }
+});
+
 function formatRupiah(num) {
   return "Rp " + Math.round(Number(num || 0)).toLocaleString("id-ID");
 }
@@ -217,13 +218,14 @@ function populateWorkerSelect() {
   select.innerHTML = '<option value="">-- Ketik Manual / Pilih Pekerja --</option>';
 
   const availableWorkers = workersDb.filter(w => {
+    if (!w) return false;
     if (w.status && w.status !== 'Aktif') return false;
     if (regu) return (w.regu || '').toLowerCase().includes(regu);
     return true;
   });
 
   availableWorkers
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
     .forEach(w => {
       select.add(new Option(`${w.name} (${w.role}${w.regu && w.regu !== '-' ? ' - Regu ' + w.regu : ''})`, w.id));
     });
@@ -287,7 +289,8 @@ function onSelectWorkerFromDb() {
 
 function onCoaChange() {
   const code = getVal('coaSelect');
-  const coa = COA_ACCOUNTS.find(c => c.code === code);
+  const cList = typeof COA_ACCOUNTS !== 'undefined' ? COA_ACCOUNTS : FALLBACK_COA;
+  const coa = cList.find(c => c.code === code);
   const modeEl = document.getElementById('calcMode');
   const rateKgEl = document.getElementById('calcRateKg');
   const rateHokEl = document.getElementById('calcRateHok');
@@ -791,56 +794,6 @@ function printDirectBluetooth() {
     showToast("❌ Error cetak: " + e.message);
   }
 }
-  let netTotal = totInc - totDed;
-
-  const record = {
-    id: 'SLIP-' + Date.now(),
-    refNo: getVal('refNo'),
-    date: getVal('payDate'),
-    workerName: workerName,
-    role: getVal('workerRole'),
-    regu: getVal('workerRegu'),
-    coaCode: getVal('coaSelect'),
-    period: getVal('periodText'),
-    grossAmount: totInc,
-    kasbonAmount: totDed,
-    netAmount: netTotal,
-    paymentMethod: getVal('paymentMethod'),
-    incomeDetails: JSON.parse(JSON.stringify(incomeItems)),
-    deductionDetails: JSON.parse(JSON.stringify(deductionItems))
-  };
-
-  if (!slipHistory.some(s => s.refNo === record.refNo && s.workerName === record.workerName)) {
-    slipHistory.unshift(record);
-    localStorage.setItem('koperasi_history', JSON.stringify(slipHistory));
-    renderDashboard();
-    renderHistoryTable();
-  }
-
-  if (typeof AndroidPrint === 'undefined' || !AndroidPrint.isBluetoothConnected || !AndroidPrint.isBluetoothConnected()) {
-    openBluetoothModal();
-    showToast("⚠️ Hubungkan Printer Bluetooth terlebih dahulu!");
-    return;
-  }
-
-  try {
-    const rawBytes = generateEscPosBytes();
-    let binaryStr = "";
-    for (let i = 0; i < rawBytes.length; i++) {
-      binaryStr += String.fromCharCode(rawBytes[i]);
-    }
-    const base64Str = btoa(binaryStr);
-    const ok = AndroidPrint.sendRawBytes(base64Str);
-    if (ok) {
-      showToast("✅ Berhasil mencetak ke Printer Bluetooth!");
-      closeBluetoothModal();
-    } else {
-      showToast("❌ Gagal mengirim data ke printer Bluetooth.");
-    }
-  } catch (e) {
-    showToast("❌ Error cetak: " + e.message);
-  }
-}
 
 // ================= DASHBOARD RENDER =================
 function renderDashboard() {
@@ -862,7 +815,8 @@ function renderDashboard() {
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  COA_ACCOUNTS.forEach(coa => {
+  const cList = typeof COA_ACCOUNTS !== 'undefined' ? COA_ACCOUNTS : FALLBACK_COA;
+  cList.forEach(coa => {
     let currentHistoryPaid = slipHistory
       .filter(s => s.coaCode === coa.code)
       .reduce((acc, s) => acc + s.grossAmount, 0);
@@ -906,6 +860,7 @@ function renderWorkersTable() {
   tbody.innerHTML = '';
 
   const filtered = workersDb.filter(w => {
+    if (!w) return false;
     const matchSearch = (w.name || '').toLowerCase().includes(search) || (w.role || '').toLowerCase().includes(search) || (w.id || '').toLowerCase().includes(search);
     const matchRegu = !regu || (w.regu || '').toLowerCase().includes(regu);
     const matchRole = !role || (w.role || '').toLowerCase().includes(role);
@@ -995,6 +950,7 @@ function renderHistoryTable() {
   tbody.innerHTML = '';
 
   const filtered = slipHistory.filter(s => {
+    if (!s) return false;
     const matchSearch = (s.workerName || '').toLowerCase().includes(search) || (s.refNo || '').toLowerCase().includes(search);
     const matchCoa = !coa || s.coaCode === coa;
     return matchSearch && matchCoa;
@@ -1081,7 +1037,7 @@ function loadSettingsToUI() {
 }
 
 function saveSettings() {
-  appSettings.businessName = getVal('setBusinessName', DEFAULT_SETTINGS.businessName);
+  appSettings.businessName = getVal('setBusinessName', FALLBACK_SETTINGS.businessName);
   appSettings.businessUnit = getVal('setBusinessUnit');
   appSettings.businessAddress = getVal('setBusinessAddress');
   appSettings.picName = getVal('setPicName');
