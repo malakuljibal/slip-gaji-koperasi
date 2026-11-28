@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
             allowContentAccess = true
             allowFileAccessFromFileURLs = true
             allowUniversalAccessFromFileURLs = true
-            useWideViewPort = true
-            loadWithOverviewMode = true
+            useWideViewPort = false
+            loadWithOverviewMode = false
         }
 
         webView.webChromeClient = WebChromeClient()
@@ -203,23 +203,14 @@ class MainActivity : AppCompatActivity() {
         fun sendRawBytes(bytesBase64: String): Boolean {
             return try {
                 if (outputStream == null || bluetoothSocket == null || !bluetoothSocket!!.isConnected) {
-                    activity.runOnUiThread {
-                        Toast.makeText(activity, "Printer Bluetooth belum terhubung!", Toast.LENGTH_SHORT).show()
-                    }
                     return false
                 }
                 val bytes = android.util.Base64.decode(bytesBase64, android.util.Base64.DEFAULT)
                 outputStream?.write(bytes)
                 outputStream?.flush()
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "Berhasil mencetak ke printer!", Toast.LENGTH_SHORT).show()
-                }
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "Gagal mencetak: ${e.message}", Toast.LENGTH_LONG).show()
-                }
                 false
             }
         }

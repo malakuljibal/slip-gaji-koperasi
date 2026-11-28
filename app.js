@@ -1,11 +1,25 @@
-// State Management
+// State Management Fallbacks
+const FALLBACK_SETTINGS = {
+  businessName: "KOPERASI PERKEBUNAN CENGKEH",
+  businessUnit: "Unit Produksi & Pengolahan Hasil (Akad Salam)",
+  businessAddress: "Sulawesi Utara | Telp/WA: 0812-3456-7890",
+  picName: "Pengurus Koperasi",
+  defaultRatePemetik: 7000,
+  defaultRateCudai: 1500,
+  defaultRatePengawas: 150000,
+  defaultRatePengawas2: 125000,
+  paperWidth: "58mm",
+  fontSize: 11,
+  footerNote: "Terima kasih atas kerja keras Anda. Simpan slip ini sebagai bukti sah."
+};
+
 let savedSettings = null;
 try { savedSettings = JSON.parse(localStorage.getItem('koperasi_settings')); } catch(e){}
-let appSettings = savedSettings || { ...DEFAULT_SETTINGS };
+let appSettings = savedSettings || (typeof DEFAULT_SETTINGS !== 'undefined' ? { ...DEFAULT_SETTINGS } : FALLBACK_SETTINGS);
 
 let savedWorkers = null;
 try { savedWorkers = JSON.parse(localStorage.getItem('koperasi_workers')); } catch(e){}
-let workersDb = (Array.isArray(savedWorkers) && savedWorkers.length > 0) ? savedWorkers : [...INITIAL_WORKERS];
+let workersDb = (Array.isArray(savedWorkers) && savedWorkers.length > 0) ? savedWorkers : (typeof INITIAL_WORKERS !== 'undefined' ? [...INITIAL_WORKERS] : []);
 
 let savedHistory = null;
 try { savedHistory = JSON.parse(localStorage.getItem('koperasi_history')); } catch(e){}
@@ -25,7 +39,7 @@ function getVal(id, fallback = "") {
 }
 
 // Initialization
-window.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   // Ensure workersDb is never empty
   if (!Array.isArray(workersDb) || workersDb.length === 0) {
     workersDb = [...INITIAL_WORKERS];
@@ -40,9 +54,36 @@ window.addEventListener('DOMContentLoaded', () => {
   renderHistoryTable();
   applyPaperWidth();
 
+  // Explicit event listener binding for all navigation buttons
+  document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const view = btn.getAttribute('data-view') || btn.dataset.view;
+      if (view) {
+        switchView(view);
+      }
+    });
+  });
+
   // Register Service Worker for PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.log('SW:', err));
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+// Document-level event delegation for navigation (catches all touch/clicks on mobile)
+document.addEventListener('click', (e) => {
+  const navBtn = e.target.closest('[data-view]');
+  if (navBtn) {
+    const view = navBtn.getAttribute('data-view');
+    if (view) {
+      switchView(view);
+    }
   }
 });
 
@@ -56,24 +97,45 @@ const VIEW_META = {
 };
 
 function switchView(viewName) {
-  document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-  const targetView = document.getElementById(`view-${viewName}`);
-  if (targetView) targetView.classList.add('active');
+  try {
+    const sections = document.querySelectorAll('.view-section');
+    sections.forEach(el => {
+      el.classList.remove('active');
+      el.style.setProperty('display', 'none', 'important');
+    });
 
-  document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.view === viewName);
-  });
+    const targetView = document.getElementById('view-' + viewName);
+    if (targetView) {
+      targetView.classList.add('active');
+      targetView.style.setProperty('display', 'block', 'important');
+    }
 
-  if (VIEW_META[viewName]) {
-    document.getElementById('topbarTitle').innerText = VIEW_META[viewName].title;
-    document.getElementById('topbarSubtitle').innerText = VIEW_META[viewName].sub;
+    document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
+      const v = btn.getAttribute('data-view');
+      if (v === viewName) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    if (VIEW_META[viewName]) {
+      const tEl = document.getElementById('topbarTitle');
+      const sEl = document.getElementById('topbarSubtitle');
+      if (tEl) tEl.innerText = VIEW_META[viewName].title;
+      if (sEl) sEl.innerText = VIEW_META[viewName].sub;
+    }
+
+    if (viewName === 'dashboard') renderDashboard();
+    if (viewName === 'workers') renderWorkersTable();
+    if (viewName === 'history') renderHistoryTable();
+
+    window.scrollTo(0, 0);
+  } catch (e) {
+    console.error("switchView error:", e);
   }
-
-  if (viewName === 'dashboard') renderDashboard();
-  if (viewName === 'workers') renderWorkersTable();
-  if (viewName === 'history') renderHistoryTable();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+window.switchView = switchView;
 
 // ================= HELPERS =================
 function formatRupiah(num) {
@@ -96,6 +158,22 @@ function generateRefNo() {
   return `KOP-${ymd}-${seq}`;
 }
 
+const FALLBACK_REGU = [
+  "PGWS", "Sabua Miring", "Sabua Miring 1", "Sabua Miring 2", "Sabua Miring 3",
+  "Sabua Miring 4", "LGKP", "Due 1", "Due 2", "Kaki Seribu 1", "Kaki Seribu 2",
+  "Pengawas Lapangan", "Pengawas Cudai", "Penjemur", "Pengawas Malam", "Regu Pemarasan"
+];
+
+const FALLBACK_COA = [
+  { code: "402", name: "Beban Upah Pemetik", mode: "borongan_kg", defaultRate: 7000, budget: 780000000, initialRealization: 85604650 },
+  { code: "403", name: "Beban Upah Pembersihan (Cudai)", mode: "borongan_kg", defaultRate: 1500, budget: 180000000, initialRealization: 9370146 },
+  { code: "404", name: "Beban Upah Pengawas", mode: "harian_hok", defaultRate: 150000, budget: 175000000, initialRealization: 128082000 },
+  { code: "405", name: "Beban Upah Penjemur & Packing", mode: "harian_hok", defaultRate: 125000, budget: 60000000, initialRealization: 7500000 },
+  { code: "407", name: "Beban Perawatan Lahan (Pemarasan)", mode: "borongan_lahan", defaultRate: 0, budget: 180000000, initialRealization: 210005500 },
+  { code: "409", name: "Beban Langsung Lain-lain", mode: "custom", defaultRate: 0, budget: 0, initialRealization: 155026165 },
+  { code: "410", name: "Beban Bagi Hasil Masyarakat", mode: "custom", defaultRate: 0, budget: 375000000, initialRealization: 375000000 }
+];
+
 // ================= DROPDOWNS =================
 function initDropdowns() {
   const reguFilterSlip = document.getElementById('filterSlipRegu');
@@ -103,9 +181,10 @@ function initDropdowns() {
   if (reguFilterSlip) reguFilterSlip.innerHTML = '<option value="">-- Semua Regu / Petak --</option>';
   if (reguFilterDb) reguFilterDb.innerHTML = '<option value="">-- Semua Regu / Petak --</option>';
 
-  const reguSet = new Set(REGU_LIST);
+  const rList = typeof REGU_LIST !== 'undefined' ? REGU_LIST : FALLBACK_REGU;
+  const reguSet = new Set(rList);
   workersDb.forEach(w => {
-    if (w.regu && w.regu !== '-' && w.regu.trim() !== '') {
+    if (w && w.regu && w.regu !== '-' && w.regu.trim() !== '') {
       reguSet.add(w.regu.trim());
     }
   });
@@ -120,7 +199,8 @@ function initDropdowns() {
   if (coaSelect) coaSelect.innerHTML = '';
   if (coaFilterHistory) coaFilterHistory.innerHTML = '<option value="">Semua Akun COA</option>';
 
-  COA_ACCOUNTS.forEach(c => {
+  const cList = typeof COA_ACCOUNTS !== 'undefined' ? COA_ACCOUNTS : FALLBACK_COA;
+  cList.forEach(c => {
     if (coaSelect) coaSelect.add(new Option(`${c.code} - ${c.name}`, c.code));
     if (coaFilterHistory) coaFilterHistory.add(new Option(`${c.code} - ${c.name}`, c.code));
   });
@@ -642,8 +722,10 @@ function generateEscPosBytes() {
 
   bytes.push(0x1B, 0x61, 0x01);
   pushString((getVal('noteText') || appSettings.footerNote) + "\n");
-  pushString("--- Simpan bukti ini ---\n\n\n\n\n\n");
-  bytes.push(0x1D, 0x56, 0x42, 0x00);
+  pushString("--- Simpan bukti ini ---\n");
+
+  // Fast Motor Paper Feed (ESC d 3) - No cutter delay stall
+  bytes.push(0x1B, 0x64, 0x03);
 
   return new Uint8Array(bytes);
 }
@@ -658,6 +740,57 @@ function printDirectBluetooth() {
   // Save record to history
   let totInc = incomeItems.reduce((acc, i) => acc + Number(i.amount || 0), 0);
   let totDed = deductionItems.reduce((acc, i) => acc + Number(i.amount || 0), 0);
+  let netTotal = totInc - totDed;
+
+  const record = {
+    id: 'SLIP-' + Date.now(),
+    refNo: getVal('refNo'),
+    date: getVal('payDate'),
+    workerName: workerName,
+    role: getVal('workerRole'),
+    regu: getVal('workerRegu'),
+    coaCode: getVal('coaSelect'),
+    period: getVal('periodText'),
+    grossAmount: totInc,
+    kasbonAmount: totDed,
+    netAmount: netTotal,
+    paymentMethod: getVal('paymentMethod'),
+    incomeDetails: JSON.parse(JSON.stringify(incomeItems)),
+    deductionDetails: JSON.parse(JSON.stringify(deductionItems))
+  };
+
+  if (!slipHistory.some(s => s.refNo === record.refNo && s.workerName === record.workerName)) {
+    slipHistory.unshift(record);
+    localStorage.setItem('koperasi_history', JSON.stringify(slipHistory));
+    renderDashboard();
+    renderHistoryTable();
+  }
+
+  if (typeof AndroidPrint === 'undefined' || !AndroidPrint.isBluetoothConnected || !AndroidPrint.isBluetoothConnected()) {
+    openBluetoothModal();
+    showToast("⚠️ Hubungkan Printer Bluetooth terlebih dahulu!");
+    return;
+  }
+
+  try {
+    const rawBytes = generateEscPosBytes();
+    let binaryStr = "";
+    const chunk = 8192;
+    for (let i = 0; i < rawBytes.length; i += chunk) {
+      binaryStr += String.fromCharCode.apply(null, rawBytes.subarray(i, i + chunk));
+    }
+    const base64Str = btoa(binaryStr);
+    const ok = AndroidPrint.sendRawBytes(base64Str);
+    if (ok) {
+      showToast("⚡ Berhasil mencetak kilat!");
+      closeBluetoothModal();
+    } else {
+      showToast("❌ Gagal mengirim data ke printer Bluetooth.");
+    }
+  } catch (e) {
+    showToast("❌ Error cetak: " + e.message);
+  }
+}
   let netTotal = totInc - totDed;
 
   const record = {
